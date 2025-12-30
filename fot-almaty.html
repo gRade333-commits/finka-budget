@@ -1,0 +1,885 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свод ФОТ Алматы - Онлайн таблица</title>
+    <script src="editable-table.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .branch-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .branch-btn {
+            padding: 10px 20px;
+            border: 2px solid #3498db;
+            background: white;
+            color: #3498db;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .branch-btn.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .branch-btn:hover {
+            background: #2980b9;
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .info-bar {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .auto-save-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .auto-save-status.saved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .auto-save-status.saving {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-row {
+            background: #5dade2 !important;
+        }
+
+        .title-cell {
+            background: #ecf0f1;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .label-cell {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .total-row {
+            background: #fff9e6 !important;
+            font-weight: bold;
+        }
+
+        .grand-total-row {
+            background: #ffe6e6 !important;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .editable {
+            background: #fff;
+        }
+
+        .editable:hover {
+            background: #f0f9ff;
+        }
+
+        .formula-cell {
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .changed {
+            background: #fff3cd !important;
+            border-color: #ffc107 !important;
+        }
+
+        .section-header {
+            background: #d6eaf8 !important;
+            color: #1a5490;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #34495e;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media print {
+            .header, .info-bar, .buttons, .branch-selector { display: none; }
+            .table-container { box-shadow: none; }
+        }
+    
+        /* Mobile adaptation - Tablets */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mobile adaptation - Medium screens */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header, .container {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+
+            h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            h2 {
+                font-size: 16px;
+            }
+
+            .subtitle {
+                font-size: 12px;
+            }
+
+            .branch-selector, .btn-group, .controls {
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .btn, button, .branch-btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-bar, .status-bar {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+            
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            .section-footer {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            input, select, textarea {
+                padding: 6px;
+                font-size: 12px;
+            }
+        }
+
+        /* Mobile adaptation - Small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header, .container {
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            h2 {
+                font-size: 14px;
+            }
+
+            .subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+
+            .branch-selector, .btn-group, .controls {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn, button, .branch-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info-bar, .status-bar {
+                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px 2px;
+            }
+
+            .section-footer {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            input, select, textarea {
+                font-size: 11px;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Свод оплаты труда филиала НАО "РФМШ"</h1>
+        <p style="color: #7f8c8d; margin-top: 5px;">Бюджет собственных средств (ПУ) 2026</p>
+        
+        <div class="branch-selector">
+            <button class="branch-btn active" data-branch="almaty">Алмата</button>
+            <button class="branch-btn" data-branch="uralsk">Уральск</button>
+            <button class="branch-btn" data-branch="astana">Астана</button>
+            <button class="branch-btn" data-branch="consolidated" style="border-color: #8e44ad; color: #8e44ad;">
+                📈 Консолидация
+            </button>
+        </div>
+    </div>
+
+    <div class="info-bar">
+        <div class="info-item">
+            <span class="info-label">Филиал:</span>
+            <span id="currentBranch">Алмата</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Пользователь:</span>
+            <span>Экономист (демо)</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Последнее изменение:</span>
+            <span id="lastUpdate">-</span>
+        </div>
+        <div class="auto-save-status saved" id="saveStatus">
+            ✓ Сохранено
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="fotTable">
+            <!-- Заголовок -->
+            <thead>
+                <tr class="header-row">
+                    <th colspan="11" class="title-cell" id="tableTitle">
+                        Свод оплаты труда филиала НАО "Республиканская физико-математическая школа" в г. Алматы
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Раздел 1: Свод тарификационной ведомости -->
+                <tr>
+                    <td colspan="11" class="section-header">2. Свод тарификационной ведомости</td>
+                </tr>
+                <tr class="header-row">
+                    <th>№ п/п</th>
+                    <th>Наименование</th>
+                    <th>Фактическая численность (ед.)</th>
+                    <th>Кол-во часов</th>
+                    <th>Заработная плата в месяц</th>
+                    <th>Годовой ФЗП</th>
+                    <th>Лечебно-оздоровительные 13 зп</th>
+                    <th>Социальный налог (11%-12%)</th>
+                    <th>Социальные отчисления 5%</th>
+                    <th>Обязательное медицинское страхование 3%</th>
+                    <th>ОПВР 3,5%</th>
+                    <th>Годовой ФОТ</th>
+                    <th>Примечание</th>
+                </tr>
+                <tr>
+                    <td class="label-cell">1</td>
+                    <td class="label-cell">Штатное расписание</td>
+                    <td class="editable"><input type="number" data-cell="D7" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="E7" value=""></td>
+                    <td class="editable"><input type="number" data-cell="F7" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="G7" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="H7" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="I7" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="J7" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="K7" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="L7" value="1"></td>
+                    <td class="formula-cell" id="M7">0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="label-cell" id="B8">2</td>
+                    <td class="label-cell">Тарификация</td>
+                    <td class="editable"><input type="number" data-cell="D8" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="E8" value=""></td>
+                    <td class="editable"><input type="number" data-cell="F8" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="G8" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="H8" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="I8" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="J8" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="K8" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="L8" value="1"></td>
+                    <td class="formula-cell" id="M8">0</td>
+                    <td></td>
+                </tr>
+                <tr class="total-row">
+                    <td></td>
+                    <td class="label-cell">Итого</td>
+                    <td class="formula-cell" id="D9">0</td>
+                    <td class="formula-cell" id="E9">0</td>
+                    <td class="formula-cell" id="F9">0</td>
+                    <td class="formula-cell" id="G9">0</td>
+                    <td class="formula-cell" id="H9">0</td>
+                    <td class="formula-cell" id="I9">0</td>
+                    <td class="formula-cell" id="J9">0</td>
+                    <td class="formula-cell" id="K9">0</td>
+                    <td class="formula-cell" id="L9">0</td>
+                    <td class="formula-cell" id="M9">0</td>
+                    <td></td>
+                </tr>
+
+                <!-- Раздел 2: Иные дополнительные выплаты -->
+<tr>
+                    <th>№ п/п</th>
+                    <th>Наименование иных дополнительных выплат</th>
+                    <th>Количество работников</th>
+                    <th>Сумма в месяц</th>
+                    <th>Всего в год</th>
+                    <th>Социальный налог (11%-12%)</th>
+                    <th>Социальные отчисления 5%</th>
+                    <th>Обязательное медицинское страхование 3%</th>
+                    <th>ОПВР 3,5%</th>
+                    <th>Годовой ФОТ</th>
+                    <th>Примечание</th>
+                </tr>
+                <tr>
+                    <td class="label-cell">3</td>
+                    <td class="label-cell">Возмещение за аренду жилья</td>
+                    <td class="editable"><input type="number" data-cell="D11" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="F11" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="G11" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="I11" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="J11" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="K11" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="L11" value="1"></td>
+                    <td class="formula-cell" id="M11">0</td>
+                    <td></td>
+                </tr>
+                <tr class="total-row">
+                    <td></td>
+                    <td class="label-cell">Итого</td>
+                    <td class="formula-cell" id="D12">0</td>
+                    <td class="formula-cell" id="F12">0</td>
+                    <td class="formula-cell" id="G12">0</td>
+                    <td class="formula-cell" id="I12">0</td>
+                    <td class="formula-cell" id="J12">0</td>
+                    <td class="formula-cell" id="K12">0</td>
+                    <td class="formula-cell" id="L12">0</td>
+                    <td class="formula-cell" id="M12">0</td>
+                    <td></td>
+                </tr>
+
+                <!-- ВСЕГО -->
+                <tr class="grand-total-row">
+                    <td></td>
+                    <td class="label-cell">ВСЕГО</td>
+                    <td class="formula-cell" id="D13">0</td>
+                    <td class="formula-cell" id="E13">0</td>
+                    <td class="formula-cell" id="F13">0</td>
+                    <td class="formula-cell" id="G13">0</td>
+                    <td class="formula-cell" id="I13">0</td>
+                    <td class="formula-cell" id="J13">0</td>
+                    <td class="formula-cell" id="K13">0</td>
+                    <td class="formula-cell" id="L13">0</td>
+                    <td class="formula-cell" id="M13">0</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="buttons">
+        <button class="btn btn-primary" onclick="saveData()">
+            💾 Сохранить данные
+        </button>
+        <button class="btn btn-success" onclick="exportToExcel()">
+            📥 Экспорт в Excel
+        </button>
+        <button class="btn btn-secondary" onclick="printTable()">
+            🖨️ Печать
+        </button>
+        <button class="btn btn-secondary" onclick="viewHistory()">
+            📜 История изменений
+        </button>
+    </div>
+
+    <script>
+        // Данные таблицы
+        let currentBranch = 'almaty'; // Текущий филиал
+        
+        let tableData = {
+            branch: 'almaty',
+            lastModified: new Date().toISOString(),
+            cells: {}
+        };
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+            calculateAll();
+            
+            // Инициализация редактируемых таблиц
+            setTimeout(() => {
+                if (typeof initAllEditableTables === 'function') {
+                    initAllEditableTables('table', () => {
+                        calculateAll();
+                        autoSave();
+                    });
+                    console.log('✅ Редактируемые таблицы инициализированы');
+                }
+            }, 100);
+        });
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Обработчик изменения ячеек
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.parentElement.classList.add('changed');
+                    calculateAll();
+                    autoSave();
+                });
+            });
+
+            // Переключение филиалов
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    switchBranch(this.dataset.branch);
+                });
+            });
+        }
+
+        // Расчет всех формул
+        function calculateAll() {
+            // Получаем значения из полей
+            const getValue = (cell) => {
+                const input = document.querySelector(`input[data-cell="${cell}"]`);
+                return parseFloat(input?.value || 0) || 0;
+            };
+
+            // M7 = G7+H7+L7+I7+J7+K7
+            const M7 = getValue('G7') + getValue('H7') + getValue('L7') + getValue('I7') + getValue('J7') + getValue('K7');
+            document.getElementById('M7').textContent = M7.toFixed(2);
+
+            // B8 = B7+1
+            document.getElementById('B8').textContent = 2;
+
+            // M8 = G8+H8+L8+I8+J8+K8
+            const M8 = getValue('G8') + getValue('H8') + getValue('L8') + getValue('I8') + getValue('J8') + getValue('K8');
+            document.getElementById('M8').textContent = M8.toFixed(2);
+
+            // Итого строка 9
+            const D9 = getValue('D7') + getValue('D8');
+            const E9 = getValue('E7') + getValue('E8');
+            const F9 = getValue('F7') + getValue('F8');
+            const G9 = getValue('G7') + getValue('G8');
+            const H9 = getValue('H7') + getValue('H8');
+            const I9 = getValue('I7') + getValue('I8');
+            const J9 = getValue('J7') + getValue('J8');
+            const K9 = getValue('K7') + getValue('K8');
+            const L9 = getValue('L7') + getValue('L8');
+            const M9 = M7 + M8;
+
+            document.getElementById('D9').textContent = D9.toFixed(2);
+            document.getElementById('E9').textContent = E9.toFixed(2);
+            document.getElementById('F9').textContent = F9.toFixed(2);
+            document.getElementById('G9').textContent = G9.toFixed(2);
+            document.getElementById('H9').textContent = H9.toFixed(2);
+            document.getElementById('I9').textContent = I9.toFixed(2);
+            document.getElementById('J9').textContent = J9.toFixed(2);
+            document.getElementById('K9').textContent = K9.toFixed(2);
+            document.getElementById('L9').textContent = L9.toFixed(2);
+            document.getElementById('M9').textContent = M9.toFixed(2);
+
+            // M11 = G11+I11+J11+K11+L11
+            const M11 = getValue('G11') + getValue('I11') + getValue('J11') + getValue('K11') + getValue('L11');
+            document.getElementById('M11').textContent = M11.toFixed(2);
+
+            // Итого строка 12 (копируем значения из строки 11)
+            const D12 = getValue('D11');
+            const F12 = getValue('F11');
+            const G12 = getValue('G11');
+            const I12 = getValue('I11');
+            const J12 = getValue('J11');
+            const K12 = getValue('K11');
+            const L12 = getValue('L11');
+            const M12 = M11;
+
+            document.getElementById('D12').textContent = D12.toFixed(2);
+            document.getElementById('F12').textContent = F12.toFixed(2);
+            document.getElementById('G12').textContent = G12.toFixed(2);
+            document.getElementById('I12').textContent = I12.toFixed(2);
+            document.getElementById('J12').textContent = J12.toFixed(2);
+            document.getElementById('K12').textContent = K12.toFixed(2);
+            document.getElementById('L12').textContent = L12.toFixed(2);
+            document.getElementById('M12').textContent = M12.toFixed(2);
+
+            // ВСЕГО строка 13
+            document.getElementById('D13').textContent = (D12 + D9).toFixed(2);
+            document.getElementById('E13').textContent = (E9).toFixed(2); // Только из раздела 1
+            document.getElementById('F13').textContent = (F12 + F9).toFixed(2);
+            document.getElementById('G13').textContent = (G12 + G9).toFixed(2);
+            document.getElementById('I13').textContent = (I12 + I9).toFixed(2);
+            document.getElementById('J13').textContent = (J12 + J9).toFixed(2);
+            document.getElementById('K13').textContent = (K12 + K9).toFixed(2);
+            document.getElementById('L13').textContent = (L12 + L9).toFixed(2);
+            document.getElementById('M13').textContent = (M12 + M9).toFixed(2);
+        }
+
+        // Автосохранение
+        let saveTimeout;
+        function autoSave() {
+            clearTimeout(saveTimeout);
+            
+            const status = document.getElementById('saveStatus');
+            status.className = 'auto-save-status saving';
+            status.textContent = '💾 Сохранение...';
+
+            saveTimeout = setTimeout(() => {
+                saveData();
+                status.className = 'auto-save-status saved';
+                status.textContent = '✓ Сохранено';
+            }, 1000);
+        }
+
+        // Сохранение данных
+        function saveData() {
+            // Не сохраняем в режиме консолидации
+            if (currentBranch === 'consolidated') return;
+            
+            // Собираем данные из всех input полей
+            document.querySelectorAll('input').forEach(input => {
+                const cell = input.dataset.cell;
+                tableData.cells[cell] = input.value;
+                input.parentElement.classList.remove('changed');
+            });
+
+            tableData.lastModified = new Date().toISOString();
+            
+            // Сохраняем в localStorage (в будущем - API)
+            const storageKey = `fot_${tableData.branch}`;
+            localStorage.setItem(storageKey, JSON.stringify(tableData));
+            
+            // Обновляем время изменения
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ru-RU');
+            
+            console.log('Данные сохранены:', tableData);
+        }
+
+        // Загрузка данных
+        function loadData() {
+            const storageKey = `fot_${tableData.branch}`;
+            const saved = localStorage.getItem(storageKey);
+            
+            // Сначала очищаем все поля
+            document.querySelectorAll('input').forEach(input => {
+                input.value = '';
+            });
+            
+            if (saved) {
+                const data = JSON.parse(saved);
+                tableData = data;
+                
+                // Загружаем значения в поля
+                Object.keys(data.cells).forEach(cell => {
+                    const input = document.querySelector(`input[data-cell="${cell}"]`);
+                    if (input) {
+                        input.value = data.cells[cell];
+                    }
+                });
+                
+                document.getElementById('lastUpdate').textContent = new Date(data.lastModified).toLocaleString('ru-RU');
+            } else {
+                // Если данных нет - показываем что новый филиал
+                document.getElementById('lastUpdate').textContent = 'Нет данных';
+                tableData.cells = {};
+            }
+            
+            calculateAll();
+        }
+
+        // Переключение филиала
+        function switchBranch(branch) {
+            // Сохраняем текущие данные перед переключением (кроме консолидации)
+            if (currentBranch !== 'consolidated') {
+                saveData();
+            }
+
+            // Меняем филиал
+            tableData.branch = branch;
+            currentBranch = branch;
+            
+            // Обновляем кнопки
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.branch === branch) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Обновляем название филиала
+            const branchNames = {
+                'almaty': 'Алмата',
+                'uralsk': 'Уральск',
+                'astana': 'Астана',
+                'consolidated': 'Консолидировано'
+            };
+            
+            const branchName = branchNames[branch];
+            document.getElementById('currentBranch').textContent = branchName;
+            
+            if (branch === 'consolidated') {
+                loadConsolidatedData();
+            } else {
+                // Обновляем заголовок таблицы
+                document.getElementById('tableTitle').textContent = 
+                    `Свод оплаты труда филиала НАО "Республиканская физико-математическая школа" в г. ${branchName}`;
+                
+                // Загружаем данные нового филиала
+                loadData();
+            }
+        }
+
+        function loadConsolidatedData() {
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const allData = {};
+            
+            branches.forEach(b => {
+                const key = `fot_${b}`;
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    allData[b] = data.cells || {};
+                }
+            });
+            
+            document.querySelectorAll('input').forEach(input => {
+                const cellId = input.dataset.cell;
+                let sum = 0;
+                
+                branches.forEach(b => {
+                    if (allData[b] && allData[b][cellId]) {
+                        sum += parseFloat(allData[b][cellId]) || 0;
+                    }
+                });
+                
+                input.value = sum.toFixed(2);
+            });
+            
+            calculateAll();
+            document.getElementById('tableTitle').textContent = 
+                'Консолидированные данные по всем филиалам НАО "РФМШ"';
+        }
+
+        // Экспорт в Excel
+        function exportToExcel() {
+            alert('Функция экспорта в Excel будет реализована на следующем этапе');
+            // Здесь будет API для экспорта
+        }
+
+        // Печать
+        function printTable() {
+            window.print();
+        }
+
+        // История изменений
+        function viewHistory() {
+            alert('История изменений:\n\n' + 
+                  '• 25.12.2025 15:30 - Обновление ФЗП (Экономист)\n' +
+                  '• 25.12.2025 10:15 - Корректировка тарификации (Экономист)\n' +
+                  '• 24.12.2025 14:00 - Начальное заполнение (Экономист)');
+        }
+    </script>
+</body>
+</html>

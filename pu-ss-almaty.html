@@ -1,0 +1,913 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>СС Алматы 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="editable-table.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .info-bar {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .auto-save-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .auto-save-status.saved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .table-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #e67e22;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .title-cell {
+            background: #fef5e7;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+            color: #2c3e50;
+            padding: 15px;
+        }
+
+        .section-header {
+            background: #fdebd0;
+            font-weight: bold;
+            color: #d68910;
+            padding: 10px;
+        }
+
+        .label-cell {
+            background: #fef9f3;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .total-row {
+            background: #fff9e6 !important;
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #e67e22;
+            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
+        }
+
+        .editable {
+            background: #fff;
+        }
+
+        .editable:hover {
+            background: #fef5e7;
+        }
+
+        .formula-cell {
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .changed {
+            background: #fff3cd !important;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #e67e22;
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }        .detail-row {
+            background: #f8f9fa;
+            display: none;
+        }
+
+        .detail-row.show {
+            display: table-row;
+        }
+
+        .detail-cell {
+            padding: 8px 8px 8px 40px;
+            font-size: 13px;
+            color: #6c757d;
+            border-left: 3px solid #3498db;
+        }
+
+        .toggle-detail {
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: 5px;
+            font-weight: bold;
+            color: #3498db;
+            transition: transform 0.2s;
+        }
+
+        .toggle-detail.expanded {
+            transform: rotate(90deg);
+        }
+
+        .label-cell.expandable {
+            cursor: pointer;
+        }
+
+        .label-cell.expandable:hover {
+            background: #e9ecef;
+        }
+
+    
+        /* Mobile adaptation - Tablets */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mobile adaptation - Medium screens */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            .header .subtitle {
+                font-size: 12px;
+            }
+
+            .branch-selector {
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .branch-btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-bar {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+
+            .auto-save-status {
+                padding: 6px 14px;
+                font-size: 11px;
+            }
+
+            .import-notice {
+                padding: 10px 15px;
+                font-size: 11px;
+            }
+
+            .sections-nav {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .section-header h2 {
+                font-size: 16px;
+            }
+            
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            .btn-add-row {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .section-footer {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .editable-cell {
+                padding: 6px;
+                font-size: 12px;
+            }
+
+            .row-actions {
+                gap: 3px;
+                margin-left: 5px;
+            }
+
+            .btn-delete-row {
+                padding: 2px 6px;
+                font-size: 10px;
+            }
+        }
+
+        /* Mobile adaptation - Small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .header .subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+
+            .branch-selector {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .branch-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info-bar {
+                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .sections-nav {
+                padding: 10px;
+            }
+
+            .section-header {
+                padding: 10px;
+            }
+
+            .section-header h2 {
+                font-size: 14px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px 2px;
+            }
+
+            .label-cell {
+                min-width: 120px;
+            }
+
+            .btn-add-row {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .section-footer {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .editable-cell {
+                font-size: 11px;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>?? ����������� �������� ������ 2026</h1>
+        <p style="color: #7f8c8d; margin-top: 5px;">������ �� � ���� 1 �� 11 � �� ���� ������� �� ���������� ��������������� �����</p>
+    </div>
+
+    <div class="info-bar">
+        <div>
+            <span style="font-weight: bold;">���������� �����:</span>
+            <span id="contingentSchool">159</span> ��������
+        </div>
+        <div>
+            <span style="font-weight: bold;">���������� ���������:</span>
+            <span id="contingentFC">164</span> ��������
+        </div>
+        <div>
+            <span style="font-weight: bold;">��������� ���������:</span>
+            <span id="lastUpdate">-</span>
+        </div>
+        <div class="auto-save-status saved" id="saveStatus">
+            ? ���������
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="mainTable">
+            <tbody>
+                <tr>
+                    <td colspan="5" class="title-cell">
+                        ������� ������ �������� ����������� ������� �� 2026 ���<br>
+                        ������� ��� ���������������� ������-�������������� ����� � �.������<br>
+                        <span style="font-size: 12px;">�� ���� ������� �� ���������� ��������������� ����� �� ���������� ������</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th style="width: 60px;">�</th>
+                    <th>������������ ��������</th>
+                    <th style="width: 18%;">����� (�����)</th>
+                    <th style="width: 18%;">����� �. ������<br>(159 ��.)</th>
+                    <th style="width: 18%;">�� "���������� �����"<br>(164 ��.)</th>
+                </tr>
+
+                <tr class="section-header">
+                    <td colspan="5">���� ������ �����</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">1</td>
+                    <td class="label-cell">������ ����� ���������� ��� "����"</td>
+                    <td class="editable"><input type="number" data-cell="D10" step="0.01" value="0"></td>
+                    <td class="formula-cell" id="E10">0.00</td>
+                    <td class="editable"><input type="number" data-cell="F10" step="0.01" value="0"></td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">2</td>
+                    <td class="label-cell">������ ����� ����������� ������������</td>
+                    <td class="editable"><input type="number" data-cell="D11" step="0.01" value="0"></td>
+                    <td class="formula-cell" id="E11">0.00</td>
+                    <td class="editable"><input type="number" data-cell="F11" step="0.01" value="0"></td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">3</td>
+                    <td class="label-cell">�������������� �������� �������</td>
+                    <td class="editable"><input type="number" data-cell="D12" step="0.01" value="0"></td>
+                    <td class="formula-cell" id="E12">0.00</td>
+                    <td class="editable"><input type="number" data-cell="F12" step="0.01" value="0"></td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">4</td>
+                    <td class="label-cell">��������������� �������</td>
+                    <td class="editable"><input type="number" data-cell="D13" step="0.01" value="0"></td>
+                    <td class="formula-cell" id="E13">0.00</td>
+                    <td class="editable"><input type="number" data-cell="F13" step="0.01" value="0"></td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">5</td>
+                    <td class="label-cell">���������� �����</td>
+                    <td class="editable"><input type="number" data-cell="D14" step="0.01" value="0"></td>
+                    <td class="formula-cell" id="E14">0.00</td>
+                    <td class="editable"><input type="number" data-cell="F14" step="0.01" value="0"></td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">6</td>
+                    <td class="label-cell">���������� ����������</td>
+                    <td class="editable"><input type="number" data-cell="D15" step="0.01" value="0"></td>
+                    <td class="formula-cell" id="E15">0.00</td>
+                    <td class="editable"><input type="number" data-cell="F15" step="0.01" value="0"></td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">7</td>
+                    <td class="label-cell">������������ ����������� �����������</td>
+                    <td class="editable"><input type="number" data-cell="D16" step="0.01" value="0"></td>
+                    <td class="formula-cell" id="E16">0.00</td>
+                    <td class="editable"><input type="number" data-cell="F16" step="0.01" value="0"></td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">8</td>
+                    <td class="label-cell">������������ ���������� ������ 3,5% �� ���� ������� ������������</td>
+                    <td class="editable"><input type="number" data-cell="D17" step="0.01" value="0"></td>
+                    <td class="formula-cell" id="E17">0.00</td>
+                    <td class="editable"><input type="number" data-cell="F17" step="0.01" value="0"></td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">9</td>
+                    <td class="label-cell">���������� �� ������ ������ ���������</td>
+                    <td class="editable"><input type="number" data-cell="D18" step="0.01" value="0"></td>
+                    <td class="formula-cell" id="E18">0.00</td>
+                    <td class="editable"><input type="number" data-cell="F18" step="0.01" value="0"></td>
+                </tr>
+
+                <tr class="total-row">
+                    <td colspan="2" class="label-cell">����� ���</td>
+                    <td class="formula-cell" id="D19">0.00</td>
+                    <td class="formula-cell" id="E19">0.00</td>
+                    <td class="formula-cell" id="F19">0.00</td>
+                </tr>
+
+                <tr class="section-header">
+                    <td colspan="5">������������ ������� � �����</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">10</td>
+                    <td class="label-cell">������������ ��������� ������� (�������� ����)</td>
+                    <td class="formula-cell" id="D20">0.00</td>
+                    <td class="editable"><input type="number" data-cell="E20" step="0.01" value="0"></td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">11</td>
+                    <td class="label-cell">������������ ������������� ������� � ������ ������� ������������ ����������</td>
+                    <td class="formula-cell" id="D21">0.00</td>
+                    <td class="editable"><input type="number" data-cell="E21" step="0.01" value="0"></td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">12</td>
+                    <td class="label-cell">������������ �������, ������-��������� ����������</td>
+                    <td class="editable"><input type="number" data-cell="D22" step="0.01" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E22" step="0.01" value="0"></td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">13</td>
+                    <td class="label-cell">������������ ������ �������</td>
+                    <td class="editable"><input type="number" data-cell="D23" step="0.01" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E23" step="0.01" value="0"></td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">14</td>
+                    <td class="label-cell">������������ ������</td>
+                    <td class="editable"><input type="number" data-cell="D24" step="0.01" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E24" step="0.01" value="0"></td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">15</td>
+                    <td class="label-cell">������ ����� �����</td>
+                    <td class="editable"><input type="number" data-cell="D25" step="0.01" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E25" step="0.01" value="0"></td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">16</td>
+                    <td class="label-cell">������ ������ � ������</td>
+                    <td class="editable"><input type="number" data-cell="D26" step="0.01" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E26" step="0.01" value="0"></td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">17</td>
+                    <td class="label-cell">������������ � ��������� �������� � �������� ��</td>
+                    <td class="editable"><input type="number" data-cell="D27" step="0.01" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E27" step="0.01" value="0"></td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">18</td>
+                    <td class="label-cell">������������ � ��������� �������� �� ������� ��</td>
+                    <td class="editable"><input type="number" data-cell="D28" step="0.01" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E28" step="0.01" value="0"></td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td class="label-cell">19</td>
+                    <td class="label-cell">������ ������� �������</td>
+                    <td class="editable"><input type="number" data-cell="D29" step="0.01" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E29" step="0.01" value="0"></td>
+                    <td>-</td>
+                </tr>
+
+                <tr class="total-row">
+                    <td colspan="2" class="label-cell" style="text-align: center; font-size: 15px;">�����</td>
+                    <td class="formula-cell" id="totalD" style="font-size: 15px;">0.00</td>
+                    <td class="formula-cell" id="totalE" style="font-size: 15px;">0.00</td>
+                    <td class="formula-cell" id="totalF" style="font-size: 15px;">0.00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="buttons">
+        <button class="btn btn-primary" onclick="saveData()">?? ��������� ������</button>
+        <button class="btn btn-success" onclick="exportToExcel()">?? ������� � Excel</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">< ����� � ������</button>
+    </div>
+
+    <script>
+        let tableData = {
+            branch: 'almaty',
+            sheet: 'ss_almaty',
+            lastModified: new Date().toISOString(),
+            cells: {}
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+            calculateTotals();
+        });
+
+        function setupEventListeners() {
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.parentElement.classList.add('changed');
+                    calculateTotals();
+                    autoSave();
+                });
+            });
+        }
+
+        function getValue(cell) {
+            const input = document.querySelector(`input[data-cell="${cell}"]`);
+            return parseFloat(input?.value || 0) || 0;
+        }
+
+        function updateCell(id, value) {
+            const cell = document.getElementById(id);
+            if (cell) {
+                cell.textContent = value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+        }
+
+        function calculateTotals() {
+            // ��� (������ 10-18)
+            let totalD_fot = 0, totalE_fot = 0, totalF_fot = 0;
+            
+            for (let row = 10; row <= 18; row++) {
+                const valD = getValue(`D${row}`);
+                const valF = getValue(`F${row}`);
+                const valE = valD - valF;
+                
+                totalD_fot += valD;
+                totalE_fot += valE;
+                totalF_fot += valF;
+                
+                updateCell(`E${row}`, valE);
+            }
+            
+            updateCell('D19', totalD_fot);
+            updateCell('E19', totalE_fot);
+            updateCell('F19', totalF_fot);
+
+            // ������ � ������ (������ 20-29)
+            let sumD = 0, sumE = 0, sumF = 0;
+            
+            // ������ 20-21 (E = D)
+            for (let row = 20; row <= 21; row++) {
+                const valE = getValue(`E${row}`);
+                updateCell(`D${row}`, valE);
+                sumD += valE;
+                sumE += valE;
+            }
+            
+            // ������ 22-29 (�������)
+            for (let row = 22; row <= 29; row++) {
+                const valD = getValue(`D${row}`);
+                const valE = getValue(`E${row}`);
+                sumD += valD;
+                sumE += valE;
+            }
+
+            // ����� ����
+            const grandTotalD = totalD_fot + sumD;
+            const grandTotalE = totalE_fot + sumE;
+            const grandTotalF = totalF_fot + sumF;
+            
+            updateCell('totalD', grandTotalD);
+            updateCell('totalE', grandTotalE);
+            updateCell('totalF', grandTotalF);
+        }
+
+        let saveTimeout;
+        function autoSave() {
+            clearTimeout(saveTimeout);
+            
+            const status = document.getElementById('saveStatus');
+            status.className = 'auto-save-status';
+            status.style.background = '#fff3cd';
+            status.style.color = '#856404';
+            status.textContent = '?? ����������...';
+
+            saveTimeout = setTimeout(() => {
+                saveData();
+                status.className = 'auto-save-status saved';
+                status.textContent = '? ���������';
+            }, 1000);
+        }
+
+        function saveData() {
+            document.querySelectorAll('input').forEach(input => {
+                if (input.dataset.cell) {
+                    tableData.cells[input.dataset.cell] = input.value;
+                    input.parentElement.classList.remove('changed');
+                }
+            });
+
+            tableData.lastModified = new Date().toISOString();
+            
+            const storageKey = `${tableData.sheet}_${tableData.branch}`;
+            localStorage.setItem(storageKey, JSON.stringify(tableData));
+            
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ru-RU');
+        }
+
+        function loadData() {
+            const storageKey = `${tableData.sheet}_${tableData.branch}`;
+            const saved = localStorage.getItem(storageKey);
+            
+            document.querySelectorAll('input').forEach(input => {
+                input.value = '0';
+            });
+            
+            if (saved) {
+                const data = JSON.parse(saved);
+                tableData = data;
+                
+                Object.keys(data.cells).forEach(cell => {
+                    const input = document.querySelector(`input[data-cell="${cell}"]`);
+                    if (input) {
+                        input.value = data.cells[cell];
+                    }
+                });
+                
+                document.getElementById('lastUpdate').textContent = new Date(data.lastModified).toLocaleString('ru-RU');
+            } else {
+                document.getElementById('lastUpdate').textContent = '��� ������';
+            }
+            
+            calculateTotals();
+        }
+
+        function exportToExcel() {
+            const data = [];
+            const table = document.querySelector('table');
+            const rows = table.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const rowData = [];
+                row.querySelectorAll('th, td').forEach(cell => {
+                    const input = cell.querySelector('input');
+                    if (input) {
+                        rowData.push(input.value || '');
+                    } else {
+                        rowData.push(cell.textContent.trim());
+                    }
+                });
+                data.push(rowData);
+            });
+            
+            const csvContent = data.map(row => row.join('\t')).join('\n');
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const branchNames = {'almaty': '������', 'uralsk': '�������', 'astana': '������', 'consolidated': '���������������'};
+            const filename = `��_������_${branchNames[currentBranch]}_${new Date().toISOString().slice(0,10)}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+    <script>
+        // НЕ инициализируем редактируемые таблицы - структура уже готова
+            console.log(' Таблица готова к работе');
+        });
+        function addDetailToggles() {
+            // Удаляем существующие детальные строки и иконки
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+            
+            const dataRows = document.querySelectorAll('tbody tr');
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const branchNames = {
+                'almaty': 'Алматы',
+                'uralsk': 'Уральск',
+                'astana': 'Астана'
+            };
+            
+            let processedCount = 0;
+            
+            dataRows.forEach((row, index) => {
+                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
+                const firstInput = row.querySelector('input[data-cell]');
+                
+                const isTotalRow = row.classList.contains('total-row') || 
+                                   row.textContent.includes('Итого') ||
+                                   row.textContent.includes('ИТОГО');
+                
+                if (labelCell && firstInput && !isTotalRow) {
+                    const rowNum = firstInput.dataset.row || index;
+                    
+                    labelCell.classList.add('expandable');
+                    const toggle = document.createElement('span');
+                    toggle.className = 'toggle-detail';
+                    toggle.textContent = '▶';
+                    toggle.dataset.row = rowNum;
+                    
+                    labelCell.insertBefore(toggle, labelCell.firstChild);
+                    
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'detail-row';
+                    detailRow.dataset.row = rowNum;
+                    
+                    const emptyCell = document.createElement('td');
+                    emptyCell.style.background = '#f8f9fa';
+                    detailRow.appendChild(emptyCell);
+                    
+                    const branchListCell = document.createElement('td');
+                    branchListCell.className = 'detail-cell';
+                    branchListCell.style.verticalAlign = 'top';
+                    
+                    let branchList = '<div style="padding: 5px 0;">';
+                    branches.forEach(b => {
+                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+                    });
+                    branchList += '</div>';
+                    branchListCell.innerHTML = branchList;
+                    detailRow.appendChild(branchListCell);
+                    
+                    const inputs = row.querySelectorAll('input[data-cell]');
+                    inputs.forEach(input => {
+                        const yearCell = document.createElement('td');
+                        yearCell.className = 'detail-cell';
+                        yearCell.style.verticalAlign = 'top';
+                        yearCell.style.textAlign = 'right';
+                        
+                        let yearData = '<div style="padding: 5px 0;">';
+                        branches.forEach(b => {
+                            const cellId = input.dataset.cell;
+                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
+                                ? parseFloat(window.branchDetailsData[b][cellId]) 
+                                : 0;
+                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                        });
+                        yearData += '</div>';
+                        yearCell.innerHTML = yearData;
+                        detailRow.appendChild(yearCell);
+                    });
+                    
+                    row.parentNode.insertBefore(detailRow, row.nextSibling);
+                    
+                    labelCell.addEventListener('click', function(e) {
+                        const toggle = this.querySelector('.toggle-detail');
+                        const detailRow = this.parentElement.nextElementSibling;
+                        
+                        if (detailRow && detailRow.classList.contains('detail-row')) {
+                            detailRow.classList.toggle('show');
+                            toggle.classList.toggle('expanded');
+                        }
+                    });
+                    
+                    processedCount++;
+                }
+            });
+            
+            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+        }
+
+        function removeDetailToggles() {
+            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.expandable').forEach(cell => {
+                cell.classList.remove('expandable');
+            });
+        }
+
+    </script>
+</body>
+</html>
+
+

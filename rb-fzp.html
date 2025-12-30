@@ -1,0 +1,597 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свод ФЗП 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="editable-table.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 20px; }
+        .header { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { color: #2c3e50; margin-bottom: 10px; }
+        .branch-selector { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .branch-btn { padding: 10px 20px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .branch-btn.active { background: #3498db; color: white; }
+        .info-bar { background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .auto-save-status { padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+        .auto-save-status.saved { background: #d4edda; color: #155724; }
+        .table-container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #cbd5e0; padding: 8px; text-align: center; }
+        th { background: #3498db; color: white; font-weight: bold; }
+        .title-cell { background: #ecf0f1; font-weight: bold; text-align: center; font-size: 14px; color: #2c3e50; padding: 15px; }
+        .label-cell { background: #f8f9fa; font-weight: bold; color: #2c3e50; }
+        .total-row { background: #fff9e6 !important; font-weight: bold; }
+        input[type="number"], input[type="text"] { width: 100%; padding: 6px; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 12px; text-align: center; }
+        input[type="text"] { font-weight: 600; color: #2c3e50; background: #f8f9fa; }
+        input:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
+        .editable { background: #fff; }
+        .editable:hover { background: #f0f9ff; }
+        .formula-cell { background: #e8f5e9; color: #2e7d32; font-weight: bold; }
+        .changed { background: #fff3cd !important; }
+        .buttons { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.3s; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-secondary { background: #95a5a6; color: white; }        .detail-row {
+            background: #f8f9fa;
+            display: none;
+        }
+
+        .detail-row.show {
+            display: table-row;
+        }
+
+        .detail-cell {
+            padding: 8px 8px 8px 40px;
+            font-size: 13px;
+            color: #6c757d;
+            border-left: 3px solid #3498db;
+        }
+
+        .toggle-detail {
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: 5px;
+            font-weight: bold;
+            color: #3498db;
+            transition: transform 0.2s;
+        }
+
+        .toggle-detail.expanded {
+            transform: rotate(90deg);
+        }
+
+        .label-cell.expandable {
+            cursor: pointer;
+        }
+
+        .label-cell.expandable:hover {
+            background: #e9ecef;
+        }
+
+    
+        /* Mobile adaptation - Tablets */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mobile adaptation - Medium screens */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            .header .subtitle {
+                font-size: 12px;
+            }
+
+            .branch-selector {
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .branch-btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-bar {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+
+            .auto-save-status {
+                padding: 6px 14px;
+                font-size: 11px;
+            }
+
+            .import-notice {
+                padding: 10px 15px;
+                font-size: 11px;
+            }
+
+            .sections-nav {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .section-header h2 {
+                font-size: 16px;
+            }
+            
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            .btn-add-row {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .section-footer {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .editable-cell {
+                padding: 6px;
+                font-size: 12px;
+            }
+
+            .row-actions {
+                gap: 3px;
+                margin-left: 5px;
+            }
+
+            .btn-delete-row {
+                padding: 2px 6px;
+                font-size: 10px;
+            }
+        }
+
+        /* Mobile adaptation - Small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .header .subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+
+            .branch-selector {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .branch-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info-bar {
+                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .sections-nav {
+                padding: 10px;
+            }
+
+            .section-header {
+                padding: 10px;
+            }
+
+            .section-header h2 {
+                font-size: 14px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px 2px;
+            }
+
+            .label-cell {
+                min-width: 120px;
+            }
+
+            .btn-add-row {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .section-footer {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .editable-cell {
+                font-size: 11px;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Свод ФЗП (Фонд заработной платы) 2026</h1>
+        <p style="color: #7f8c8d; margin-top: 5px;">Консолидированный бюджет • Лист 4 из 6</p>
+        
+        <div class="branch-selector">
+            <button class="branch-btn active" data-branch="almaty">Алматы</button>
+            <button class="branch-btn" data-branch="astana">Астана</button>
+            <button class="branch-btn" data-branch="uralsk">Уральск</button>
+            <button class="branch-btn" data-branch="consolidated" style="border-color: #8e44ad; color: #8e44ad;">
+                📈 Консолидация
+            </button>
+        </div>
+    </div>
+
+    <div class="info-bar">
+        <div><span style="font-weight: bold;">Филиал:</span> <span id="currentBranch">Алматы</span></div>
+        <div><span style="font-weight: bold;">Последнее обновление:</span> <span id="lastUpdate">-</span></div>
+        <div class="auto-save-status saved" id="saveStatus">✓ Сохранено</div>
+    </div>
+
+    <div class="table-container">
+        <table id="fzpTable">
+            <tbody>
+                <tr>
+                    <td colspan="11" class="title-cell">План по заработной платежке с отчислениями на 2026 год</td>
+                </tr>
+                <tr>
+                    <th style="width: 5%;">№ п/п</th>
+                    <th style="width: 20%;">Наименование подразделения</th>
+                    <th style="width: 10%;">Плановая численность (академ.)</th>
+                    <th style="width: 10%;">Ст времени по ГОЗ</th>
+                    <th style="width: 10%;">Количество часов по адрес</th>
+                    <th style="width: 10%;">Оплата ФЗП на 2026 год</th>
+                    <th style="width: 10%;">Учебно-вспомогательная работа</th>
+                    <th style="width: 8%;">Социальный налог 6%</th>
+                    <th style="width: 8%;">Социальные отчисления 5%</th>
+                    <th style="width: 10%;">Обязательное социальное медицинское страхование 3%</th>
+                    <th style="width: 10%;">Итого</th>
+                </tr>
+                <tr>
+                    <td class="label-cell">1</td>
+                    <td class="editable"><input type="text" data-cell="B5" value="Преподаватели"></td>
+                    <td class="editable"><input type="number" data-cell="C5" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D5" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E5" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="F5" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="G5" value="0"></td>
+                    <td class="formula-cell" id="tax1_1">0.00</td>
+                    <td class="formula-cell" id="tax2_1">0.00</td>
+                    <td class="formula-cell" id="tax3_1">0.00</td>
+                    <td class="formula-cell" id="total_1">0.00</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="2" class="label-cell">Итого</td>
+                    <td class="formula-cell" id="totalQuantity">0</td>
+                    <td class="formula-cell" id="totalTime">0.00</td>
+                    <td class="formula-cell" id="totalHours">0.00</td>
+                    <td class="formula-cell" id="totalPayment">0.00</td>
+                    <td class="formula-cell" id="totalWork">0.00</td>
+                    <td class="formula-cell" id="totalTax1">0.00</td>
+                    <td class="formula-cell" id="totalTax2">0.00</td>
+                    <td class="formula-cell" id="totalTax3">0.00</td>
+                    <td class="formula-cell" id="grandTotal">0.00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="buttons">
+        <button class="btn btn-primary" onclick="saveData()">💾 Сохранить данные</button>
+        <button class="btn btn-success" onclick="exportToExcel()">📥 Скачать в Excel</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Назад в Главное</button>
+    </div>
+
+    <script>
+        let currentBranch = 'almaty';
+        let tableData = { branch: 'almaty', sheet: 'rb_fzp', lastModified: new Date().toISOString(), cells: {} };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+            calculateTotals();
+            
+            // НЕ инициализируем редактируемые таблицы - структура уже готова
+            console.log('✅ Таблица готова к работе');
+        });
+
+        function setupEventListeners() {
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.parentElement.classList.add('changed');
+                    calculateTotals();
+                    autoSave();
+                });
+            });
+
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    switchBranch(this.dataset.branch);
+                });
+            });
+        }
+
+        function getValue(cell) {
+            const input = document.querySelector(`input[data-cell="${cell}"]`);
+            return parseFloat(input?.value || 0) || 0;
+        }
+
+        function calculateTotals() {
+            const payment = getValue('F5');
+            const work = getValue('G5');
+            const total = payment + work;
+            
+            const tax1 = total * 0.06;
+            const tax2 = total * 0.05;
+            const tax3 = total * 0.03;
+            const grandTotal = total + tax1 + tax2 + tax3;
+            
+            document.getElementById('tax1_1').textContent = tax1.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('tax2_1').textContent = tax2.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('tax3_1').textContent = tax3.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('total_1').textContent = grandTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            
+            document.getElementById('totalQuantity').textContent = getValue('C5');
+            document.getElementById('totalTime').textContent = getValue('D5').toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('totalHours').textContent = getValue('E5').toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('totalPayment').textContent = payment.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('totalWork').textContent = work.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('totalTax1').textContent = tax1.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('totalTax2').textContent = tax2.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('totalTax3').textContent = tax3.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('grandTotal').textContent = grandTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+        }
+
+        let saveTimeout;
+        function autoSave() {
+            clearTimeout(saveTimeout);
+            const status = document.getElementById('saveStatus');
+            status.className = 'auto-save-status';
+            status.style.background = '#fff3cd';
+            status.style.color = '#856404';
+            status.textContent = '⏳ Сохранение...';
+            saveTimeout = setTimeout(() => { saveData(); status.className = 'auto-save-status saved'; status.textContent = '✓ Сохранено'; }, 1000);
+        }
+
+        function saveData() {
+            if (currentBranch === 'consolidated') return;
+            document.querySelectorAll('input').forEach(input => { tableData.cells[input.dataset.cell] = input.value; input.parentElement.classList.remove('changed'); });
+            tableData.lastModified = new Date().toISOString();
+            const storageKey = `${tableData.sheet}_${tableData.branch}`;
+            localStorage.setItem(storageKey, JSON.stringify(tableData));
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ru-RU');
+        }
+
+        function loadData() {
+            const storageKey = `${tableData.sheet}_${tableData.branch}`;
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+                const data = JSON.parse(saved);
+                tableData = data;
+                Object.keys(data.cells).forEach(cell => {
+                    const input = document.querySelector(`input[data-cell="${cell}"]`);
+                    if (input) input.value = data.cells[cell];
+                });
+                document.getElementById('lastUpdate').textContent = new Date(data.lastModified).toLocaleString('ru-RU');
+            } else {
+                document.getElementById('lastUpdate').textContent = 'Нет данных';
+            }
+            calculateTotals();
+        }
+
+        function switchBranch(branch) {
+            if (currentBranch !== 'consolidated') saveData();
+            // Удаляем детали при переключении с консолидации
+            if (currentBranch === 'consolidated' && branch !== 'consolidated') {
+                removeDetailToggles();
+            }
+            
+            currentBranch = branch;
+            tableData.branch = branch;
+            document.querySelectorAll('.branch-btn').forEach(btn => { btn.classList.remove('active'); if (btn.dataset.branch === branch) btn.classList.add('active'); });
+            if (branch === 'consolidated') loadConsolidatedData(); else loadData();
+        }
+
+        function loadConsolidatedData() {
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const allData = {};
+
+            // Сохраняем данные для детализации
+            window.branchDetailsData = {};
+            branches.forEach(b => {
+                const key = `rb_fzp_${b}`;
+                const saved = localStorage.getItem(key);
+                if (saved) allData[b] = JSON.Parse(saved).cells || {};
+            });
+            document.querySelectorAll('input').forEach(input => {
+                const cellId = input.dataset.cell;
+                let sum = 0;
+                branches.forEach(b => { if (allData[b] && allData[b][cellId]) sum += parseFloat(allData[b][cellId]) || 0; });
+                input.value = sum;
+            });
+            calculateTotals();
+            document.getElementById('lastUpdate').textContent = 'Консолидация из 3 филиалов';
+        }
+
+        function exportToExcel() {
+            const data = [];
+            const table = document.querySelector('table');
+            const rows = table.querySelectorAll('tr');
+            rows.forEach(row => {
+                const rowData = [];
+                row.querySelectorAll('th, td').forEach(cell => {
+                    const input = cell.querySelector('input');
+                    rowData.push(input ? input.value || '' : cell.textContent.trim());
+                });
+                data.push(rowData);
+            });
+            const csvContent = data.map(row => row.join('\t')).join('\n');
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const branchNames = {'almaty': 'Алматы', 'uralsk': 'Уральск', 'astana': 'Астана', 'consolidated': 'Консолидированная'};
+            const filename = `ФЗП_${branchNames[currentBranch]}_${new Date().toISOString().slice(0,10)}.csv`;
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        function addDetailToggles() {
+            // Удаляем существующие детальные строки и иконки
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+            
+            const dataRows = document.querySelectorAll('tbody tr');
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const branchNames = {
+                'almaty': 'Алматы',
+                'uralsk': 'Уральск',
+                'astana': 'Астана'
+            };
+            
+            let processedCount = 0;
+            
+            dataRows.forEach((row, index) => {
+                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
+                const firstInput = row.querySelector('input[data-cell]');
+                
+                const isTotalRow = row.classList.contains('total-row') || 
+                                   row.textContent.includes('Итого') ||
+                                   row.textContent.includes('ИТОГО');
+                
+                if (labelCell && firstInput && !isTotalRow) {
+                    const rowNum = firstInput.dataset.row || index;
+                    
+                    labelCell.classList.add('expandable');
+                    const toggle = document.createElement('span');
+                    toggle.className = 'toggle-detail';
+                    toggle.textContent = '▶';
+                    toggle.dataset.row = rowNum;
+                    
+                    labelCell.insertBefore(toggle, labelCell.firstChild);
+                    
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'detail-row';
+                    detailRow.dataset.row = rowNum;
+                    
+                    const emptyCell = document.createElement('td');
+                    emptyCell.style.background = '#f8f9fa';
+                    detailRow.appendChild(emptyCell);
+                    
+                    const branchListCell = document.createElement('td');
+                    branchListCell.className = 'detail-cell';
+                    branchListCell.style.verticalAlign = 'top';
+                    
+                    let branchList = '<div style="padding: 5px 0;">';
+                    branches.forEach(b => {
+                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+                    });
+                    branchList += '</div>';
+                    branchListCell.innerHTML = branchList;
+                    detailRow.appendChild(branchListCell);
+                    
+                    const inputs = row.querySelectorAll('input[data-cell]');
+                    inputs.forEach(input => {
+                        const yearCell = document.createElement('td');
+                        yearCell.className = 'detail-cell';
+                        yearCell.style.verticalAlign = 'top';
+                        yearCell.style.textAlign = 'right';
+                        
+                        let yearData = '<div style="padding: 5px 0;">';
+                        branches.forEach(b => {
+                            const cellId = input.dataset.cell;
+                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
+                                ? parseFloat(window.branchDetailsData[b][cellId]) 
+                                : 0;
+                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                        });
+                        yearData += '</div>';
+                        yearCell.innerHTML = yearData;
+                        detailRow.appendChild(yearCell);
+                    });
+                    
+                    row.parentNode.insertBefore(detailRow, row.nextSibling);
+                    
+                    labelCell.addEventListener('click', function(e) {
+                        const toggle = this.querySelector('.toggle-detail');
+                        const detailRow = this.parentElement.nextElementSibling;
+                        
+                        if (detailRow && detailRow.classList.contains('detail-row')) {
+                            detailRow.classList.toggle('show');
+                            toggle.classList.toggle('expanded');
+                        }
+                    });
+                    
+                    processedCount++;
+                }
+            });
+            
+            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+        }
+
+        function removeDetailToggles() {
+            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.expandable').forEach(cell => {
+                cell.classList.remove('expandable');
+            });
+        }
+
+    </script>
+</body>
+</html>
+
+

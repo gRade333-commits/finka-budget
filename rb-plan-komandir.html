@@ -1,0 +1,938 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>План командировок 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="editable-table.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .branch-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .branch-btn {
+            padding: 10px 20px;
+            border: 2px solid #3498db;
+            background: white;
+            color: #3498db;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .branch-btn.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .info-bar {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .auto-save-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .auto-save-status.saved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .table-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .title-cell {
+            background: #ecf0f1;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+            color: #2c3e50;
+            padding: 15px;
+        }
+
+        .label-cell {
+            background: #f8f9fa;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .total-row {
+            background: #fff9e6 !important;
+            font-weight: bold;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #cbd5e0;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+
+        .editable {
+            background: #fff;
+        }
+
+        .editable:hover {
+            background: #f0f9ff;
+        }
+
+        .formula-cell {
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .changed {
+            background: #fff3cd !important;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-add {
+            background: #16a085;
+            color: white;
+        }        .detail-row {
+            background: #f8f9fa;
+            display: none;
+        }
+
+        .detail-row.show {
+            display: table-row;
+        }
+
+        .detail-cell {
+            padding: 8px 8px 8px 40px;
+            font-size: 13px;
+            color: #6c757d;
+            border-left: 3px solid #3498db;
+        }
+
+        .toggle-detail {
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: 5px;
+            font-weight: bold;
+            color: #3498db;
+            transition: transform 0.2s;
+        }
+
+        .toggle-detail.expanded {
+            transform: rotate(90deg);
+        }
+
+        .label-cell.expandable {
+            cursor: pointer;
+        }
+
+        .label-cell.expandable:hover {
+            background: #e9ecef;
+        }
+
+    
+        /* Mobile adaptation - Tablets */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mobile adaptation - Medium screens */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            .header .subtitle {
+                font-size: 12px;
+            }
+
+            .branch-selector {
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .branch-btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-bar {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+
+            .auto-save-status {
+                padding: 6px 14px;
+                font-size: 11px;
+            }
+
+            .import-notice {
+                padding: 10px 15px;
+                font-size: 11px;
+            }
+
+            .sections-nav {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .section-header h2 {
+                font-size: 16px;
+            }
+            
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            .btn-add-row {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .section-footer {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .editable-cell {
+                padding: 6px;
+                font-size: 12px;
+            }
+
+            .row-actions {
+                gap: 3px;
+                margin-left: 5px;
+            }
+
+            .btn-delete-row {
+                padding: 2px 6px;
+                font-size: 10px;
+            }
+        }
+
+        /* Mobile adaptation - Small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .header .subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+
+            .branch-selector {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .branch-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info-bar {
+                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .sections-nav {
+                padding: 10px;
+            }
+
+            .section-header {
+                padding: 10px;
+            }
+
+            .section-header h2 {
+                font-size: 14px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px 2px;
+            }
+
+            .label-cell {
+                min-width: 120px;
+            }
+
+            .btn-add-row {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .section-footer {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .editable-cell {
+                font-size: 11px;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>?? ���� ������������ � ��������� ��������� 2026</h1>
+        <p style="color: #7f8c8d; margin-top: 5px;">��������������� ������ � ���� 6 �� 6 � ��������� ������� � �������� ��</p>
+        
+        <div class="branch-selector">
+            <button class="branch-btn active" data-branch="almaty">Алматы</button>
+            <button class="branch-btn" data-branch="astana">Астана</button>
+            <button class="branch-btn" data-branch="uralsk">Уральск</button>
+            <button class="branch-btn" data-branch="consolidated" style="border-color: #8e44ad; color: #8e44ad;">
+                📈 Консолидация
+            </button>
+        </div>
+    </div>
+
+    <div class="info-bar">
+        <div>
+            <span style="font-weight: bold;">������:</span>
+            <span id="currentBranch">������</span>
+        </div>
+        <div>
+            <span style="font-weight: bold;">��� (2026):</span>
+            <span>3 692 �����</span>
+        </div>
+        <div>
+            <span style="font-weight: bold;">��������� ���������:</span>
+            <span id="lastUpdate">-</span>
+        </div>
+        <div class="auto-save-status saved" id="saveStatus">
+            ? ���������
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 50px;">�</th>
+                    <th rowspan="2" style="width: 30%;">�������� �����������</th>
+                    <th rowspan="2" style="width: 15%;">����� ����������</th>
+                    <th colspan="5">�������� ������</th>
+                    <th rowspan="2" style="width: 12%;">�������� (���)</th>
+                </tr>
+                <tr>
+                    <th style="width: 8%;">������ ��� (�����)</th>
+                    <th style="width: 8%;">���-�� �������</th>
+                    <th style="width: 8%;">���-�� ����</th>
+                    <th style="width: 8%;">� �.�. ���� � ����</th>
+                    <th style="width: 8%;">���-�� ���.</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr data-row="1">
+                    <td class="label-cell">1</td>
+                    <td class="editable"><input type="text" data-cell="B18" value="��������� ������� ��� ������� � �������������� ����� ��������������� ��������� �� ������ � �� ��������"></td>
+                    <td class="editable"><input type="text" data-cell="C18" value="�.������-�.������"></td>
+                    <td class="editable"><input type="number" data-cell="D18" step="1" value="3692"></td>
+                    <td class="editable"><input type="number" data-cell="E18" step="1" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="F18" step="1" value="5"></td>
+                    <td class="editable"><input type="number" data-cell="G18" step="1" value="2"></td>
+                    <td class="editable"><input type="number" data-cell="H18" step="1" value="2"></td>
+                    <td class="formula-cell" id="I18">0.00</td>
+                </tr>
+
+                <tr data-row="2">
+                    <td class="label-cell">2</td>
+                    <td class="editable"><input type="text" data-cell="B19" value="��������� ������� ��� ������� � �������������� ����� ��������������� ��������� �� ���������� � �� �����"></td>
+                    <td class="editable"><input type="text" data-cell="C19" value="�.������-�.������"></td>
+                    <td class="editable"><input type="number" data-cell="D19" step="1" value="3692"></td>
+                    <td class="editable"><input type="number" data-cell="E19" step="1" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="F19" step="1" value="5"></td>
+                    <td class="editable"><input type="number" data-cell="G19" step="1" value="2"></td>
+                    <td class="editable"><input type="number" data-cell="H19" step="1" value="2"></td>
+                    <td class="formula-cell" id="I19">0.00</td>
+                </tr>
+
+                <tr data-row="3">
+                    <td class="label-cell">3</td>
+                    <td class="editable"><input type="text" data-cell="B20" value="��������� ������� ��� ������� � �������������� ����� ��������������� ��������� �� ���������� ����� � ����������"></td>
+                    <td class="editable"><input type="text" data-cell="C20" value="�.������-�.����"></td>
+                    <td class="editable"><input type="number" data-cell="D20" step="1" value="3692"></td>
+                    <td class="editable"><input type="number" data-cell="E20" step="1" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="F20" step="1" value="5"></td>
+                    <td class="editable"><input type="number" data-cell="G20" step="1" value="2"></td>
+                    <td class="editable"><input type="number" data-cell="H20" step="1" value="2"></td>
+                    <td class="formula-cell" id="I20">0.00</td>
+                </tr>
+
+                <tr data-row="4">
+                    <td class="label-cell">4</td>
+                    <td class="editable"><input type="text" data-cell="B21" value="��������� ������� ��� ������� � �������������� ����� ��������������� ��������� �� �������� ����� � ����������"></td>
+                    <td class="editable"><input type="text" data-cell="C21" value="�.������-�.���������"></td>
+                    <td class="editable"><input type="number" data-cell="D21" step="1" value="3692"></td>
+                    <td class="editable"><input type="number" data-cell="E21" step="1" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="F21" step="1" value="5"></td>
+                    <td class="editable"><input type="number" data-cell="G21" step="1" value="2"></td>
+                    <td class="editable"><input type="number" data-cell="H21" step="1" value="2"></td>
+                    <td class="formula-cell" id="I21">0.00</td>
+                </tr>
+
+                <tr data-row="5">
+                    <td class="label-cell">5</td>
+                    <td class="editable"><input type="text" data-cell="B22" value="������ ��������� �������"></td>
+                    <td class="editable"><input type="text" data-cell="C22" value="�� ��"></td>
+                    <td class="editable"><input type="number" data-cell="D22" step="1" value="3692"></td>
+                    <td class="editable"><input type="number" data-cell="E22" step="1" value="5"></td>
+                    <td class="editable"><input type="number" data-cell="F22" step="1" value="3"></td>
+                    <td class="editable"><input type="number" data-cell="G22" step="1" value="1"></td>
+                    <td class="editable"><input type="number" data-cell="H22" step="1" value="1"></td>
+                    <td class="formula-cell" id="I22">0.00</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="8" class="label-cell" style="text-align: right; padding-right: 20px;">�����:</td>
+                    <td class="formula-cell" id="totalSum">0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+            <p style="font-weight: bold; margin-bottom: 10px;">?? ������ ��������:</p>
+            <p style="font-size: 13px;">�������� = ��� ? ������� ? ��� ? ���-�� ���.</p>
+            <p style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">��� (����������� ��������� ����������) �� 2026 ��� = 3 692 �����</p>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button class="btn btn-add" onclick="addRow()">? �������� �������</button>
+        <button class="btn btn-primary" onclick="saveData()">?? ��������� ������</button>
+        <button class="btn btn-success" onclick="exportToExcel()">?? ������� � Excel</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">< ����� � ������</button>
+    </div>
+
+    <script>
+        let currentBranch = 'almaty'; // ������� ������
+        
+        let tableData = {
+            branch: 'almaty',
+            sheet: 'rb_plan_komandir',
+            lastModified: new Date().toISOString(),
+            cells: {},
+            rowCount: 5
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+            calculateTotals();
+            
+            // НЕ инициализируем редактируемые таблицы - структура уже готова
+            console.log(' Таблица готова к работе');
+        });
+
+        function setupEventListeners() {
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.parentElement.classList.add('changed');
+                    calculateTotals();
+                    autoSave();
+                });
+            });
+
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    switchBranch(this.dataset.branch);
+                });
+            });
+        }
+
+        function getValue(cell) {
+            const input = document.querySelector(`input[data-cell="${cell}"]`);
+            return parseFloat(input?.value || 0) || 0;
+        }
+
+        function calculateRowTotal(rowNum) {
+            const baseRow = 17 + rowNum;
+            const mrp = getValue(`D${baseRow}`);
+            const trips = getValue(`E${baseRow}`);
+            const days = getValue(`F${baseRow}`);
+            const people = getValue(`H${baseRow}`);
+            
+            const total = mrp * trips * days * people;
+            
+            const cell = document.getElementById(`I${baseRow}`);
+            if (cell) {
+                cell.textContent = total.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+            
+            return total;
+        }
+
+        function calculateTotals() {
+            let grandTotal = 0;
+            
+            // ������� ��� ���� �����
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach((row, idx) => {
+                grandTotal += calculateRowTotal(idx + 1);
+            });
+            
+            const totalCell = document.getElementById('totalSum');
+            if (totalCell) {
+                totalCell.textContent = grandTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+        }
+
+        function addRow() {
+            tableData.rowCount++;
+            const tbody = document.getElementById('tableBody');
+            const newRowNum = tableData.rowCount;
+            const baseRow = 17 + newRowNum;
+            
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-row', newRowNum);
+            tr.innerHTML = `
+                <td class="label-cell">${newRowNum}</td>
+                <td class="editable"><input type="text" data-cell="B${baseRow}" value=""></td>
+                <td class="editable"><input type="text" data-cell="C${baseRow}" value=""></td>
+                <td class="editable"><input type="number" data-cell="D${baseRow}" step="1" value="3692"></td>
+                <td class="editable"><input type="number" data-cell="E${baseRow}" step="1" value="1"></td>
+                <td class="editable"><input type="number" data-cell="F${baseRow}" step="1" value="3"></td>
+                <td class="editable"><input type="number" data-cell="G${baseRow}" step="1" value="1"></td>
+                <td class="editable"><input type="number" data-cell="H${baseRow}" step="1" value="1"></td>
+                <td class="formula-cell" id="I${baseRow}">0.00</td>
+            `;
+            
+            tbody.appendChild(tr);
+            
+            // ����������������� ����������� ��� ����� �����
+            tr.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.parentElement.classList.add('changed');
+                    calculateTotals();
+                    autoSave();
+                });
+            });
+            
+            calculateTotals();
+        }
+
+        let saveTimeout;
+        function autoSave() {
+            clearTimeout(saveTimeout);
+            
+            const status = document.getElementById('saveStatus');
+            status.className = 'auto-save-status';
+            status.style.background = '#fff3cd';
+            status.style.color = '#856404';
+            status.textContent = '?? ����������...';
+
+            saveTimeout = setTimeout(() => {
+                saveData();
+                status.className = 'auto-save-status saved';
+                status.textContent = '? ���������';
+            }, 1000);
+        }
+
+        function saveData() {
+            // �� ��������� � ������ ������������
+            if (currentBranch === 'consolidated') return;
+            
+            document.querySelectorAll('input').forEach(input => {
+                if (input.dataset.cell) {
+                    tableData.cells[input.dataset.cell] = input.value;
+                    input.parentElement.classList.remove('changed');
+                }
+            });
+
+            tableData.lastModified = new Date().toISOString();
+            
+            const storageKey = `${tableData.sheet}_${tableData.branch}`;
+            localStorage.setItem(storageKey, JSON.stringify(tableData));
+            
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ru-RU');
+        }
+
+        function loadData() {
+            const storageKey = `${tableData.sheet}_${tableData.branch}`;
+            const saved = localStorage.getItem(storageKey);
+            
+            if (saved) {
+                const data = JSON.parse(saved);
+                tableData = data;
+                
+                Object.keys(data.cells).forEach(cell => {
+                    const input = document.querySelector(`input[data-cell="${cell}"]`);
+                    if (input) {
+                        input.value = data.cells[cell];
+                    }
+                });
+                
+                document.getElementById('lastUpdate').textContent = new Date(data.lastModified).toLocaleString('ru-RU');
+            } else {
+                document.getElementById('lastUpdate').textContent = '��� ������';
+            }
+            
+            calculateTotals();
+        }
+
+        function switchBranch(branch) {
+            // �� ��������� ������ ���� ������� ����� - ������������
+            if (currentBranch !== 'consolidated') {
+                saveData();
+            }
+            tableData.branch = branch;
+            // Удаляем детали при переключении с консолидации
+            if (currentBranch === 'consolidated' && branch !== 'consolidated') {
+                removeDetailToggles();
+            }
+            
+            currentBranch = branch;
+            
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.branch === branch) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            const branchNames = {
+                'almaty': '������',
+                'uralsk': '�������',
+                'astana': '������',
+                'consolidated': '���������������'
+            };
+            
+            document.getElementById('currentBranch').textContent = branchNames[branch];
+            
+            if (branch === 'consolidated') {
+                document.querySelectorAll('input').forEach(input => {
+                    input.disabled = true;
+                });
+                loadConsolidatedData();
+            } else {
+                document.querySelectorAll('input').forEach(input => {
+                    input.disabled = false;
+                });
+                loadData();
+            }
+        }
+
+        function loadConsolidatedData() {
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const allData = {};
+
+            // Сохраняем данные для детализации
+            window.branchDetailsData = {};
+            
+            branches.forEach(b => {
+                const key = `rb_plan_komandir_${b}`;
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    allData[b] = JSON.parse(saved).cells || {};
+                }
+            });
+            
+            document.querySelectorAll('input').forEach(input => {
+                const cellId = input.dataset.cell;
+                let sum = 0;
+                branches.forEach(b => {
+                    if (allData[b]?.[cellId]) {
+                        sum += parseFloat(allData[b][cellId]) || 0;
+                    }
+                });
+                input.value = sum.toFixed(2);
+            });
+            
+            calculateTotals();
+            document.getElementById('lastUpdate').textContent = '������������ �� 3 ��������';
+        }
+
+        function exportToExcel() {
+            const data = [];
+            const table = document.querySelector('table');
+            const rows = table.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const rowData = [];
+                row.querySelectorAll('th, td').forEach(cell => {
+                    const input = cell.querySelector('input');
+                    if (input) {
+                        rowData.push(input.value || '');
+                    } else {
+                        rowData.push(cell.textContent.trim());
+                    }
+                });
+                data.push(rowData);
+            });
+            
+            const csvContent = data.map(row => row.join('\t')).join('\n');
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const branchNames = {
+                'almaty': '������',
+                'uralsk': '�������',
+                'astana': '������',
+                'consolidated': '���������������'
+            };
+            
+            const filename = `����_������������_2026_${branchNames[currentBranch]}_${new Date().toISOString().slice(0,10)}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        function addDetailToggles() {
+            // Удаляем существующие детальные строки и иконки
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+            
+            const dataRows = document.querySelectorAll('tbody tr');
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const branchNames = {
+                'almaty': 'Алматы',
+                'uralsk': 'Уральск',
+                'astana': 'Астана'
+            };
+            
+            let processedCount = 0;
+            
+            dataRows.forEach((row, index) => {
+                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
+                const firstInput = row.querySelector('input[data-cell]');
+                
+                const isTotalRow = row.classList.contains('total-row') || 
+                                   row.textContent.includes('Итого') ||
+                                   row.textContent.includes('ИТОГО');
+                
+                if (labelCell && firstInput && !isTotalRow) {
+                    const rowNum = firstInput.dataset.row || index;
+                    
+                    labelCell.classList.add('expandable');
+                    const toggle = document.createElement('span');
+                    toggle.className = 'toggle-detail';
+                    toggle.textContent = '▶';
+                    toggle.dataset.row = rowNum;
+                    
+                    labelCell.insertBefore(toggle, labelCell.firstChild);
+                    
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'detail-row';
+                    detailRow.dataset.row = rowNum;
+                    
+                    const emptyCell = document.createElement('td');
+                    emptyCell.style.background = '#f8f9fa';
+                    detailRow.appendChild(emptyCell);
+                    
+                    const branchListCell = document.createElement('td');
+                    branchListCell.className = 'detail-cell';
+                    branchListCell.style.verticalAlign = 'top';
+                    
+                    let branchList = '<div style="padding: 5px 0;">';
+                    branches.forEach(b => {
+                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+                    });
+                    branchList += '</div>';
+                    branchListCell.innerHTML = branchList;
+                    detailRow.appendChild(branchListCell);
+                    
+                    const inputs = row.querySelectorAll('input[data-cell]');
+                    inputs.forEach(input => {
+                        const yearCell = document.createElement('td');
+                        yearCell.className = 'detail-cell';
+                        yearCell.style.verticalAlign = 'top';
+                        yearCell.style.textAlign = 'right';
+                        
+                        let yearData = '<div style="padding: 5px 0;">';
+                        branches.forEach(b => {
+                            const cellId = input.dataset.cell;
+                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
+                                ? parseFloat(window.branchDetailsData[b][cellId]) 
+                                : 0;
+                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                        });
+                        yearData += '</div>';
+                        yearCell.innerHTML = yearData;
+                        detailRow.appendChild(yearCell);
+                    });
+                    
+                    row.parentNode.insertBefore(detailRow, row.nextSibling);
+                    
+                    labelCell.addEventListener('click', function(e) {
+                        const toggle = this.querySelector('.toggle-detail');
+                        const detailRow = this.parentElement.nextElementSibling;
+                        
+                        if (detailRow && detailRow.classList.contains('detail-row')) {
+                            detailRow.classList.toggle('show');
+                            toggle.classList.toggle('expanded');
+                        }
+                    });
+                    
+                    processedCount++;
+                }
+            });
+            
+            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+        }
+
+        function removeDetailToggles() {
+            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.expandable').forEach(cell => {
+                cell.classList.remove('expandable');
+            });
+        }
+
+    </script>
+</body>
+</html>
+
+

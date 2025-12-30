@@ -1,0 +1,1132 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сводная общая 2026 - Полная версия (572 строки)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .branch-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .branch-btn {
+            padding: 12px 24px;
+            border: 2px solid #3498db;
+            background: white;
+            color: #3498db;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .branch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .branch-btn.active {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .info-bar {
+            background: rgba(255,255,255,0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .auto-save-status {
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .auto-save-status.saved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .auto-save-status.saving {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .import-notice {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            border-left: 4px solid #e17055;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #d63031;
+            display: none;
+            animation: pulse 2s infinite;
+        }
+        
+        .import-notice.active {
+            display: block;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .row-actions {
+            display: inline-flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .btn-delete-row {
+            padding: 3px 8px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        
+        .btn-delete-row:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+        
+        .section-footer {
+            padding: 15px;
+            background: #f8f9fa;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .btn-add-row {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-add-row:hover {
+            background: linear-gradient(135deg, #229954, #1e8449);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+        }
+        
+        .editable-cell {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .editable-cell:focus {
+            outline: 2px solid #3498db;
+            background: #f0f9ff;
+            border-color: #3498db;
+        }
+
+        .sections-nav {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .sections-nav h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .section-link {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 5px;
+            background: #ecf0f1;
+            color: #2c3e50;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .section-link:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        .section-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .section-header:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-header .toggle-icon {
+            font-size: 24px;
+            transition: transform 0.3s;
+        }
+
+        .section-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            overflow-x: auto;
+            max-height: none;
+            transition: all 0.3s;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #dfe6e9;
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th {
+            background: linear-gradient(135deg, #74b9ff, #a29bfe);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 5px;
+            font-size: 13px;
+        }
+
+        td input:focus {
+            outline: 2px solid #3498db;
+            background: #f0f9ff;
+            border-radius: 3px;
+        }
+
+        .formula-cell {
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .row-header {
+            background: #ecf0f1;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .summary-row {
+            background: #e3f2fd;
+            font-weight: 700;
+            color: #1976d2;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            .header .subtitle {
+                font-size: 12px;
+            }
+
+            .branch-selector {
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .branch-btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-bar {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+
+            .auto-save-status {
+                padding: 6px 14px;
+                font-size: 11px;
+            }
+
+            .import-notice {
+                padding: 10px 15px;
+                font-size: 11px;
+            }
+
+            .sections-nav {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .section-header h2 {
+                font-size: 16px;
+            }
+            
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            .btn-add-row {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .section-footer {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .editable-cell {
+                padding: 6px;
+                font-size: 12px;
+            }
+
+            .row-actions {
+                gap: 3px;
+                margin-left: 5px;
+            }
+
+            .btn-delete-row {
+                padding: 2px 6px;
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .header .subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+
+            .branch-selector {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .branch-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info-bar {
+                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .sections-nav {
+                padding: 10px;
+            }
+
+            .section-header {
+                padding: 10px;
+            }
+
+            .section-header h2 {
+                font-size: 14px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px 2px;
+            }
+
+            .label-cell {
+                min-width: 120px;
+            }
+
+            .btn-add-row {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .section-footer {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .editable-cell {
+                font-size: 11px;
+                padding: 5px;
+            }
+        }
+
+        .detail-row {
+            background: #f8f9fa;
+            display: none;
+        }
+
+        .detail-row.show {
+            display: table-row;
+        }
+
+        .detail-cell {
+            padding: 8px 8px 8px 40px;
+            font-size: 13px;
+            color: #6c757d;
+            border-left: 3px solid #3498db;
+        }
+
+        .toggle-detail {
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: 5px;
+            font-weight: bold;
+            color: #3498db;
+            transition: transform 0.2s;
+        }
+
+        .toggle-detail.expanded {
+            transform: rotate(90deg);
+        }
+
+        .label-cell.expandable {
+            cursor: pointer;
+        }
+
+        .label-cell.expandable:hover {
+            background: #e9ecef;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Сводная общая 2026 - Полная версия</h1>
+            <div class="subtitle">ФНАО «Республиканская физико-математическая школа» в г.Алматы<br>
+            Бюджетная программа 004 • Подпрограмма 100 • 13 разделов • 572 строки</div>
+            
+            <div class="branch-selector">
+                <button class="branch-btn active" onclick="switchBranch('almaty')">🏛️ Алматы</button>
+                <button class="branch-btn" onclick="switchBranch('astana')">🏛️ Астана</button>
+                <button class="branch-btn" onclick="switchBranch('uralsk')">🏛️ Уральск</button>
+                <button class="branch-btn" onclick="switchBranch('consolidated')">📈 Консолидация</button>
+            </div>
+        </div>
+
+        <div class="info-bar">
+            <div>
+                <strong>Текущий филиал:</strong> <span id="current-branch">Алматы</span>
+            </div>
+            <div class="auto-save-status saved" id="save-status">✅ Сохранено</div>
+        </div>
+        
+        <div class="import-notice" id="import-notice">
+            🔒 Данные импортированы - автоматические формулы консолидации отключены. 
+            Начните редактировать любую ячейку для активации формул.
+        </div>
+
+        <div class="sections-nav">
+            <h3>📑 Быстрая навигация по разделам:</h3>
+            <div id="nav-links"></div>
+        </div>
+
+        <div id="sections-container"></div>
+
+        <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">⬆️ Наверх</button>
+    </div>
+
+    <script>
+        let currentBranch = 'almaty';
+        let saveTimeout = null;
+        let isDataImported = false; // Флаг для отслеживания импортированных данных
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSectionsData();
+            updateImportNotice();
+        });
+        
+        // Обновление отображения уведомления об импорте
+        function updateImportNotice() {
+            const notice = document.getElementById('import-notice');
+            const importFlag = localStorage.getItem('rb_svodnaya_import_flag');
+            
+            if (importFlag === 'true') {
+                notice.classList.add('active');
+            } else {
+                notice.classList.remove('active');
+            }
+        }
+
+        // Загрузка данных разделов
+        async function loadSectionsData() {
+            try {
+                const response = await fetch('svodnaya_sections_full.json');
+                const data = await response.json();
+                
+                // Генерируем навигацию
+                generateNavigation(data.sections);
+                
+                // Генерируем разделы
+                generateSections(data.sections);
+                
+                // Загружаем сохраненные данные
+                loadData();
+                
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+                // Fallback - генерируем пустую структуру
+                generateEmptySections();
+            }
+        }
+
+        // Генерация навигации
+        function generateNavigation(sections) {
+            const navContainer = document.getElementById('nav-links');
+            navContainer.innerHTML = sections.map(sec => 
+                `<a href="#section-${sec.num}" class="section-link">
+                    ${sec.num}. ${sec.title}
+                </a>`
+            ).join('');
+        }
+
+        // Генерация разделов
+        function generateSections(sections) {
+            const container = document.getElementById('sections-container');
+            container.innerHTML = sections.map(sec => `
+                <div class="section-container" id="section-${sec.num}">
+                    <div class="section-header" onclick="toggleSection(${sec.num})">
+                        <h2>${sec.num}. ${sec.title}</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content" id="content-${sec.num}">
+                        ${generateSectionTable(sec)}
+                        <div class="section-footer">
+                            <button class="btn-add-row" onclick="addNewRow(${sec.num})">
+                                ➕ Добавить новую строку
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Генерация таблицы раздела
+        function generateSectionTable(section) {
+            if (!section.rows || section.rows.length === 0) {
+                return '<p style="padding: 20px; color: #7f8c8d;">Нет данных</p>';
+            }
+
+            // Определяем количество столбцов из первой строки
+            const maxCols = Math.max(...section.rows.map(r => r.data.filter(c => c !== "").length));
+            
+            let html = '<table>';
+            
+            section.rows.forEach((row, idx) => {
+                const isHeader = idx === 0 || row.data[1] === "№ п.п" || row.data[1] === "№ п/п" || row.data[1] === "№ ";
+                const isSummary = row.data[2]?.includes("Всего") || row.data[2]?.includes("ИТОГО");
+                const rowId = `sec${section.num}_row${row.idx}`;
+                
+                html += '<tr id="' + rowId + '"' + (isSummary ? ' class="summary-row"' : '') + '>';
+                
+                row.data.forEach((cell, colIdx) => {
+                    if (cell === "") return; // Пропускаем пустые ячейки
+                    
+                    const cellTag = isHeader ? 'th' : 'td';
+                    const cellId = `sec${section.num}_row${row.idx}_col${colIdx}`;
+                    
+                    if (isHeader) {
+                        html += `<${cellTag}>${cell}</${cellTag}>`;
+                    } else {
+                        // Все ячейки теперь редактируемые
+                        html += `<td><input type="text" class="editable-cell" id="${cellId}" 
+                                value="${cell}" 
+                                oninput="handleInput('${cellId}')" 
+                                placeholder="-"></td>`;
+                    }
+                });
+                
+                // Добавляем кнопку удаления для не-заголовочных строк
+                if (!isHeader) {
+                    html += `<td style="width: 60px; text-align: center;">
+                        <button class="btn-delete-row" onclick="deleteRow('${rowId}', ${section.num})" title="Удалить строку">🗑️</button>
+                    </td>`;
+                } else {
+                    html += `<th style="width: 60px;">Действия</th>`;
+                }
+                
+                html += '</tr>';
+            });
+            
+            html += '</table>';
+            return html;
+        }
+
+        // Сворачивание/разворачивание раздела
+        function toggleSection(num) {
+            const header = document.querySelector(`#section-${num} .section-header`);
+            const content = document.getElementById(`content-${num}`);
+            
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+        
+        // Добавление новой строки
+        function addNewRow(sectionNum) {
+            const table = document.querySelector(`#section-${sectionNum} table`);
+            if (!table) return;
+            
+            // Находим последнюю строку (перед футером)
+            const rows = table.querySelectorAll('tr');
+            const lastRow = rows[rows.length - 1];
+            const newRowIndex = rows.length;
+            
+            // Определяем количество столбцов (исключая колонку действий)
+            const headerCells = rows[0].querySelectorAll('th, td');
+            const numCols = headerCells.length - 1; // Минус колонка действий
+            
+            // Создаем новую строку
+            const newRow = document.createElement('tr');
+            const rowId = `sec${sectionNum}_row${newRowIndex}`;
+            newRow.id = rowId;
+            
+            // Добавляем ячейки
+            for (let i = 0; i < numCols; i++) {
+                const td = document.createElement('td');
+                const cellId = `sec${sectionNum}_row${newRowIndex}_col${i}`;
+                td.innerHTML = `<input type="text" class="editable-cell" id="${cellId}" 
+                    value="" 
+                    oninput="handleInput('${cellId}')" 
+                    placeholder="${i === 0 ? '№' : i === 1 ? 'Наименование' : '-'}">`;
+                newRow.appendChild(td);
+            }
+            
+            // Добавляем кнопку удаления
+            const actionTd = document.createElement('td');
+            actionTd.style.width = '60px';
+            actionTd.style.textAlign = 'center';
+            actionTd.innerHTML = `<button class="btn-delete-row" onclick="deleteRow('${rowId}', ${sectionNum})" title="Удалить строку">🗑️</button>`;
+            newRow.appendChild(actionTd);
+            
+            // Вставляем строку перед последней строкой или в конец
+            table.appendChild(newRow);
+            
+            // Фокусируемся на первой ячейке новой строки
+            const firstInput = newRow.querySelector('input');
+            if (firstInput) {
+                firstInput.focus();
+            }
+            
+            console.log(`➕ Добавлена новая строка в раздел ${sectionNum}`);
+        }
+        
+        // Удаление строки
+        function deleteRow(rowId, sectionNum) {
+            if (!confirm('Удалить эту строку?')) return;
+            
+            const row = document.getElementById(rowId);
+            if (row) {
+                // Сохраняем данные всех ячеек строки для удаления из localStorage
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => {
+                    if (input.id) {
+                        localStorage.removeItem(input.id);
+                    }
+                });
+                
+                row.remove();
+                saveData(); // Сохраняем изменения
+                console.log(`🗑️ Удалена строка ${rowId} из раздела ${sectionNum}`);
+            }
+        }
+
+        // Переключение филиала
+        function switchBranch(branch) {
+            // Не сохраняем если текущий режим - консолидация
+            if (currentBranch !== 'consolidated') {
+                saveData();
+            }
+            
+            // Удаляем детали при переключении с консолидации
+            if (currentBranch === 'consolidated' && branch !== 'consolidated') {
+                removeDetailToggles();
+            }
+            
+            currentBranch = branch;
+            
+            // Обновляем кнопки
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Обновляем название филиала
+            const branchNames = {
+                'almaty': 'Алматы',
+                'uralsk': 'Уральск',
+                'astana': 'Астана',
+                'consolidated': 'Консолидировано'
+            };
+            document.getElementById('current-branch').textContent = branchNames[branch];
+            
+            // Загружаем данные
+            if (branch === 'consolidated') {
+                document.querySelectorAll('input').forEach(input => {
+                    input.disabled = true;
+                });
+                loadConsolidatedData();
+            } else {
+                document.querySelectorAll('input').forEach(input => {
+                    input.disabled = false;
+                });
+                loadData();
+            }
+        }
+
+        // Обработка ввода
+        function handleInput(cellId) {
+            // Сбрасываем флаг импорта при первом ручном редактировании
+            if (isDataImported) {
+                isDataImported = false;
+                localStorage.removeItem('rb_svodnaya_import_flag');
+                console.log('🔓 Флаг импорта сброшен - формулы активированы');
+                updateImportNotice(); // Скрываем уведомление
+            }
+            
+            // Показываем статус сохранения
+            const status = document.getElementById('save-status');
+            status.textContent = '💾 Сохранение...';
+            status.className = 'auto-save-status saving';
+            
+            // Отложенное сохранение (debounce)
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveData();
+                status.textContent = '✅ Сохранено';
+                status.className = 'auto-save-status saved';
+            }, 1000);
+        }
+
+        // Сохранение данных
+        function saveData() {
+            // Не сохраняем в режиме консолидации
+            if (currentBranch === 'consolidated') return;
+            
+            const data = {};
+            
+            // Собираем все input элементы
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                if (input.id) {
+                    data[input.id] = input.value;
+                }
+            });
+            
+            const key = `rb_svodnaya_${currentBranch}`;
+            localStorage.setItem(key, JSON.stringify(data));
+            console.log(`✅ Данные сохранены для ${currentBranch}`);
+        }
+
+        // Загрузка данных
+        function loadData() {
+            const key = `rb_svodnaya_${currentBranch}`;
+            const saved = localStorage.getItem(key);
+            
+            // Проверяем флаг импорта
+            const importFlag = localStorage.getItem('rb_svodnaya_import_flag');
+            if (importFlag === 'true') {
+                isDataImported = true;
+            }
+            
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.keys(data).forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.value = data[id];
+                    }
+                });
+                console.log(`✅ Данные загружены для ${currentBranch}`);
+                
+                if (isDataImported) {
+                    console.log('📥 Данные были импортированы - формулы заблокированы до ручного редактирования');
+                    updateImportNotice(); // Показываем уведомление
+                }
+            }
+        }
+
+        // Загрузка консолидированных данных
+        function loadConsolidatedData() {
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const allData = {};
+            
+            // Проверяем флаг импорта
+            const importFlag = localStorage.getItem('rb_svodnaya_import_flag');
+            if (importFlag === 'true') {
+                isDataImported = true;
+                console.log('📥 Обнаружен флаг импорта - пропускаем автоматический пересчет консолидации');
+                console.log('ℹ️ Для активации формул начните редактировать любую ячейку');
+                updateImportNotice(); // Показываем уведомление
+                return; // Пропускаем автоматический пересчет
+            }
+            
+            // Загружаем данные всех филиалов
+            branches.forEach(b => {
+                const key = `rb_svodnaya_${b}`;
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    allData[b] = JSON.parse(saved);
+                }
+            });
+            
+            // Сохраняем данные для детализации
+            window.branchDetailsData = allData;
+            
+            // Суммируем только числовые данные
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                if (input.id) {
+                    let sum = 0;
+                    let hasNumericData = false;
+                    
+                    branches.forEach(b => {
+                        if (allData[b] && allData[b][input.id]) {
+                            const value = parseFloat(allData[b][input.id]);
+                            if (!isNaN(value) && value !== 0) {
+                                sum += value;
+                                hasNumericData = true;
+                            }
+                        }
+                    });
+                    
+                    // Обновляем только если есть числовые данные
+                    if (hasNumericData) {
+                        input.value = sum;
+                    }
+                    // Иначе оставляем поле как есть (не трогаем текстовые наименования)
+                }
+            });
+            
+            // Добавляем кнопки раскрытия деталей
+            addDetailToggles();
+            
+            console.log(`✅ Консолидация загружена из ${branches.length} филиалов`);
+        }
+
+        // Генерация пустой структуры (fallback)
+        function generateEmptySections() {
+            const container = document.getElementById('sections-container');
+            container.innerHTML = `
+                <div class="section-container">
+                    <div style="padding: 40px; text-align: center; color: #7f8c8d;">
+                        <h3>⚠️ Не удалось загрузить данные</h3>
+                        <p>Убедитесь, что файл svodnaya_sections_full.json находится в той же папке</p>
+                    </div>
+                </div>
+            `;
+        }
+        function addDetailToggles() {
+            // Удаляем существующие детальные строки и иконки
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+            
+            const dataRows = document.querySelectorAll('table tr');
+            const branches = ['almaty', 'astana', 'uralsk'];
+            const branchNames = {
+                'almaty': 'Алматы',
+                'astana': 'Астана',
+                'uralsk': 'Уральск'
+            };
+            
+            let processedCount = 0;
+            
+            dataRows.forEach((row, index) => {
+                // Ищем вторую ячейку (с названием строки)
+                const labelCell = row.querySelector('td:nth-child(2)');
+                // Ищем input элементы с id (в rb-svodnaya используется id вместо data-cell)
+                const firstInput = row.querySelector('input[type="text"]');
+                
+                const isTotalRow = row.classList.contains('summary-row') || 
+                                   row.textContent.includes('Итого') ||
+                                   row.textContent.includes('ИТОГО') ||
+                                   row.textContent.includes('Всего');
+                
+                const isHeader = row.querySelector('th') !== null;
+                
+                if (labelCell && firstInput && !isTotalRow && !isHeader) {
+                    const rowNum = row.id || `row_${index}`;
+                    
+                    // Проверяем есть ли данные хотя бы в одном филиале для этой строки
+                    const inputs = row.querySelectorAll('input[type="text"]');
+                    let hasData = false;
+                    inputs.forEach(input => {
+                        branches.forEach(b => {
+                            if (window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][input.id]) {
+                                const val = parseFloat(window.branchDetailsData[b][input.id]);
+                                if (!isNaN(val) && val !== 0) {
+                                    hasData = true;
+                                }
+                            }
+                        });
+                    });
+                    
+                    // Пропускаем строки без данных
+                    if (!hasData) return;
+                    
+                    labelCell.classList.add('expandable');
+                    const toggle = document.createElement('span');
+                    toggle.className = 'toggle-detail';
+                    toggle.textContent = '▶';
+                    toggle.dataset.row = rowNum;
+                    
+                    labelCell.insertBefore(toggle, labelCell.firstChild);
+                    
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'detail-row';
+                    detailRow.dataset.row = rowNum;
+                    
+                    // Первая колонка пустая
+                    const emptyCell = document.createElement('td');
+                    emptyCell.style.background = '#f8f9fa';
+                    detailRow.appendChild(emptyCell);
+                    
+                    // Вторая колонка - список филиалов
+                    const branchListCell = document.createElement('td');
+                    branchListCell.className = 'detail-cell';
+                    branchListCell.style.verticalAlign = 'top';
+                    
+                    let branchList = '<div style="padding: 5px 0;">';
+                    branches.forEach(b => {
+                        branchList += `<div style="margin: 5px 0; line-height: 20px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+                    });
+                    branchList += '</div>';
+                    branchListCell.innerHTML = branchList;
+                    detailRow.appendChild(branchListCell);
+                    
+                    // Колонки с данными - для каждого input в строке
+                    inputs.forEach(input => {
+                        const dataCell = document.createElement('td');
+                        dataCell.className = 'detail-cell';
+                        dataCell.style.verticalAlign = 'top';
+                        dataCell.style.textAlign = 'right';
+                        dataCell.style.paddingLeft = '8px';
+                        dataCell.style.paddingRight = '8px';
+                        
+                        let cellData = '<div style="padding: 5px 0;">';
+                        branches.forEach(b => {
+                            const cellId = input.id;
+                            let value = 0;
+                            if (window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId]) {
+                                const val = parseFloat(window.branchDetailsData[b][cellId]);
+                                if (!isNaN(val)) value = val;
+                            }
+                            cellData += `<div style="margin: 5px 0; line-height: 20px; color: #555; font-size: 12px;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                        });
+                        cellData += '</div>';
+                        dataCell.innerHTML = cellData;
+                        detailRow.appendChild(dataCell);
+                    });
+                    
+                    // Колонка действий (пустая)
+                    const actionCell = document.createElement('td');
+                    actionCell.style.background = '#f8f9fa';
+                    detailRow.appendChild(actionCell);
+                    
+                    // Вставляем детальную строку после текущей
+                    row.parentNode.insertBefore(detailRow, row.nextSibling);
+                    
+                    // Обработчик клика на всю ячейку с наименованием
+                    labelCell.addEventListener('click', function(e) {
+                        const toggle = this.querySelector('.toggle-detail');
+                        const detailRow = this.parentElement.nextElementSibling;
+                        
+                        if (detailRow && detailRow.classList.contains('detail-row')) {
+                            detailRow.classList.toggle('show');
+                            toggle.classList.toggle('expanded');
+                        }
+                    });
+                    
+                    processedCount++;
+                }
+            });
+            
+            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+        }
+
+        function removeDetailToggles() {
+            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.expandable').forEach(cell => {
+                cell.classList.remove('expandable');
+            });
+        }
+
+    </script>
+</body>
+</html>
+

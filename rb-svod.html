@@ -1,0 +1,996 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свод РБ 2026-2028</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="editable-table.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .branch-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .branch-btn {
+            padding: 10px 20px;
+            border: 2px solid #3498db;
+            background: white;
+            color: #3498db;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .branch-btn.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .info-bar {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .auto-save-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .auto-save-status.saved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .table-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+
+        .title-cell {
+            background: #ecf0f1;
+            font-weight: bold;
+            text-align: center;
+            font-size: 15px;
+            color: #2c3e50;
+            padding: 15px;
+        }
+
+        .label-cell {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50 !important;
+            font-size: 14px !important;
+            min-width: 200px;
+        }
+
+        .total-row {
+            background: #fff9e6 !important;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .editable {
+            background: #fff;
+        }
+
+        .editable:hover {
+            background: #f0f9ff;
+        }
+
+        .formula-cell {
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+            text-align: right;
+            padding: 12px;
+        }
+
+        .changed {
+            background: #fff3cd !important;
+        }
+
+        .detail-row {
+            background: #f8f9fa;
+            display: none;
+        }
+
+        .detail-row.show {
+            display: table-row;
+        }
+
+        .detail-cell {
+            padding: 8px 8px 8px 40px;
+            font-size: 13px;
+            color: #6c757d;
+            border-left: 3px solid #3498db;
+        }
+
+        .toggle-detail {
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: 5px;
+            font-weight: bold;
+            color: #3498db;
+            transition: transform 0.2s;
+        }
+
+        .toggle-detail.expanded {
+            transform: rotate(90deg);
+        }
+
+        .label-cell.expandable {
+            cursor: pointer;
+        }
+
+        .label-cell.expandable:hover {
+            background: #e9ecef;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+    
+        /* Mobile adaptation - Tablets */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mobile adaptation - Medium screens */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            .header .subtitle {
+                font-size: 12px;
+            }
+
+            .branch-selector {
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .branch-btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-bar {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+
+            .auto-save-status {
+                padding: 6px 14px;
+                font-size: 11px;
+            }
+
+            .import-notice {
+                padding: 10px 15px;
+                font-size: 11px;
+            }
+
+            .sections-nav {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .section-header h2 {
+                font-size: 16px;
+            }
+            
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            .btn-add-row {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .section-footer {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .editable-cell {
+                padding: 6px;
+                font-size: 12px;
+            }
+
+            .row-actions {
+                gap: 3px;
+                margin-left: 5px;
+            }
+
+            .btn-delete-row {
+                padding: 2px 6px;
+                font-size: 10px;
+            }
+        }
+
+        /* Mobile adaptation - Small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .header .subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+
+            .branch-selector {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .branch-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info-bar {
+                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .sections-nav {
+                padding: 10px;
+            }
+
+            .section-header {
+                padding: 10px;
+            }
+
+            .section-header h2 {
+                font-size: 14px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px 2px;
+            }
+
+            .label-cell {
+                min-width: 120px;
+            }
+
+            .btn-add-row {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .section-footer {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .editable-cell {
+                font-size: 11px;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Бюджет РБ - Свод расходов 2026-2028</h1>
+        <p style="color: #7f8c8d; margin-top: 5px;">Республиканский бюджет • Лист 1 из 6</p>
+        
+        <div class="branch-selector">
+            <button class="branch-btn active" data-branch="almaty">Алматы</button>
+            <button class="branch-btn" data-branch="astana">Астана</button>
+            <button class="branch-btn" data-branch="uralsk">Уральск</button>
+            <button class="branch-btn" data-branch="consolidated" style="border-color: #8e44ad; color: #8e44ad;">
+                📈 Консолидация
+            </button>
+        </div>
+    </div>
+
+    <div class="info-bar">
+        <div>
+            <span style="font-weight: bold;">Филиал:</span>
+            <span id="currentBranch">Алмата</span>
+        </div>
+        <div>
+            <span style="font-weight: bold;">Контингент:</span>
+            <span id="contingent">1186 учащихся</span>
+        </div>
+        <div>
+            <span style="font-weight: bold;">Последнее изменение:</span>
+            <span id="lastUpdate">-</span>
+        </div>
+        <div class="auto-save-status saved" id="saveStatus">
+            ✓ Сохранено
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="svodTable">
+            <tbody>
+                <tr>
+                    <td colspan="5" class="title-cell">
+                        Сводный расчет расходов на 2026-2028 годы
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="title-cell" style="background: #d6eaf8;">
+                        По бюджетной программе 004 «Обеспечение деятельности других субъектов квазигосударственного сектора»
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="title-cell" style="background: #d6eaf8;">
+                        по 100 подпрограмме «Обучение и воспитание одаренных детей»
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="title-cell" style="background: #e8f4f8;">
+                        <span style="font-weight: bold;">Контингент учащихся:</span> <span id="tableContingent">1186</span>
+                    </td>
+                </tr>
+                
+                <!-- Заголовок таблицы -->
+                <tr>
+                    <th style="width: 50px;">№</th>
+                    <th style="width: 40%;">Наименование расходов</th>
+                    <th style="width: 20%;">2026г</th>
+                    <th style="width: 20%;">2027г</th>
+                    <th style="width: 20%;">2028г</th>
+                </tr>
+
+                <!-- Строки данных -->
+                <tr>
+                    <td class="label-cell">1</td>
+                    <td class="label-cell">Оплата труда</td>
+                    <td class="editable"><input type="number" data-cell="C10" data-year="2026" data-row="10" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D10" data-year="2027" data-row="10" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E10" data-year="2028" data-row="10" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">2</td>
+                    <td class="label-cell">Компенсационные выплаты</td>
+                    <td class="editable"><input type="number" data-cell="C11" data-year="2026" data-row="11" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D11" data-year="2027" data-row="11" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E11" data-year="2028" data-row="11" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">3</td>
+                    <td class="label-cell">Социальный налог 6%</td>
+                    <td class="editable"><input type="number" data-cell="C12" data-year="2026" data-row="12" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D12" data-year="2027" data-row="12" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E12" data-year="2028" data-row="12" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">4</td>
+                    <td class="label-cell">Социальные отчисления 5%</td>
+                    <td class="editable"><input type="number" data-cell="C13" data-year="2026" data-row="13" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D13" data-year="2027" data-row="13" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E13" data-year="2028" data-row="13" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">5</td>
+                    <td class="label-cell">Обязательное социальное медицинское страхование 3%</td>
+                    <td class="editable"><input type="number" data-cell="C14" data-year="2026" data-row="14" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D14" data-year="2027" data-row="14" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E14" data-year="2028" data-row="14" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">6</td>
+                    <td class="label-cell">Обязательные пенсионные взносы 3,5%-4,5%</td>
+                    <td class="editable"><input type="number" data-cell="C15" data-year="2026" data-row="15" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D15" data-year="2027" data-row="15" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E15" data-year="2028" data-row="15" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">7</td>
+                    <td class="label-cell">Приобретение продуктов питания (питьевая вода)</td>
+                    <td class="editable"><input type="number" data-cell="C16" data-year="2026" data-row="16" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D16" data-year="2027" data-row="16" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E16" data-year="2028" data-row="16" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">8</td>
+                    <td class="label-cell">Приобретение медикаментов и прочих средств медицинского назначения</td>
+                    <td class="editable"><input type="number" data-cell="C17" data-year="2026" data-row="17" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D17" data-year="2027" data-row="17" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E17" data-year="2028" data-row="17" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">9</td>
+                    <td class="label-cell">Приобретение горюче-смазочных материалов</td>
+                    <td class="editable"><input type="number" data-cell="C18" data-year="2026" data-row="18" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D18" data-year="2027" data-row="18" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E18" data-year="2028" data-row="18" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">10</td>
+                    <td class="label-cell">Приобретение прочих запасов</td>
+                    <td class="editable"><input type="number" data-cell="C19" data-year="2026" data-row="19" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D19" data-year="2027" data-row="19" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E19" data-year="2028" data-row="19" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">11</td>
+                    <td class="label-cell">Коммунальные услуги</td>
+                    <td class="editable"><input type="number" data-cell="C20" data-year="2026" data-row="20" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D20" data-year="2027" data-row="20" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E20" data-year="2028" data-row="20" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">12</td>
+                    <td class="label-cell">Услуги связи и интернет</td>
+                    <td class="editable"><input type="number" data-cell="C21" data-year="2026" data-row="21" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D21" data-year="2027" data-row="21" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E21" data-year="2028" data-row="21" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">13</td>
+                    <td class="label-cell">Прочие услуги и работы</td>
+                    <td class="editable"><input type="number" data-cell="C22" data-year="2026" data-row="22" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D22" data-year="2027" data-row="22" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E22" data-year="2028" data-row="22" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">14</td>
+                    <td class="label-cell">Командировки и служебные разъезды в пределах РК</td>
+                    <td class="editable"><input type="number" data-cell="C23" data-year="2026" data-row="23" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D23" data-year="2027" data-row="23" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E23" data-year="2028" data-row="23" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">15</td>
+                    <td class="label-cell">Организация горячим пятиразовым питанием</td>
+                    <td class="editable"><input type="number" data-cell="C24" data-year="2026" data-row="24" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D24" data-year="2027" data-row="24" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E24" data-year="2028" data-row="24" value="0"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">16</td>
+                    <td class="label-cell">Прочие текущие затраты</td>
+                    <td class="editable"><input type="number" data-cell="C25" data-year="2026" data-row="25" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="D25" data-year="2027" data-row="25" value="0"></td>
+                    <td class="editable"><input type="number" data-cell="E25" data-year="2028" data-row="25" value="0"></td>
+                </tr>
+
+                <!-- Итого -->
+                <tr class="total-row">
+                    <td></td>
+                    <td class="label-cell">Итого</td>
+                    <td class="formula-cell" id="total2026">0.00</td>
+                    <td class="formula-cell" id="total2027">0.00</td>
+                    <td class="formula-cell" id="total2028">0.00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="buttons">
+        <button class="btn btn-primary" onclick="saveData()">💾 Сохранить данные</button>
+        <button class="btn btn-success" onclick="exportToExcel()">📥 Экспорт в Excel</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Назад к списку</button>
+    </div>
+
+    <script>
+        let currentBranch = 'almaty'; // Текущий филиал
+        
+        let tableData = {
+            branch: 'almaty',
+            sheet: 'rb_svod',
+            lastModified: new Date().toISOString(),
+            cells: {}
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+            calculateTotals();
+            
+            // НЕ инициализируем редактируемые таблицы для этой страницы
+            // Таблица уже имеет правильную структуру с input полями
+            console.log('✅ Таблица rb-svod готова к работе');
+        });
+
+        function setupEventListeners() {
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.parentElement.classList.add('changed');
+                    calculateTotals();
+                    autoSave();
+                });
+            });
+
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    switchBranch(this.dataset.branch);
+                });
+            });
+        }
+
+        function calculateTotals() {
+            let total2026 = 0;
+            let total2027 = 0;
+            let total2028 = 0;
+
+            document.querySelectorAll('input').forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                const year = input.dataset.year;
+                
+                if (year === '2026') total2026 += value;
+                if (year === '2027') total2027 += value;
+                if (year === '2028') total2028 += value;
+            });
+
+            document.getElementById('total2026').textContent = total2026.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('total2027').textContent = total2027.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('total2028').textContent = total2028.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+        }
+
+        let saveTimeout;
+        function autoSave() {
+            clearTimeout(saveTimeout);
+            
+            const status = document.getElementById('saveStatus');
+            status.className = 'auto-save-status';
+            status.style.background = '#fff3cd';
+            status.style.color = '#856404';
+            status.textContent = '💾 Сохранение...';
+
+            saveTimeout = setTimeout(() => {
+                saveData();
+                status.className = 'auto-save-status saved';
+                status.textContent = '✓ Сохранено';
+            }, 1000);
+        }
+
+        function saveData() {
+            // Не сохраняем в режиме консолидации
+            if (currentBranch === 'consolidated') return;
+            
+            document.querySelectorAll('input').forEach(input => {
+                tableData.cells[input.dataset.cell] = input.value;
+                input.parentElement.classList.remove('changed');
+            });
+
+            tableData.lastModified = new Date().toISOString();
+            
+            const storageKey = `${tableData.sheet}_${tableData.branch}`;
+            localStorage.setItem(storageKey, JSON.stringify(tableData));
+            
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ru-RU');
+        }
+
+        function loadData() {
+            const storageKey = `${tableData.sheet}_${tableData.branch}`;
+            const saved = localStorage.getItem(storageKey);
+            
+            document.querySelectorAll('input').forEach(input => {
+                input.value = '0';
+            });
+            
+            if (saved) {
+                const data = JSON.parse(saved);
+                tableData = data;
+                
+                Object.keys(data.cells).forEach(cell => {
+                    const input = document.querySelector(`input[data-cell="${cell}"]`);
+                    if (input) {
+                        input.value = data.cells[cell];
+                    }
+                });
+                
+                document.getElementById('lastUpdate').textContent = new Date(data.lastModified).toLocaleString('ru-RU');
+            } else {
+                document.getElementById('lastUpdate').textContent = 'Нет данных';
+            }
+            
+            calculateTotals();
+        }
+
+        function switchBranch(branch) {
+            // Не сохраняем данные если текущий режим - консолидация
+            if (currentBranch !== 'consolidated') {
+                saveData();
+            }
+            
+            // Удаляем детали при переключении с консолидации
+            if (currentBranch === 'consolidated' && branch !== 'consolidated') {
+                removeDetailToggles();
+            }
+            
+            currentBranch = branch;
+            tableData.branch = branch; // Обновляем branch в tableData
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.branch === branch) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            const branchNames = {
+                'almaty': 'Алматы',
+                'uralsk': 'Уральск',
+                'astana': 'Астана',
+                'consolidated': 'Консолидировано'
+            };
+            
+            document.getElementById('currentBranch').textContent = branchNames[branch];
+            
+            if (branch === 'consolidated') {
+                // Делаем поля только для чтения в режиме консолидации
+                document.querySelectorAll('input').forEach(input => {
+                    input.disabled = true;
+                });
+                loadConsolidatedData();
+            } else {
+                // Включаем редактирование для обычных филиалов
+                document.querySelectorAll('input').forEach(input => {
+                    input.disabled = false;
+                });
+                loadData();
+            }
+        }
+
+        function loadConsolidatedData() {
+            // Загружаем данные всех трех филиалов
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const allData = {};
+            
+            branches.forEach(b => {
+                const key = `rb_svod_${b}`;
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    allData[b] = data.cells || {};
+                }
+            });
+            
+            // Сохраняем данные для детализации
+            window.branchDetailsData = allData;
+            
+            // Суммируем данные
+            const consolidatedCells = {};
+            
+            document.querySelectorAll('input').forEach(input => {
+                const cellId = input.dataset.cell;
+                let sum = 0;
+                
+                branches.forEach(b => {
+                    if (allData[b] && allData[b][cellId]) {
+                        sum += parseFloat(allData[b][cellId]) || 0;
+                    }
+                });
+                
+                input.value = sum.toFixed(2);
+                consolidatedCells[cellId] = sum.toFixed(2);
+            });
+            
+            // Добавляем кнопки раскрытия деталей
+            addDetailToggles();
+            
+            // Пересчитываем итоги
+            calculateTotals();
+            
+            // Показываем информацию
+            document.getElementById('lastUpdate').textContent = 'Консолидация из 3 филиалов';
+        }
+
+        function addDetailToggles() {
+            // Удаляем существующие детальные строки и иконки
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+            
+            // Находим все строки с данными (не заголовки и не итого)
+            const dataRows = document.querySelectorAll('tbody tr');
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const branchNames = {
+                'almaty': 'Алматы',
+                'uralsk': 'Уральск',
+                'astana': 'Астана'
+            };
+            
+            let processedCount = 0;
+            
+            dataRows.forEach((row, index) => {
+                // Ищем ячейку с наименованием (вторая колонка с классом label-cell)
+                const labelCell = row.querySelector('td.label-cell:nth-child(2)');
+                const firstInput = row.querySelector('input[data-cell]');
+                
+                // Проверяем что это НЕ итоговая строка
+                const isTotalRow = row.classList.contains('total-row') || 
+                                   row.textContent.includes('Итого') ||
+                                   row.textContent.includes('ИТОГО');
+                
+                if (labelCell && firstInput && !isTotalRow) {
+                    const rowNum = firstInput.dataset.row;
+                    
+                    // Добавляем класс и иконку раскрытия
+                    labelCell.classList.add('expandable');
+                    const toggle = document.createElement('span');
+                    toggle.className = 'toggle-detail';
+                    toggle.textContent = '▶';
+                    toggle.dataset.row = rowNum;
+                    
+                    // Вставляем иконку в начало ячейки
+                    labelCell.insertBefore(toggle, labelCell.firstChild);
+                    
+                    // Создаем детальную строку
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'detail-row';
+                    detailRow.dataset.row = rowNum;
+                    
+                    // Первая колонка пустая
+                    const emptyCell = document.createElement('td');
+                    emptyCell.style.background = '#f8f9fa';
+                    detailRow.appendChild(emptyCell);
+                    
+                    // Вторая колонка - список филиалов
+                    const branchListCell = document.createElement('td');
+                    branchListCell.className = 'detail-cell';
+                    branchListCell.style.verticalAlign = 'top';
+                    
+                    let branchList = '<div style="padding: 5px 0;">';
+                    branches.forEach(b => {
+                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+                    });
+                    branchList += '</div>';
+                    branchListCell.innerHTML = branchList;
+                    detailRow.appendChild(branchListCell);
+                    
+                    // Колонки с данными по годам
+                    ['2026', '2027', '2028'].forEach(year => {
+                        const yearCell = document.createElement('td');
+                        yearCell.className = 'detail-cell';
+                        yearCell.style.verticalAlign = 'top';
+                        yearCell.style.textAlign = 'right';
+                        
+                        let yearData = '<div style="padding: 5px 0;">';
+                        branches.forEach(b => {
+                            const input = row.querySelector(`input[data-year="${year}"]`);
+                            if (input) {
+                                const cellId = input.dataset.cell;
+                                const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
+                                    ? parseFloat(window.branchDetailsData[b][cellId]) 
+                                    : 0;
+                                yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                            }
+                        });
+                        yearData += '</div>';
+                        yearCell.innerHTML = yearData;
+                        detailRow.appendChild(yearCell);
+                    });
+                    
+                    // Вставляем детальную строку после текущей
+                    row.parentNode.insertBefore(detailRow, row.nextSibling);
+                    
+                    // Обработчик клика на всю ячейку с наименованием
+                    labelCell.addEventListener('click', function(e) {
+                        const toggle = this.querySelector('.toggle-detail');
+                        const detailRow = this.parentElement.nextElementSibling;
+                        
+                        if (detailRow && detailRow.classList.contains('detail-row')) {
+                            detailRow.classList.toggle('show');
+                            toggle.classList.toggle('expanded');
+                        }
+                    });
+                    
+                    processedCount++;
+                }
+            });
+            
+            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+        }
+
+        function removeDetailToggles() {
+            // Удаляем иконки и детальные строки
+            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.expandable').forEach(cell => {
+                cell.classList.remove('expandable');
+            });
+        }
+
+        function exportToExcel() {
+            // Собираем данные из таблицы
+            const data = [];
+            const table = document.querySelector('table');
+            const rows = table.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const rowData = [];
+                row.querySelectorAll('th, td').forEach(cell => {
+                    const input = cell.querySelector('input');
+                    if (input) {
+                        const val = parseFloat(input.value) || 0;
+                        rowData.push(val);
+                    } else {
+                        rowData.push(cell.textContent.trim());
+                    }
+                });
+                data.push(rowData);
+            });
+            
+            // Создаем Excel файл используя SheetJS
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            
+            // Автоширина колонок
+            const colWidths = [];
+            data.forEach(row => {
+                row.forEach((cell, i) => {
+                    const cellLen = String(cell).length;
+                    if (!colWidths[i] || colWidths[i] < cellLen) {
+                        colWidths[i] = cellLen;
+                    }
+                });
+            });
+            ws['!cols'] = colWidths.map(w => ({ wch: Math.min(w + 2, 50) }));
+            
+            XLSX.utils.book_append_sheet(wb, ws, "Свод 2026-2028");
+            
+            // Название файла
+            const branchNames = {
+                'almaty': 'Алматы',
+                'uralsk': 'Уральск',
+                'astana': 'Астана',
+                'consolidated': 'Консолидировано'
+            };
+            
+            const branch = currentBranch || 'almaty';
+            const filename = `Свод_2026-2028_${branchNames[branch]}_${new Date().toISOString().slice(0,10)}.xlsx`;
+            
+            // Скачиваем
+            XLSX.writeFile(wb, filename);
+        }
+    </script>
+</body>
+</html>

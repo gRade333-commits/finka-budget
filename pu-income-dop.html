@@ -1,0 +1,677 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доходная часть Доп - Бюджет ПУ 2026</title>
+    <script src="editable-table.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; min-height: 100vh; }
+        .container { max-width: 1600px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 14px; }
+        .controls { padding: 20px 30px; background: #f8f9fa; border-bottom: 2px solid #dee2e6; display: flex; gap: 20px; align-items: center; }
+                
+        .branch-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .branch-btn {
+            padding: 10px 20px;
+            border: 2px solid #e67e22;
+            background: white;
+            color: #e67e22;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .branch-btn.active {
+            background: #e67e22;
+            color: white;
+        }
+        
+        .branch-btn:hover {
+            background: #f39c12;
+            border-color: #f39c12;
+            color: white;
+        }
+
+        .control-group { display: flex; align-items: center; gap: 10px; }
+                
+        .branch-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .branch-btn {
+            padding: 10px 20px;
+            border: 2px solid #e67e22;
+            background: white;
+            color: #e67e22;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .branch-btn.active {
+            background: #e67e22;
+            color: white;
+        }
+        
+        .branch-btn:hover {
+            background: #f39c12;
+            border-color: #f39c12;
+            color: white;
+        }
+
+        .control-group label { font-weight: 600; color: #495057; }
+                
+        .branch-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .branch-btn {
+            padding: 10px 20px;
+            border: 2px solid #e67e22;
+            background: white;
+            color: #e67e22;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .branch-btn.active {
+            background: #e67e22;
+            color: white;
+        }
+        
+        .branch-btn:hover {
+            background: #f39c12;
+            border-color: #f39c12;
+            color: white;
+        }
+
+        .control-group select { padding: 8px 15px; border: 2px solid #dee2e6; border-radius: 5px; font-size: 14px; cursor: pointer; background: white; }
+        .save-status { margin-left: auto; padding: 8px 15px; background: #d4edda; color: #155724; border-radius: 5px; font-size: 14px; font-weight: 600; }
+        .content { padding: 30px; }
+        .budget-table-wrapper { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { border: 1px solid #dee2e6; padding: 10px; text-align: left; }
+        th { background: #e67e22; color: white; font-weight: 600; }
+        .total-row { background: #fff3cd; font-weight: 700; }
+        input[type="number"] { width: 100%; padding: 6px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; }
+        input[type="number"]:focus { outline: none; border-color: #e67e22; }
+        .formula-cell { background: #f1f3f5; color: #495057; font-weight: 600; text-align: right; }
+        .back-link { display: inline-block; margin-bottom: 20px; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px; }
+        .back-link:hover { background: #5a6268; }
+        .num-col { width: 50px; text-align: center; }
+        .name-col { min-width: 300px; }
+        .month-col { width: 100px; text-align: right; }        .detail-row {
+            background: #f8f9fa;
+            display: none;
+        }
+
+        .detail-row.show {
+            display: table-row;
+        }
+
+        .detail-cell {
+            padding: 8px 8px 8px 40px;
+            font-size: 13px;
+            color: #6c757d;
+            border-left: 3px solid #3498db;
+        }
+
+        .toggle-detail {
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: 5px;
+            font-weight: bold;
+            color: #3498db;
+            transition: transform 0.2s;
+        }
+
+        .toggle-detail.expanded {
+            transform: rotate(90deg);
+        }
+
+        .label-cell.expandable {
+            cursor: pointer;
+        }
+
+        .label-cell.expandable:hover {
+            background: #e9ecef;
+        }
+
+    
+        /* Mobile adaptation - Tablets */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mobile adaptation - Medium screens */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            .header .subtitle {
+                font-size: 12px;
+            }
+
+            .branch-selector {
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .branch-btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-bar {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+
+            .auto-save-status {
+                padding: 6px 14px;
+                font-size: 11px;
+            }
+
+            .import-notice {
+                padding: 10px 15px;
+                font-size: 11px;
+            }
+
+            .sections-nav {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .section-header h2 {
+                font-size: 16px;
+            }
+            
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            .btn-add-row {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .section-footer {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .editable-cell {
+                padding: 6px;
+                font-size: 12px;
+            }
+
+            .row-actions {
+                gap: 3px;
+                margin-left: 5px;
+            }
+
+            .btn-delete-row {
+                padding: 2px 6px;
+                font-size: 10px;
+            }
+        }
+
+        /* Mobile adaptation - Small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .header .subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+
+            .branch-selector {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .branch-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info-bar {
+                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .sections-nav {
+                padding: 10px;
+            }
+
+            .section-header {
+                padding: 10px;
+            }
+
+            .section-header h2 {
+                font-size: 14px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px 2px;
+            }
+
+            .label-cell {
+                min-width: 120px;
+            }
+
+            .btn-add-row {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .section-footer {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .editable-cell {
+                font-size: 11px;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>�������������� �������� �����</h1>
+            <p>���� ����������� �� 2026 ��� - ������ �. ������</p>
+        </div>
+        
+        <div class="controls">
+            <div class="branch-selector">
+                <button class="branch-btn active" onclick="switchBranch('almaty')">Алматы</button>
+                <button class="branch-btn" onclick="switchBranch('astana')">Астана</button>
+                <button class="branch-btn" onclick="switchBranch('uralsk')">Уральск</button>
+                <button class="branch-btn" onclick="switchBranch('consolidated')">Консолидация</button>
+            </div>
+            <div class="save-status" id="saveStatus">���������</div>
+        </div>
+        
+        <div class="content">
+            <a href="index.html" class="back-link">< ��������� � ������</a>
+            
+            <div class="budget-table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="num-col">�</th>
+                            <th class="name-col">�������� ������</th>
+                            <th class="month-col">������</th>
+                            <th class="month-col">�������</th>
+                            <th class="month-col">����</th>
+                            <th class="month-col">������</th>
+                            <th class="month-col">���</th>
+                            <th class="month-col">����</th>
+                            <th class="month-col">����</th>
+                            <th class="month-col">������</th>
+                            <th class="month-col">��������</th>
+                            <th class="month-col">�������</th>
+                            <th class="month-col">������</th>
+                            <th class="month-col">�������</th>
+                            <th class="month-col">�����</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="num-col">1</td>
+                            <td>�������������� �����������</td>
+                            <td><input type="number" id="r1-m1" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m2" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m3" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m4" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m5" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m6" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m7" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m8" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m9" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m10" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m11" value="0" oninput="update(1)"></td>
+                            <td><input type="number" id="r1-m12" value="0" oninput="update(1)"></td>
+                            <td class="formula-cell" id="r1-total">0.00</td>
+                        </tr>
+                        <tr>
+                            <td class="num-col">2</td>
+                            <td>������ ������</td>
+                            <td><input type="number" id="r2-m1" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m2" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m3" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m4" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m5" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m6" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m7" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m8" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m9" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m10" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m11" value="0" oninput="update(2)"></td>
+                            <td><input type="number" id="r2-m12" value="0" oninput="update(2)"></td>
+                            <td class="formula-cell" id="r2-total">0.00</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2"><strong>�����</strong></td>
+                            <td class="formula-cell" id="total-m1">0.00</td>
+                            <td class="formula-cell" id="total-m2">0.00</td>
+                            <td class="formula-cell" id="total-m3">0.00</td>
+                            <td class="formula-cell" id="total-m4">0.00</td>
+                            <td class="formula-cell" id="total-m5">0.00</td>
+                            <td class="formula-cell" id="total-m6">0.00</td>
+                            <td class="formula-cell" id="total-m7">0.00</td>
+                            <td class="formula-cell" id="total-m8">0.00</td>
+                            <td class="formula-cell" id="total-m9">0.00</td>
+                            <td class="formula-cell" id="total-m10">0.00</td>
+                            <td class="formula-cell" id="total-m11">0.00</td>
+                            <td class="formula-cell" id="total-m12">0.00</td>
+                            <td class="formula-cell" id="grand-total">0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_KEY = 'pu_income_dop';
+        let currentBranch = 'almaty';
+        let saveTimeout;
+
+        function update(r) {
+            let sum = 0;
+            for (let m = 1; m <= 12; m++) {
+                sum += parseFloat(document.getElementById(`r${r}-m${m}`).value) || 0;
+            }
+            document.getElementById(`r${r}-total`).textContent = sum.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            updateTotals();
+            scheduleAutoSave();
+        }
+
+        function updateTotals() {
+            let mt = [0,0,0,0,0,0,0,0,0,0,0,0], gt = 0;
+            for (let r = 1; r <= 2; r++) {
+                for (let m = 1; m <= 12; m++) {
+                    const v = parseFloat(document.getElementById(`r${r}-m${m}`).value) || 0;
+                    mt[m-1] += v;
+                    gt += v;
+                }
+            }
+            for (let m = 1; m <= 12; m++) {
+                document.getElementById(`total-m${m}`).textContent = mt[m-1].toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            }
+            document.getElementById('grand-total').textContent = gt.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+        }
+
+        function scheduleAutoSave() {
+            document.getElementById('saveStatus').textContent = '��������...';
+            document.getElementById('saveStatus').style.background = '#fff3cd';
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveData, 1000);
+        }
+
+        function saveData() {
+            // �� ��������� � ������ ������������
+            if (currentBranch === 'consolidated') return;
+            
+            const data = { rows: {} };
+            for (let r = 1; r <= 2; r++) {
+                data.rows[r] = {};
+                for (let m = 1; m <= 12; m++) data.rows[r][`m${m}`] = document.getElementById(`r${r}-m${m}`).value;
+            }
+            localStorage.setItem(`${SHEET_KEY}_${currentBranch}`, JSON.stringify(data));
+            document.getElementById('saveStatus').textContent = '���������';
+            document.getElementById('saveStatus').style.background = '#d4edda';
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem(`${SHEET_KEY}_${currentBranch}`);
+            for (let r = 1; r <= 2; r++) {
+                for (let m = 1; m <= 12; m++) {
+                    document.getElementById(`r${r}-m${m}`).value = '';
+                    document.getElementById(`r${r}-m${m}`).disabled = false;
+                }
+            }
+            if (saved) {
+                const data = JSON.parse(saved);
+                for (let r = 1; r <= 2; r++) {
+                    if (data.rows && data.rows[r]) {
+                        for (let m = 1; m <= 12; m++) document.getElementById(`r${r}-m${m}`).value = data.rows[r][`m${m}`] || '';
+                    }
+                }
+            }
+            updateTotals();
+        }
+
+        function switchBranch(newBranch) {
+            if (currentBranch !== 'consolidated' && currentBranch !== newBranch) {
+                saveData();
+            }
+            currentBranch = newBranch;
+            document.querySelectorAll('.branch-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            if (currentBranch === 'consolidated') {
+                loadConsolidatedData();
+            } else {
+                document.querySelectorAll('input').forEach(input => {
+                    input.disabled = false;
+                });
+                loadData();
+            }
+        }
+
+        function loadConsolidatedData() {
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const allData = {};
+
+            // Сохраняем данные для детализации
+            window.branchDetailsData = {};
+            
+            for (let r = 1; r <= 2; r++) {
+                allData[r] = {};
+                for (let m = 1; m <= 12; m++) allData[r][`m${m}`] = 0;
+            }
+            
+            branches.forEach(b => {
+                const key = `${SHEET_KEY}_${b}`;
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        if (data.rows) {
+                            for (let r = 1; r <= 2; r++) {
+                                if (data.rows[r]) {
+                                    for (let m = 1; m <= 12; m++) {
+                                        allData[r][`m${m}`] += parseFloat(data.rows[r][`m${m}`]) || 0;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) {}
+                }
+            });
+            
+            for (let r = 1; r <= 2; r++) {
+                for (let m = 1; m <= 12; m++) {
+                    document.getElementById(`r${r}-m${m}`).value = allData[r][`m${m}`];
+                    document.getElementById(`r${r}-m${m}`).disabled = true;
+                }
+            }
+            updateTotals();
+        }
+
+        window.addEventListener('load', loadData);
+    </script>
+    <script>
+        // НЕ инициализируем редактируемые таблицы - структура уже готова
+            console.log(' Таблица готова к работе');
+        });
+        function addDetailToggles() {
+            // Удаляем существующие детальные строки и иконки
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+            
+            const dataRows = document.querySelectorAll('tbody tr');
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const branchNames = {
+                'almaty': 'Алматы',
+                'uralsk': 'Уральск',
+                'astana': 'Астана'
+            };
+            
+            let processedCount = 0;
+            
+            dataRows.forEach((row, index) => {
+                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
+                const firstInput = row.querySelector('input[data-cell]');
+                
+                const isTotalRow = row.classList.contains('total-row') || 
+                                   row.textContent.includes('Итого') ||
+                                   row.textContent.includes('ИТОГО');
+                
+                if (labelCell && firstInput && !isTotalRow) {
+                    const rowNum = firstInput.dataset.row || index;
+                    
+                    labelCell.classList.add('expandable');
+                    const toggle = document.createElement('span');
+                    toggle.className = 'toggle-detail';
+                    toggle.textContent = '▶';
+                    toggle.dataset.row = rowNum;
+                    
+                    labelCell.insertBefore(toggle, labelCell.firstChild);
+                    
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'detail-row';
+                    detailRow.dataset.row = rowNum;
+                    
+                    const emptyCell = document.createElement('td');
+                    emptyCell.style.background = '#f8f9fa';
+                    detailRow.appendChild(emptyCell);
+                    
+                    const branchListCell = document.createElement('td');
+                    branchListCell.className = 'detail-cell';
+                    branchListCell.style.verticalAlign = 'top';
+                    
+                    let branchList = '<div style="padding: 5px 0;">';
+                    branches.forEach(b => {
+                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+                    });
+                    branchList += '</div>';
+                    branchListCell.innerHTML = branchList;
+                    detailRow.appendChild(branchListCell);
+                    
+                    const inputs = row.querySelectorAll('input[data-cell]');
+                    inputs.forEach(input => {
+                        const yearCell = document.createElement('td');
+                        yearCell.className = 'detail-cell';
+                        yearCell.style.verticalAlign = 'top';
+                        yearCell.style.textAlign = 'right';
+                        
+                        let yearData = '<div style="padding: 5px 0;">';
+                        branches.forEach(b => {
+                            const cellId = input.dataset.cell;
+                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
+                                ? parseFloat(window.branchDetailsData[b][cellId]) 
+                                : 0;
+                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                        });
+                        yearData += '</div>';
+                        yearCell.innerHTML = yearData;
+                        detailRow.appendChild(yearCell);
+                    });
+                    
+                    row.parentNode.insertBefore(detailRow, row.nextSibling);
+                    
+                    labelCell.addEventListener('click', function(e) {
+                        const toggle = this.querySelector('.toggle-detail');
+                        const detailRow = this.parentElement.nextElementSibling;
+                        
+                        if (detailRow && detailRow.classList.contains('detail-row')) {
+                            detailRow.classList.toggle('show');
+                            toggle.classList.toggle('expanded');
+                        }
+                    });
+                    
+                    processedCount++;
+                }
+            });
+            
+            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+        }
+
+        function removeDetailToggles() {
+            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.expandable').forEach(cell => {
+                cell.classList.remove('expandable');
+            });
+        }
+
+    </script>
+</body>
+</html>
+
+

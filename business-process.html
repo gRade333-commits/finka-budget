@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система онлайн-бюджетирования РФМШ - Бизнес-процесс</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 4px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .process-flow {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .step {
+            flex: 1;
+            min-width: 250px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #3498db;
+        }
+
+        .step:last-child::after {
+            content: '';
+        }
+
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .branch {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-weight: bold;
+        }
+
+        .branch.almaty { background: #e74c3c; }
+        .branch.uralsk { background: #f39c12; }
+        .branch.astana { background: #27ae60; }
+        .branch.management { background: #8e44ad; }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .tech-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .tech-item strong {
+            color: #2980b9;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        ul {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e74c3c;
+        }
+
+        /* Mobile adaptation - Tablets */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 30px;
+            }
+
+            .process-flow {
+                flex-direction: column;
+            }
+
+            .step::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -25px;
+                transform: translateX(50%);
+            }
+
+            .step:last-child::after {
+                content: '';
+            }
+        }
+
+        /* Mobile adaptation - Medium screens */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+                padding-bottom: 10px;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+                margin-top: 20px;
+                padding-left: 10px;
+            }
+
+            h3 {
+                font-size: 1.1rem;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            .step {
+                min-width: 100%;
+                padding: 15px;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+
+        /* Mobile adaptation - Small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                padding-bottom: 8px;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+                margin-top: 15px;
+                padding-left: 8px;
+            }
+
+            h3 {
+                font-size: 1rem;
+            }
+
+            .section {
+                padding: 12px;
+                margin: 15px 0;
+            }
+
+            .step {
+                padding: 12px;
+            }
+
+            .step-number {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            ul {
+                padding-left: 20px;
+            }
+
+            li {
+                margin: 6px 0;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏛️ Система онлайн-бюджетирования РФМШ</h1>
+        
+        <div class="section">
+            <h2>📋 Описание проекта</h2>
+            <p><strong>Цель:</strong> Создать веб-систему для распределённого заполнения бюджетов филиалами с автоматической консолидацией данных для правления.</p>
+            
+            <h3>Текущая ситуация:</h3>
+            <ul>
+                <li>Два типа бюджетов: <strong>Республиканский бюджет (РБ)</strong> и <strong>Собственные средства (ПУ)</strong></li>
+                <li>В каждом бюджете множество листов и таблиц</li>
+                <li>Сейчас заполняется только одним филиалом (Алмата)</li>
+                <li>Нужна консолидация данных от трёх филиалов</li>
+            </ul>
+
+            <h3>Филиалы участники:</h3>
+            <div>
+                <span class="branch almaty">Алмата</span>
+                <span class="branch uralsk">Уральск</span>
+                <span class="branch astana">Астана</span>
+                <span class="branch management">→ Правление РФМШ</span>
+            </div>
+        </div>
+
+        <h2>🔄 Бизнес-процесс</h2>
+        <div class="process-flow">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Заполнение филиалами</h3>
+                <p>Экономисты каждого филиала заполняют онлайн-таблицы для своего филиала</p>
+                <ul>
+                    <li>Алмата → свои данные</li>
+                    <li>Уральск → свои данные</li>
+                    <li>Астана → свои данные</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Сохранение в БД</h3>
+                <p>Данные автоматически сохраняются в базе данных после каждого изменения</p>
+                <ul>
+                    <li>Автосохранение</li>
+                    <li>История изменений</li>
+                    <li>Валидация данных</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Консолидация</h3>
+                <p>Автоматическое суммирование данных от всех филиалов</p>
+                <ul>
+                    <li>Алмата + Уральск + Астана</li>
+                    <li>По каждой статье</li>
+                    <li>По каждому разделу</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Отчёт для правления</h3>
+                <p>Итоговые таблицы для правления РФМШ</p>
+                <ul>
+                    <li>Те же формы</li>
+                    <li>Сводные данные</li>
+                    <li>Экспорт в Excel</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🏗️ Архитектура системы</h2>
+            
+            <h3>Frontend (Клиентская часть):</h3>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <strong>HTML5</strong>
+                    <p>Структура страниц</p>
+                </div>
+                <div class="tech-item">
+                    <strong>CSS3</strong>
+                    <p>Стилизация таблиц</p>
+                </div>
+                <div class="tech-item">
+                    <strong>JavaScript</strong>
+                    <p>Интерактивность</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Таблицы</strong>
+                    <p>Динамические формы</p>
+                </div>
+            </div>
+
+            <h3>Backend (Серверная часть):</h3>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <strong>Python/Flask</strong>
+                    <p>Веб-сервер + API</p>
+                </div>
+                <div class="tech-item">
+                    <strong>PostgreSQL</strong>
+                    <p>База данных</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Pandas</strong>
+                    <p>Обработка данных</p>
+                </div>
+                <div class="tech-item">
+                    <strong>openpyxl</strong>
+                    <p>Экспорт в Excel</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Структура данных</h2>
+            
+            <h3>Таблицы в базе данных:</h3>
+            <table>
+                <tr>
+                    <th>Таблица</th>
+                    <th>Описание</th>
+                    <th>Ключевые поля</th>
+                </tr>
+                <tr>
+                    <td><code>branches</code></td>
+                    <td>Справочник филиалов</td>
+                    <td>id, name, code</td>
+                </tr>
+                <tr>
+                    <td><code>budget_types</code></td>
+                    <td>Типы бюджетов (РБ, ПУ)</td>
+                    <td>id, name, code</td>
+                </tr>
+                <tr>
+                    <td><code>budget_sheets</code></td>
+                    <td>Листы бюджета</td>
+                    <td>id, budget_type_id, sheet_name, order</td>
+                </tr>
+                <tr>
+                    <td><code>budget_items</code></td>
+                    <td>Статьи бюджета</td>
+                    <td>id, sheet_id, code, name, parent_id</td>
+                </tr>
+                <tr>
+                    <td><code>budget_data</code></td>
+                    <td>Фактические данные</td>
+                    <td>branch_id, item_id, year, month, value</td>
+                </tr>
+                <tr>
+                    <td><code>users</code></td>
+                    <td>Пользователи системы</td>
+                    <td>id, username, branch_id, role</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>👥 Роли пользователей</h2>
+            
+            <table>
+                <tr>
+                    <th>Роль</th>
+                    <th>Права доступа</th>
+                    <th>Функционал</th>
+                </tr>
+                <tr>
+                    <td><strong>Экономист филиала</strong></td>
+                    <td>Редактирование данных своего филиала</td>
+                    <td>Заполнение таблиц, просмотр истории</td>
+                </tr>
+                <tr>
+                    <td><strong>Руководитель филиала</strong></td>
+                    <td>Просмотр + утверждение данных филиала</td>
+                    <td>Утверждение бюджета, комментарии</td>
+                </tr>
+                <tr>
+                    <td><strong>Правление РФМШ</strong></td>
+                    <td>Просмотр всех данных + консолидация</td>
+                    <td>Сводные отчёты, экспорт, аналитика</td>
+                </tr>
+                <tr>
+                    <td><strong>Администратор</strong></td>
+                    <td>Полный доступ к системе</td>
+                    <td>Управление пользователями, настройки</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>✨ Функциональные требования</h2>
+            
+            <h3>1. Онлайн-таблицы (идентичные Excel):</h3>
+            <ul>
+                <li>✅ Точное повторение структуры Excel-файлов (строчка в строчку)</li>
+                <li>✅ Автосохранение при изменении ячеек</li>
+                <li>✅ Валидация данных (числовые поля, обязательные поля)</li>
+                <li>✅ Выделение изменённых ячеек</li>
+                <li>✅ Формулы и автоматические расчёты</li>
+            </ul>
+
+            <h3>2. Управление доступом:</h3>
+            <ul>
+                <li>✅ Авторизация пользователей</li>
+                <li>✅ Доступ только к своему филиалу (для экономистов)</li>
+                <li>✅ Разделение прав по ролям</li>
+                <li>✅ Журнал действий пользователей</li>
+            </ul>
+
+            <h3>3. Консолидация данных:</h3>
+            <ul>
+                <li>✅ Автоматическое суммирование по филиалам</li>
+                <li>✅ Обновление в реальном времени</li>
+                <li>✅ Визуализация распределения по филиалам</li>
+                <li>✅ Сравнение плановых и фактических данных</li>
+            </ul>
+
+            <h3>4. Отчётность:</h3>
+            <ul>
+                <li>✅ Экспорт в Excel (форматы РБ и ПУ)</li>
+                <li>✅ PDF-отчёты для печати</li>
+                <li>✅ Графики и диаграммы</li>
+                <li>✅ История изменений</li>
+            </ul>
+        </div>
+
+        <div class="alert">
+            <h3>⚠️ Важные моменты реализации:</h3>
+            <ul>
+                <li>Необходимо детально изучить структуру обоих Excel-файлов</li>
+                <li>Определить все формулы и связи между ячейками</li>
+                <li>Продумать логику консолидации для каждого типа статей</li>
+                <li>Настроить backup и восстановление данных</li>
+            </ul>
+        </div>
+
+        <div class="success">
+            <h3>✅ План реализации:</h3>
+            <ol>
+                <li><strong>Этап 1:</strong> Анализ Excel-файлов и проектирование БД</li>
+                <li><strong>Этап 2:</strong> Создание backend API (Flask + PostgreSQL)</li>
+                <li><strong>Этап 3:</strong> Разработка frontend (HTML-таблицы)</li>
+                <li><strong>Этап 4:</strong> Реализация системы авторизации</li>
+                <li><strong>Этап 5:</strong> Механизм консолидации данных</li>
+                <li><strong>Этап 6:</strong> Экспорт и отчётность</li>
+                <li><strong>Этап 7:</strong> Тестирование и запуск</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Следующие шаги</h2>
+            <p>Для начала работы мне нужно:</p>
+            <ol>
+                <li>Изучить структуру файлов <code>Бюджет РБ 2026 (1).xlsx</code> и <code>Бюджет ПУ 2026 (1).xlsx</code></li>
+                <li>Определить какие листы и таблицы нужно реализовать в первую очередь</li>
+                <li>Создать схему базы данных</li>
+                <li>Разработать прототип одной таблицы для демонстрации</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

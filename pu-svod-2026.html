@@ -1,0 +1,641 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>СВОД общий 2026 - Бюджет ПУ</title>
+    <script src="editable-table.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 28px; }
+        .controls { padding: 20px 30px; background: #f8f9fa; border-bottom: 2px solid #dee2e6; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .branch-selector { display: flex; gap: 10px; flex-wrap: wrap; }
+        .branch-btn { padding: 10px 20px; border: 2px solid #e67e22; background: white; color: #e67e22; border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .branch-btn.active { background: #e67e22; color: white; }
+        .branch-btn:hover { background: #f39c12; border-color: #f39c12; color: white; }
+        .control-group { display: flex; align-items: center; gap: 10px; }
+        .control-group button { padding: 8px 15px; background: #e67e22; color: white; border: none; cursor: pointer; font-weight: 600; border-radius: 5px; }
+        .control-group button:hover { background: #d35400; }
+        .save-status { margin-left: auto; padding: 8px 15px; background: #d4edda; color: #155724; border-radius: 5px; font-weight: 600; }
+        .content { padding: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+        th, td { border: 1px solid #dee2e6; padding: 8px; }
+        th { background: #e67e22; color: white; font-weight: 600; position: sticky; top: 0; z-index: 10; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 5px; border: 1px solid #ced4da; border-radius: 3px; }
+        .formula-cell { background: #f1f3f5; font-weight: 600; text-align: right; }
+        .total-row { background: #fff3cd; font-weight: 700; }
+        .back-link { display: inline-block; margin-bottom: 20px; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px; }
+        .section-header { background: #e9ecef; font-weight: 700; }
+        .delete-btn { padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .delete-btn:hover { background: #c82333; }        .detail-row {
+            background: #f8f9fa;
+            display: none;
+        }
+
+        .detail-row.show {
+            display: table-row;
+        }
+
+        .detail-cell {
+            padding: 8px 8px 8px 40px;
+            font-size: 13px;
+            color: #6c757d;
+            border-left: 3px solid #3498db;
+        }
+
+        .toggle-detail {
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: 5px;
+            font-weight: bold;
+            color: #3498db;
+            transition: transform 0.2s;
+        }
+
+        .toggle-detail.expanded {
+            transform: rotate(90deg);
+        }
+
+        .label-cell.expandable {
+            cursor: pointer;
+        }
+
+        .label-cell.expandable:hover {
+            background: #e9ecef;
+        }
+
+    
+        /* Mobile adaptation - Tablets */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mobile adaptation - Medium screens */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            .header .subtitle {
+                font-size: 12px;
+            }
+
+            .branch-selector {
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .branch-btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-bar {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+
+            .auto-save-status {
+                padding: 6px 14px;
+                font-size: 11px;
+            }
+
+            .import-notice {
+                padding: 10px 15px;
+                font-size: 11px;
+            }
+
+            .sections-nav {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .section-header h2 {
+                font-size: 16px;
+            }
+            
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            .btn-add-row {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .section-footer {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .editable-cell {
+                padding: 6px;
+                font-size: 12px;
+            }
+
+            .row-actions {
+                gap: 3px;
+                margin-left: 5px;
+            }
+
+            .btn-delete-row {
+                padding: 2px 6px;
+                font-size: 10px;
+            }
+        }
+
+        /* Mobile adaptation - Small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .header .subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+
+            .branch-selector {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .branch-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info-bar {
+                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .sections-nav {
+                padding: 10px;
+            }
+
+            .section-header {
+                padding: 10px;
+            }
+
+            .section-header h2 {
+                font-size: 14px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px 2px;
+            }
+
+            .label-cell {
+                min-width: 120px;
+            }
+
+            .btn-add-row {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .section-footer {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .editable-cell {
+                font-size: 11px;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>СВОД общий 2026</h1>
+            <p>Сводная таблица расходов по всем статьям - филиал Алматы</p>
+        </div>
+        <div class="controls">
+            <div class="branch-selector">
+                <button class="branch-btn active" onclick="switchBranch('almaty')">Алматы</button>
+                <button class="branch-btn" onclick="switchBranch('astana')">Астана</button>
+                <button class="branch-btn" onclick="switchBranch('uralsk')">Уральск</button>
+                <button class="branch-btn" onclick="switchBranch('consolidated')">Консолидация</button>
+            </div>
+            <div class="control-group">
+                <button onclick="addRow()">+ Добавить строку</button>
+            </div>
+            <div class="save-status" id="saveStatus">Сохранено</div>
+        </div>
+        <div class="content">
+            <a href="index.html" class="back-link">← Вернуться к списку</a>
+            
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">№</th>
+                            <th style="min-width:300px;">Наименование расходов</th>
+                            <th style="width:120px;">План (тенге)</th>
+                            <th style="width:120px;">Факт (тенге)</th>
+                            <th style="width:120px;">Отклонение</th>
+                            <th style="width:200px;">Примечание</th>
+                            <th style="width:80px;">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr class="section-header">
+                            <td colspan="7"><strong>1. ФОНД ОПЛАТЫ ТРУДА</strong></td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="7"><strong>2. МАТЕРИАЛЫ И РАСХОДНЫЕ МАТЕРИАЛЫ</strong></td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="7"><strong>3. КОММУНАЛЬНЫЕ УСЛУГИ</strong></td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="7"><strong>4. ТРАНСПОРТНЫЕ УСЛУГИ</strong></td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="7"><strong>5. ПИТАНИЕ</strong></td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="7"><strong>6. УСЛУГИ СВЯЗИ</strong></td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="7"><strong>7. ПРОЧИЕ УСЛУГИ</strong></td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="7"><strong>8. КОМАНДИРОВОЧНЫЕ РАСХОДЫ</strong></td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="7"><strong>9. РЕМОНТ И ОБСЛУЖИВАНИЕ</strong></td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="7"><strong>10. ПРОЧИЕ РАСХОДЫ</strong></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="2"><strong>ИТОГО:</strong></td>
+                            <td class="formula-cell" id="totalPlan">0.00</td>
+                            <td class="formula-cell" id="totalFact">0.00</td>
+                            <td class="formula-cell" id="totalDiff">0.00</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        const KEY = 'pu_svod_2026';
+        let branch = 'almaty';
+        let timeout;
+        let rowCounter = 0;
+
+        function addRow() {
+            rowCounter++;
+            const tbody = document.getElementById('tableBody');
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td>${rowCounter}</td>
+                <td><input type="text" id="name-${rowCounter}" placeholder="Наименование" oninput="schedSave()"></td>
+                <td><input type="number" id="plan-${rowCounter}" value="0" oninput="calc()"></td>
+                <td><input type="number" id="fact-${rowCounter}" value="0" oninput="calc()"></td>
+                <td class="formula-cell" id="diff-${rowCounter}">0.00</td>
+                <td><input type="text" id="note-${rowCounter}" placeholder="Примечание" oninput="schedSave()"></td>
+                <td><button class="delete-btn" onclick="delRow(this)">Удалить</button></td>
+            `;
+            calc();
+        }
+
+        function delRow(btn) {
+            btn.closest('tr').remove();
+            calc();
+        }
+
+        function calc() {
+            let totalP = 0, totalF = 0;
+            const tbody = document.getElementById('tableBody');
+            const rows = tbody.querySelectorAll('tr:not(.section-header)');
+            
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input[type="number"]');
+                if (inputs.length >= 2) {
+                    const plan = parseFloat(inputs[0].value) || 0;
+                    const fact = parseFloat(inputs[1].value) || 0;
+                    const diff = plan - fact; // План - Факт (положительное = экономия)
+                    const diffCell = row.querySelector('.formula-cell');
+                    if (diffCell && diffCell.id.startsWith('diff-')) {
+                        diffCell.textContent = diff.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+                        // Цветовая индикация
+                        if (diff > 0) {
+                            diffCell.style.color = '#27ae60'; // Зеленый = экономия
+                        } else if (diff < 0) {
+                            diffCell.style.color = '#e74c3c'; // Красный = перерасход
+                        } else {
+                            diffCell.style.color = '#495057'; // Серый = точно по плану
+                        }
+                    }
+                    totalP += plan;
+                    totalF += fact;
+                }
+            });
+            
+            const totalDiff = totalP - totalF;
+            document.getElementById('totalPlan').textContent = totalP.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('totalFact').textContent = totalF.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            document.getElementById('totalDiff').textContent = totalDiff.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+            
+            // Цветовая индикация для итого
+            if (totalDiff > 0) {
+                document.getElementById('totalDiff').style.color = '#27ae60';
+            } else if (totalDiff < 0) {
+                document.getElementById('totalDiff').style.color = '#e74c3c';
+            } else {
+                document.getElementById('totalDiff').style.color = '#495057';
+            }
+            
+            schedSave();
+        }
+
+        function schedSave() {
+            document.getElementById('saveStatus').textContent = 'Изменено...';
+            document.getElementById('saveStatus').style.background = '#fff3cd';
+            clearTimeout(timeout);
+            timeout = setTimeout(save, 1000);
+        }
+
+        function save() {
+            // Не сохраняем в режиме консолидации
+            if (branch === 'consolidated') return;
+            
+            const data = { rows: [] };
+            const tbody = document.getElementById('tableBody');
+            const rows = tbody.querySelectorAll('tr:not(.section-header)');
+            
+            rows.forEach((row, idx) => {
+                const nameInput = row.querySelector('input[type="text"]');
+                const planInput = row.querySelectorAll('input[type="number"]')[0];
+                const factInput = row.querySelectorAll('input[type="number"]')[1];
+                const noteInput = row.querySelectorAll('input[type="text"]')[1];
+                
+                if (nameInput && planInput && factInput) {
+                    data.rows.push({
+                        name: nameInput.value,
+                        plan: planInput.value,
+                        fact: factInput.value,
+                        note: noteInput ? noteInput.value : ''
+                    });
+                }
+            });
+            
+            localStorage.setItem(`${KEY}_${branch}`, JSON.stringify(data));
+            document.getElementById('saveStatus').textContent = 'Сохранено';
+            document.getElementById('saveStatus').style.background = '#d4edda';
+        }
+
+        function load() {
+            const saved = localStorage.getItem(`${KEY}_${branch}`);
+            const tbody = document.getElementById('tableBody');
+            
+            const sectionHeaders = Array.from(tbody.querySelectorAll('.section-header'));
+            tbody.innerHTML = '';
+            sectionHeaders.forEach(h => tbody.appendChild(h));
+            
+            rowCounter = 0;
+            
+            if (saved) {
+                const data = JSON.parse(saved);
+                data.rows.forEach(r => {
+                    rowCounter++;
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${rowCounter}</td>
+                        <td><input type="text" id="name-${rowCounter}" value="${r.name || ''}" oninput="schedSave()"></td>
+                        <td><input type="number" id="plan-${rowCounter}" value="${r.plan || 0}" oninput="calc()"></td>
+                        <td><input type="number" id="fact-${rowCounter}" value="${r.fact || 0}" oninput="calc()"></td>
+                        <td class="formula-cell" id="diff-${rowCounter}">0.00</td>
+                        <td><input type="text" id="note-${rowCounter}" value="${r.note || ''}" oninput="schedSave()"></td>
+                        <td><button class="delete-btn" onclick="delRow(this)">Удалить</button></td>
+                    `;
+                });
+            }
+            calc();
+        }
+
+        function switchBranch(newBranch) {
+            if (branch !== 'consolidated' && branch !== newBranch) {
+                save();
+            }
+            branch = newBranch;
+            document.querySelectorAll('.branch-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            if (branch === 'consolidated') {
+                document.querySelectorAll('input').forEach(input => {
+                    input.disabled = true;
+                });
+                loadConsolidatedData();
+            } else {
+                load();
+            }
+        }
+
+        function loadConsolidatedData() {
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const consolidated = {};
+            
+            branches.forEach(b => {
+                const key = `${KEY}_${b}`;
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        if (data.rows) {
+                            data.rows.forEach((row, idx) => {
+                                if (!consolidated[idx]) {
+                                    consolidated[idx] = { name: row.name, plan: 0, fact: 0, note: '' };
+                                }
+                                consolidated[idx].plan += parseFloat(row.plan) || 0;
+                                consolidated[idx].fact += parseFloat(row.fact) || 0;
+                            });
+                        }
+                    } catch (e) {}
+                }
+            });
+            
+            const tbody = document.getElementById('tableBody');
+            const sectionHeaders = Array.from(tbody.querySelectorAll('.section-header'));
+            tbody.innerHTML = '';
+            sectionHeaders.forEach(h => tbody.appendChild(h));
+            rowCounter = 0;
+            
+            Object.values(consolidated).forEach(r => {
+                rowCounter++;
+                const diff = r.plan - r.fact; // План - Факт
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${rowCounter}</td>
+                    <td><input type="text" id="name-${rowCounter}" value="${r.name || ''}" disabled></td>
+                    <td><input type="number" id="plan-${rowCounter}" value="${r.plan || 0}" disabled></td>
+                    <td><input type="number" id="fact-${rowCounter}" value="${r.fact || 0}" disabled></td>
+                    <td class="formula-cell" id="diff-${rowCounter}">0.00</td>
+                    <td><input type="text" id="note-${rowCounter}" value="${r.note || ''}" disabled></td>
+                    <td></td>
+                `;
+            });
+            calc();
+        }
+
+        window.addEventListener('load', load);
+        
+        // НЕ инициализируем редактируемые таблицы - структура уже готова
+            console.log(' Таблица готова к работе');
+        function addDetailToggles() {
+            // Удаляем существующие детальные строки и иконки
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+            
+            const dataRows = document.querySelectorAll('tbody tr');
+            const branches = ['almaty', 'uralsk', 'astana'];
+            const branchNames = {
+                'almaty': 'Алматы',
+                'uralsk': 'Уральск',
+                'astana': 'Астана'
+            };
+            
+            let processedCount = 0;
+            
+            dataRows.forEach((row, index) => {
+                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
+                const firstInput = row.querySelector('input[data-cell]');
+                
+                const isTotalRow = row.classList.contains('total-row') || 
+                                   row.textContent.includes('Итого') ||
+                                   row.textContent.includes('ИТОГО');
+                
+                if (labelCell && firstInput && !isTotalRow) {
+                    const rowNum = firstInput.dataset.row || index;
+                    
+                    labelCell.classList.add('expandable');
+                    const toggle = document.createElement('span');
+                    toggle.className = 'toggle-detail';
+                    toggle.textContent = '▶';
+                    toggle.dataset.row = rowNum;
+                    
+                    labelCell.insertBefore(toggle, labelCell.firstChild);
+                    
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'detail-row';
+                    detailRow.dataset.row = rowNum;
+                    
+                    const emptyCell = document.createElement('td');
+                    emptyCell.style.background = '#f8f9fa';
+                    detailRow.appendChild(emptyCell);
+                    
+                    const branchListCell = document.createElement('td');
+                    branchListCell.className = 'detail-cell';
+                    branchListCell.style.verticalAlign = 'top';
+                    
+                    let branchList = '<div style="padding: 5px 0;">';
+                    branches.forEach(b => {
+                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+                    });
+                    branchList += '</div>';
+                    branchListCell.innerHTML = branchList;
+                    detailRow.appendChild(branchListCell);
+                    
+                    const inputs = row.querySelectorAll('input[data-cell]');
+                    inputs.forEach(input => {
+                        const yearCell = document.createElement('td');
+                        yearCell.className = 'detail-cell';
+                        yearCell.style.verticalAlign = 'top';
+                        yearCell.style.textAlign = 'right';
+                        
+                        let yearData = '<div style="padding: 5px 0;">';
+                        branches.forEach(b => {
+                            const cellId = input.dataset.cell;
+                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
+                                ? parseFloat(window.branchDetailsData[b][cellId]) 
+                                : 0;
+                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                        });
+                        yearData += '</div>';
+                        yearCell.innerHTML = yearData;
+                        detailRow.appendChild(yearCell);
+                    });
+                    
+                    row.parentNode.insertBefore(detailRow, row.nextSibling);
+                    
+                    labelCell.addEventListener('click', function(e) {
+                        const toggle = this.querySelector('.toggle-detail');
+                        const detailRow = this.parentElement.nextElementSibling;
+                        
+                        if (detailRow && detailRow.classList.contains('detail-row')) {
+                            detailRow.classList.toggle('show');
+                            toggle.classList.toggle('expanded');
+                        }
+                    });
+                    
+                    processedCount++;
+                }
+            });
+            
+            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+        }
+
+        function removeDetailToggles() {
+            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.expandable').forEach(cell => {
+                cell.classList.remove('expandable');
+            });
+        }
+
+    </script>
+</body>
+</html>
+
+
