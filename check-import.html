@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="shared.css">
+    <title>Проверка импортированных данных</title>
+</head>
+<body class="page-util">
+    <div class="container">
+        <a href="index.html" class="back-link">← Вернуться на главную</a>
+        
+        <h1>🔍 Проверка импортированных данных</h1>
+        <p class="subtitle">Диагностика данных в localStorage</p>
+
+        <div style="text-align: center;">
+            <button class="btn" onclick="checkData()">🔍 Проверить данные</button>
+            <button class="btn" onclick="showSample()">📋 Показать примеры</button>
+        </div>
+
+        <div class="log" id="log">
+            <div class="log-entry log-info">Нажмите "Проверить данные" для начала диагностики...</div>
+        </div>
+    </div>
+
+    <script>
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function checkData() {
+            document.getElementById('log').innerHTML = '';
+            addLog('🚀 Начало проверки данных...', 'info');
+
+            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+            const rbTables = ['rb_svod', 'rb_svodnaya', 'rb_income', 'rb_fzp', 'rb_kalkulyacia', 'rb_plan_komandir'];
+            const puTables = ['pu_svod_2026', 'pu_ss_dotacia', 'pu_income_pu', 'pu_income_dt', 'pu_income_dop', 
+                             'pu_fot_almaty', 'pu_grafik_almaty', 'pu_kalkulyacia_almaty', 'pu_plan_rk', 
+                             'pu_plan_abroad', 'pu_ss_almaty'];
+
+            addLog('', 'info');
+            addLog('=== РБ (Республиканский бюджет) ===', 'info');
+            
+            let rbFound = 0;
+            let rbMissing = 0;
+            
+            rbTables.forEach(table => {
+                const branchResults = [];
+                branches.forEach(branch => {
+                    const key = `${table}_${branch}`;
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (table === 'rb_svodnaya') {
+                                const keys = Object.keys(parsed);
+                                branchResults.push(`${branch}: ${keys.length} ячеек`);
+                                rbFound++;
+                            } else if (parsed.cells) {
+                                const keys = Object.keys(parsed.cells);
+                                branchResults.push(`${branch}: ${keys.length} ячеек`);
+                                rbFound++;
+                            } else {
+                                branchResults.push(`${branch}: неверный формат`);
+                                rbMissing++;
+                            }
+                        } catch (e) {
+                            branchResults.push(`${branch}: ошибка`);
+                            rbMissing++;
+                        }
+                    } else {
+                        branchResults.push(`${branch}: нет данных`);
+                        rbMissing++;
+                    }
+                });
+                
+                if (branchResults.every(r => r.includes('нет данных'))) {
+                    addLog(`❌ ${table}: нет данных`, 'error');
+                } else {
+                    addLog(`✅ ${table}: ${branchResults.join(', ')}`, 'success');
+                }
+            });
+
+            addLog('', 'info');
+            addLog('=== ПУ (Подушевое финансирование) ===', 'info');
+            
+            let puFound = 0;
+            let puMissing = 0;
+            
+            puTables.forEach(table => {
+                const branchResults = [];
+                branches.forEach(branch => {
+                    const key = `${table}_${branch}`;
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (parsed.cells) {
+                                const keys = Object.keys(parsed.cells);
+                                branchResults.push(`${branch}: ${keys.length} ячеек`);
+                                puFound++;
+                            } else {
+                                branchResults.push(`${branch}: неверный формат`);
+                                puMissing++;
+                            }
+                        } catch (e) {
+                            branchResults.push(`${branch}: ошибка`);
+                            puMissing++;
+                        }
+                    } else {
+                        branchResults.push(`${branch}: нет данных`);
+                        puMissing++;
+                    }
+                });
+                
+                if (branchResults.every(r => r.includes('нет данных'))) {
+                    addLog(`❌ ${table}: нет данных`, 'error');
+                } else {
+                    addLog(`✅ ${table}: ${branchResults.join(', ')}`, 'success');
+                }
+            });
+
+            addLog('', 'info');
+            addLog(`📊 ИТОГО:`, 'info');
+            addLog(`✅ РБ: найдено ${rbFound}, отсутствует ${rbMissing}`, rbFound > 0 ? 'success' : 'error');
+            addLog(`✅ ПУ: найдено ${puFound}, отсутствует ${puMissing}`, puFound > 0 ? 'success' : 'error');
+        }
+
+        function showSample() {
+            document.getElementById('log').innerHTML = '';
+            addLog('📋 Примеры данных из localStorage:', 'info');
+            
+            // Пример rb_svod
+            const rbSvodData = localStorage.getItem('rb_svod_almaty');
+            if (rbSvodData) {
+                const parsed = JSON.parse(rbSvodData);
+                addLog('', 'info');
+                addLog('=== rb_svod_almaty ===', 'info');
+                addLog(`Структура: ${JSON.stringify(Object.keys(parsed), null, 2)}`, 'success');
+                if (parsed.cells) {
+                    const cellKeys = Object.keys(parsed.cells).slice(0, 10);
+                    addLog(`Первые 10 ячеек: ${cellKeys.join(', ')}`, 'success');
+                }
+            }
+            
+            // Пример rb_svodnaya
+            const rbSvodnayaData = localStorage.getItem('rb_svodnaya_almaty');
+            if (rbSvodnayaData) {
+                const parsed = JSON.parse(rbSvodnayaData);
+                addLog('', 'info');
+                addLog('=== rb_svodnaya_almaty ===', 'info');
+                const keys = Object.keys(parsed).slice(0, 10);
+                addLog(`Первые 10 ключей: ${keys.join(', ')}`, 'success');
+            }
+            
+            // Пример pu_svod_2026
+            const puSvodData = localStorage.getItem('pu_svod_2026_almaty');
+            if (puSvodData) {
+                const parsed = JSON.parse(puSvodData);
+                addLog('', 'info');
+                addLog('=== pu_svod_2026_almaty ===', 'info');
+                addLog(`Структура: ${JSON.stringify(Object.keys(parsed), null, 2)}`, 'success');
+                if (parsed.cells) {
+                    const cellKeys = Object.keys(parsed.cells).slice(0, 10);
+                    addLog(`Первые 10 ячеек: ${cellKeys.join(', ')}`, 'success');
+                }
+            }
+        }
+    </script>
+    <script src="shared-nav.js"></script>
+</body>
+</html>

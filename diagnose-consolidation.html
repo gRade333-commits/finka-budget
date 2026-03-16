@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="shared.css">
+    <title>Диагностика консолидации</title>
+</head>
+<body class="page-util">
+    <div class="container">
+        <h1>🔍 Диагностика консолидации</h1>
+        
+        <button onclick="checkAll()">Проверить все ключи</button>
+        <button onclick="testConsolidation()">Тест консолидации РБ</button>
+        <button onclick="showAllKeys()">Показать все ключи localStorage</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function checkAll() {
+            const result = document.getElementById('result');
+            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+            
+            const rbSheets = [
+                'rb_svod',
+                'rb_income',
+                'rb_fzp',
+                'rb_kalkulyacia',
+                'rb_svodnaya',
+                'rb_plan_komandir'
+            ];
+            
+            const puSheets = [
+                'pu_svod_2026',
+                'pu_ss_dotacia',
+                'pu_income_pu',
+                'pu_income_dt',
+                'pu_income_dop',
+                'pu_fot',
+                'pu_grafik',
+                'pu_kalkulyacia',
+                'pu_plan_rk',
+                'pu_plan_abroad'
+            ];
+            
+            const other = ['fot'];
+            
+            let html = '<h2>Проверка наличия ключей в localStorage</h2>';
+            html += '<table><tr><th>Ключ</th><th>Алматы</th><th>Уральск</th><th>Астана</th><th>Кол-во ячеек</th></tr>';
+            
+            // Проверяем РБ
+            html += '<tr><th colspan="5" style="background: #2c3e50;">РЕСПУБЛИКАНСКИЙ БЮДЖЕТ (RB)</th></tr>';
+            rbSheets.forEach(sheet => {
+                html += '<tr>';
+                html += `<td><strong>${sheet}</strong></td>`;
+                
+                let cellCounts = {};
+                branches.forEach(branch => {
+                    const key = `${sheet}_${branch}`;
+                    const data = localStorage.getItem(key);
+                    const exists = data !== null;
+                    
+                    if (exists) {
+                        try {
+                            const parsed = JSON.parse(data);
+                            cellCounts[branch] = Object.keys(parsed.cells || {}).length;
+                        } catch (e) {
+                            cellCounts[branch] = 'ошибка';
+                        }
+                    }
+                    
+                    html += `<td class="${exists ? 'success' : 'error'}">${exists ? '✅ Есть' : '❌ Нет'}</td>`;
+                });
+                
+                html += `<td>${Object.values(cellCounts).join(' / ')}</td>`;
+                html += '</tr>';
+            });
+            
+            // Проверяем ПУ
+            html += '<tr><th colspan="5" style="background: #2c3e50;">ПОДУШЕВОЕ ФИНАНСИРОВАНИЕ (PU)</th></tr>';
+            puSheets.forEach(sheet => {
+                html += '<tr>';
+                html += `<td><strong>${sheet}</strong></td>`;
+                
+                let cellCounts = {};
+                branches.forEach(branch => {
+                    const key = `${sheet}_${branch}`;
+                    const data = localStorage.getItem(key);
+                    const exists = data !== null;
+                    
+                    if (exists) {
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (parsed.cells) {
+                                cellCounts[branch] = Object.keys(parsed.cells).length;
+                            } else if (parsed.rows) {
+                                cellCounts[branch] = Array.isArray(parsed.rows) ? parsed.rows.length : Object.keys(parsed.rows).length;
+                            } else {
+                                cellCounts[branch] = Object.keys(parsed).length;
+                            }
+                        } catch (e) {
+                            cellCounts[branch] = 'ошибка';
+                        }
+                    }
+                    
+                    html += `<td class="${exists ? 'success' : 'error'}">${exists ? '✅ Есть' : '❌ Нет'}</td>`;
+                });
+                
+                html += `<td>${Object.values(cellCounts).join(' / ')}</td>`;
+                html += '</tr>';
+            });
+            
+            // Проверяем прочие
+            html += '<tr><th colspan="5" style="background: #2c3e50;">ПРОЧИЕ</th></tr>';
+            other.forEach(sheet => {
+                html += '<tr>';
+                html += `<td><strong>${sheet}</strong></td>`;
+                
+                branches.forEach(branch => {
+                    const key = `${sheet}_${branch}`;
+                    const data = localStorage.getItem(key);
+                    const exists = data !== null;
+                    html += `<td class="${exists ? 'success' : 'error'}">${exists ? '✅ Есть' : '❌ Нет'}</td>`;
+                });
+                
+                html += '<td>-</td>';
+                html += '</tr>';
+            });
+            
+            html += '</table>';
+            result.innerHTML = html;
+        }
+        
+        function testConsolidation() {
+            const result = document.getElementById('result');
+            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+            
+            let html = '<h2>Тест консолидации rb_svod</h2>';
+            
+            // Загружаем данные
+            const allData = {};
+            branches.forEach(b => {
+                const key = `rb_svod_${b}`;
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    allData[b] = data.cells || {};
+                }
+            });
+            
+            // Берём первые 10 ячеек из Алматы и проверяем консолидацию
+            const almatyKeys = Object.keys(allData['almaty'] || {}).slice(0, 10);
+            
+            html += '<table><tr><th>Ячейка</th><th>Алматы</th><th>Уральск</th><th>Астана</th><th>Консолидация</th><th>Проверка</th></tr>';
+            
+            almatyKeys.forEach(cellId => {
+                const almaty = parseFloat(allData['almaty']?.[cellId]) || 0;
+                const uralsk = parseFloat(allData['uralsk']?.[cellId]) || 0;
+                const astana = parseFloat(allData['astana']?.[cellId]) || 0;
+                const sum = almaty + uralsk + astana;
+                
+                const isCorrect = sum > 0;
+                
+                html += '<tr>';
+                html += `<td><strong>${cellId}</strong></td>`;
+                html += `<td>${almaty.toFixed(2)}</td>`;
+                html += `<td>${uralsk.toFixed(2)}</td>`;
+                html += `<td>${astana.toFixed(2)}</td>`;
+                html += `<td><strong>${sum.toFixed(2)}</strong></td>`;
+                html += `<td class="${isCorrect ? 'success' : 'warning'}">${isCorrect ? '✅' : '⚠️'}</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</table>';
+            
+            html += '<h3>Подробные данные:</h3>';
+            html += '<pre>' + JSON.stringify(allData, null, 2).substring(0, 2000) + '...</pre>';
+            
+            result.innerHTML = html;
+        }
+        
+        function showAllKeys() {
+            const result = document.getElementById('result');
+            const keys = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('rb_') || key.startsWith('pu_') || key.startsWith('fot_'))) {
+                    const data = localStorage.getItem(key);
+                    keys.push({
+                        key: key,
+                        size: (data.length / 1024).toFixed(2) + ' KB'
+                    });
+                }
+            }
+            
+            let html = '<h2>Все ключи в localStorage</h2>';
+            html += '<table><tr><th>Ключ</th><th>Размер</th></tr>';
+            
+            keys.forEach(item => {
+                html += `<tr><td>${item.key}</td><td>${item.size}</td></tr>`;
+            });
+            
+            html += '</table>';
+            html += `<p><strong>Всего ключей:</strong> ${keys.length}</p>`;
+            
+            result.innerHTML = html;
+        }
+    </script>
+    <script src="shared-nav.js"></script>
+</body>
+</html>

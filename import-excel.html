@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="shared.css">
+    <title>Импорт данных из Excel</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="page-util">
+    <div class="container">
+        <a href="index.html" class="back-link">← Вернуться на главную</a>
+        
+        <h1>📊 Импорт данных из Excel</h1>
+        <p class="subtitle">Массовое заполнение всех таблиц бюджетной системы</p>
+
+        <div class="upload-section">
+            <h2>Республиканский бюджет (РБ)</h2>
+            <div class="file-input-wrapper">
+                <input type="file" id="rbFile" class="file-input" accept=".xlsx,.xls">
+                <label for="rbFile" class="file-label">📁 Выбрать файл РБ</label>
+                <span id="rbFileName" class="file-name">Файл не выбран</span>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h2>Подушевое финансирование (ПУ)</h2>
+            <div class="file-input-wrapper">
+                <input type="file" id="puFile" class="file-input" accept=".xlsx,.xls">
+                <label for="puFile" class="file-label">📁 Выбрать файл ПУ</label>
+                <span id="puFileName" class="file-name">Файл не выбран</span>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button id="showSheetsBtn" class="btn btn-secondary" disabled>
+                📋 Показать листы в файлах
+            </button>
+            <button id="importBtn" class="btn btn-primary" disabled>
+                🚀 Импортировать данные
+            </button>
+            <button id="clearBtn" class="btn btn-danger">
+                🗑️ Очистить все данные
+            </button>
+            <button id="exportBtn" class="btn btn-secondary">
+                💾 Экспортировать текущие данные
+            </button>
+        </div>
+
+        <div class="progress" id="progress">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-card">
+                <h3>Обработано листов</h3>
+                <div class="value" id="sheetsProcessed">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Импортировано строк</h3>
+                <div class="value" id="rowsImported">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Ошибок</h3>
+                <div class="value" id="errorsCount">0</div>
+            </div>
+        </div>
+
+        <div class="log" id="log">
+            <div class="log-entry log-info">Готов к импорту данных...</div>
+        </div>
+    </div>
+
+    <script>
+        let rbWorkbook = null;
+        let puWorkbook = null;
+        const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+
+        document.getElementById('rbFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('rbFileName').textContent = file.name;
+                readExcelFile(file, 'rb');
+            }
+        });
+
+        document.getElementById('puFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('puFileName').textContent = file.name;
+                readExcelFile(file, 'pu');
+            }
+        });
+
+        function readExcelFile(file, type) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                
+                if (type === 'rb') {
+                    rbWorkbook = workbook;
+                    addLog(`✅ Файл РБ загружен: ${workbook.SheetNames.length} листов`, 'success');
+                } else {
+                    puWorkbook = workbook;
+                    addLog(`✅ Файл ПУ загружен: ${workbook.SheetNames.length} листов`, 'success');
+                }
+                
+                checkImportReady();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function checkImportReady() {
+            const importBtn = document.getElementById('importBtn');
+            const showSheetsBtn = document.getElementById('showSheetsBtn');
+            if (rbWorkbook || puWorkbook) {
+                importBtn.disabled = false;
+                showSheetsBtn.disabled = false;
+            }
+        }
+
+        document.getElementById('showSheetsBtn').addEventListener('click', function() {
+            addLog('📋 Список листов в загруженных файлах:', 'info');
+            
+            if (rbWorkbook) {
+                addLog('--- Файл РБ ---', 'info');
+                rbWorkbook.SheetNames.forEach((name, index) => {
+                    addLog(`${index + 1}. "${name}"`, 'success');
+                });
+            }
+            
+            if (puWorkbook) {
+                addLog('--- Файл ПУ ---', 'info');
+                puWorkbook.SheetNames.forEach((name, index) => {
+                    addLog(`${index + 1}. "${name}"`, 'success');
+                });
+            }
+        });
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateProgress(percent, text) {
+            const progress = document.getElementById('progress');
+            const progressBar = document.getElementById('progressBar');
+            progress.style.display = 'block';
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = text || percent + '%';
+        }
+
+        function updateStats(sheets, rows, errors) {
+            document.getElementById('stats').style.display = 'grid';
+            document.getElementById('sheetsProcessed').textContent = sheets;
+            document.getElementById('rowsImported').textContent = rows;
+            document.getElementById('errorsCount').textContent = errors;
+        }
+
+        // ПРАВИЛЬНАЯ конвертация в формат страниц
+        function convertExcelDataToPageFormat(excelData, sheetKey, branch, startRow = 1) {
+            const cells = {};
+            
+            excelData.forEach((row, rowIndex) => {
+                if (rowIndex < startRow) return; // Пропускаем заголовки
+                
+                row.forEach((cellValue, colIndex) => {
+                    const colLetter = String.fromCharCode(65 + colIndex); // A, B, C...
+                    const cellId = `${colLetter}${rowIndex + 1}`;
+                    const value = cellValue === '' ? 0 : (isNaN(cellValue) ? cellValue : Number(cellValue));
+                    cells[cellId] = value;
+                });
+            });
+            
+            // Возвращаем в формате, который ожидают страницы
+            return {
+                branch: branch,
+                sheet: sheetKey,
+                lastModified: new Date().toISOString(),
+                cells: cells
+            };
+        }
+
+        // Специальная конвертация для rb-svodnaya (сохраняет формат как на странице)
+        async function convertExcelToSvodnaya(excelData, branch) {
+            // Загружаем структуру секций если есть
+            let sectionData = {};
+            
+            try {
+                const response = await fetch('svodnaya_sections_full.json');
+                const jsonData = await response.json();
+                
+                // Если есть структура секций, используем её
+                if (jsonData && jsonData.sections) {
+                    jsonData.sections.forEach(section => {
+                        section.rows.forEach(row => {
+                            row.data.forEach((cell, colIdx) => {
+                                // Пропускаем заголовки и формулы (первые 2 колонки и последняя)
+                                if (colIdx === 0 || colIdx === 1 || colIdx === row.data.length - 1 || cell === "") return;
+                                
+                                const cellId = `sec${section.num}_row${row.idx}_col${colIdx}`;
+                                
+                                // Получаем значение из Excel данных если есть
+                                if (excelData[row.idx] && excelData[row.idx][colIdx] !== undefined) {
+                                    const value = excelData[row.idx][colIdx];
+                                    sectionData[cellId] = value === '' ? '' : value;
+                                } else {
+                                    sectionData[cellId] = '';
+                                }
+                            });
+                        });
+                    });
+                    return sectionData;
+                }
+            } catch (e) {
+                console.log('Используем простую конвертацию (файл структуры не найден)');
+            }
+            
+            // Если структура не загрузилась, используем простую конвертацию
+            const data = {};
+            excelData.forEach((row, rowIdx) => {
+                if (rowIdx < 10) return; // Пропускаем первые строки с заголовками
+                
+                row.forEach((cellValue, colIdx) => {
+                    if (colIdx < 2 || colIdx > 30) return; // Пропускаем первые 2 колонки и после 30
+                    
+                    const cellId = `sec1_row${rowIdx}_col${colIdx}`;
+                    const value = cellValue === '' ? '' : cellValue;
+                    data[cellId] = value;
+                });
+            });
+            
+            return data;
+        }
+
+        document.getElementById('importBtn').addEventListener('click', async function() {
+            addLog('🚀 Начало импорта данных...', 'info');
+            
+            let totalSheets = 0;
+            let totalRows = 0;
+            let totalErrors = 0;
+
+            try {
+                if (rbWorkbook) {
+                    addLog('📊 Импорт данных РБ...', 'info');
+                    const rbResult = await importRBData(rbWorkbook);
+                    totalSheets += rbResult.sheets;
+                    totalRows += rbResult.rows;
+                    totalErrors += rbResult.errors;
+                }
+
+                if (puWorkbook) {
+                    addLog('👥 Импорт данных ПУ...', 'info');
+                    const puResult = await importPUData(puWorkbook);
+                    totalSheets += puResult.sheets;
+                    totalRows += puResult.rows;
+                    totalErrors += puResult.errors;
+                }
+
+                updateStats(totalSheets, totalRows, totalErrors);
+                updateProgress(100, 'Завершено!');
+                
+                const totalDataSets = totalSheets * branches.length;
+                
+                if (totalErrors === 0) {
+                    addLog(`✅ Импорт успешно завершен!`, 'success');
+                    addLog(`📊 Обработано листов: ${totalSheets}`, 'success');
+                    addLog(`📁 Создано наборов данных: ${totalDataSets} (для ${branches.length} филиалов)`, 'success');
+                    addLog(`📝 Всего строк: ${totalRows}`, 'success');
+                    addLog(`🎉 Данные готовы к использованию! Откройте любую страницу бюджета.`, 'success');
+                } else {
+                    addLog(`⚠️ Импорт завершен с ошибками: ${totalErrors}`, 'warning');
+                }
+                
+            } catch (error) {
+                addLog(`❌ Ошибка импорта: ${error.message}`, 'error');
+                totalErrors++;
+                updateStats(totalSheets, totalRows, totalErrors);
+            }
+        });
+
+        async function importRBData(workbook) {
+            let sheets = 0;
+            let rows = 0;
+            let errors = 0;
+
+            const sheetMapping = {
+                'Свод ': { key: 'rb_svod', data: 'rb_svod_data' },
+                'Сводная общая 2026г.': { key: 'rb_svodnaya', data: 'rb_svodnaya_data', special: true },
+                'ДОХОДНАЯ ЧАСТЬ РБ': { key: 'rb_income', data: 'rb_income_data' },
+                'СВОД ФЗП': { key: 'rb_fzp', data: 'rb_fzp_data' },
+                'Калькуляция 2026': { key: 'rb_kalkulyacia', data: 'rb_kalkulyacia_data' },
+                'План командир 2026': { key: 'rb_plan_komandir', data: 'rb_plan_komandir_data' }
+            };
+
+            for (const [sheetName, config] of Object.entries(sheetMapping)) {
+                try {
+                    let foundSheet = workbook.SheetNames.find(name => 
+                        name.trim() === sheetName.trim() || name === sheetName
+                    );
+                    
+                    if (foundSheet) {
+                        const worksheet = workbook.Sheets[foundSheet];
+                        const rawData = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''});
+                        
+                        // Сохраняем сырые данные
+                        localStorage.setItem(config.data, JSON.stringify(rawData));
+                        
+                        // Конвертируем для каждого филиала
+                        for (const branch of branches) {
+                            if (config.special) {
+                                // Специальная обработка для rb-svodnaya
+                                const pageData = await convertExcelToSvodnaya(rawData, branch);
+                                localStorage.setItem(`rb_svodnaya_${branch}`, JSON.stringify(pageData));
+                                
+                                // Устанавливаем флаг импорта для блокировки автоматических формул
+                                localStorage.setItem('rb_svodnaya_import_flag', 'true');
+                            } else {
+                                // Стандартная обработка - преобразуем Excel в формат {A1: value, B1: value}
+                                const cells = {};
+                                rawData.forEach((row, rowIndex) => {
+                                    if (rowIndex < 1) return; // Пропускаем заголовок
+                                    row.forEach((cellValue, colIndex) => {
+                                        const colLetter = String.fromCharCode(65 + colIndex); // A, B, C...
+                                        const cellId = `${colLetter}${rowIndex + 1}`;
+                                        const value = cellValue === '' ? 0 : (isNaN(cellValue) ? cellValue : Number(cellValue));
+                                        cells[cellId] = value;
+                                    });
+                                });
+                                
+                                // Сохраняем в формате страниц
+                                const pageData = {
+                                    branch: branch,
+                                    sheet: config.key,
+                                    lastModified: new Date().toISOString(),
+                                    cells: cells
+                                };
+                                localStorage.setItem(`${config.key}_${branch}`, JSON.stringify(pageData));
+                            }
+                        }
+                        
+                        sheets++;
+                        rows += rawData.length;
+                        addLog(`✓ ${sheetName}: ${rawData.length} строк → ${branches.length} филиала`, 'success');
+                        
+                        updateProgress(Math.round((sheets / Object.keys(sheetMapping).length) * 50));
+                    } else {
+                        addLog(`⚠️ Лист "${sheetName}" не найден в файле РБ`, 'warning');
+                    }
+                } catch (error) {
+                    addLog(`❌ Ошибка обработки листа "${sheetName}": ${error.message}`, 'error');
+                    errors++;
+                }
+            }
+
+            // Добавляем информационное сообщение о флаге импорта для РБ
+            if (sheets > 0) {
+                addLog(`ℹ️ Установлен флаг импорта - автоматические формулы консолидации отключены`, 'info');
+                addLog(`💡 Для активации формул начните редактировать любую ячейку в rb-svodnaya.html`, 'info');
+            }
+
+            return {sheets, rows, errors};
+        }
+
+        async function importPUData(workbook) {
+            let sheets = 0;
+            let rows = 0;
+            let errors = 0;
+
+            const sheetMapping = {
+                'СВОД общий 2026': { key: 'pu_svod_2026', data: 'pu_svod_2026_data' },
+                'СС Дотация': { key: 'pu_ss_dotacia', data: 'pu_ss_dotacia_data' },
+                'ДОХОДНАЯ ЧАСТЬ ПУ': { key: 'pu_income_pu', data: 'pu_income_pu_data' },
+                'ДОХОДНАЯ ЧАСТЬ ДТ': { key: 'pu_income_dt', data: 'pu_income_dt_data' },
+                'ДОХОДНАЯ ЧАСТЬ доп': { key: 'pu_income_dop', data: 'pu_income_dop_data' },
+                'Свод ФОТ Алматы': { key: 'pu_fot_almaty', data: 'pu_fot_almaty_data' },
+                'График род. оплаты Алматы ': { key: 'pu_grafik_almaty', data: 'pu_grafik_almaty_data' },
+                ' Калькуляция Алматы': { key: 'pu_kalkulyacia_almaty', data: 'pu_kalkulyacia_almaty_data' },
+                'План команд в пред РК': { key: 'pu_plan_rk', data: 'pu_plan_rk_data' },
+                'План команд за пределы РК': { key: 'pu_plan_abroad', data: 'pu_plan_abroad_data' },
+                'СС Алматы': { key: 'pu_ss_almaty', data: 'pu_ss_almaty_data' }
+            };
+
+            for (const [sheetName, config] of Object.entries(sheetMapping)) {
+                try {
+                    let foundSheet = workbook.SheetNames.find(name => 
+                        name.trim() === sheetName.trim() || name === sheetName
+                    );
+                    
+                    if (foundSheet) {
+                        const worksheet = workbook.Sheets[foundSheet];
+                        const rawData = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''});
+                        
+                        localStorage.setItem(config.data, JSON.stringify(rawData));
+                        
+                        for (const branch of branches) {
+                            // Преобразуем Excel в формат {A1: value, B1: value}
+                            const cells = {};
+                            rawData.forEach((row, rowIndex) => {
+                                if (rowIndex < 1) return; // Пропускаем заголовок
+                                row.forEach((cellValue, colIndex) => {
+                                    const colLetter = String.fromCharCode(65 + colIndex); // A, B, C...
+                                    const cellId = `${colLetter}${rowIndex + 1}`;
+                                    const value = cellValue === '' ? 0 : (isNaN(cellValue) ? cellValue : Number(cellValue));
+                                    cells[cellId] = value;
+                                });
+                            });
+                            
+                            // Сохраняем в формате страниц
+                            const pageData = {
+                                branch: branch,
+                                sheet: config.key,
+                                lastModified: new Date().toISOString(),
+                                cells: cells
+                            };
+                            localStorage.setItem(`${config.key}_${branch}`, JSON.stringify(pageData));
+                        }
+                        
+                        sheets++;
+                        rows += rawData.length;
+                        addLog(`✓ ${sheetName}: ${rawData.length} строк → ${branches.length} филиала`, 'success');
+                        
+                        updateProgress(50 + Math.round((sheets / Object.keys(sheetMapping).length) * 50));
+                    } else {
+                        addLog(`⚠️ Лист "${sheetName}" не найден в файле ПУ`, 'warning');
+                    }
+                } catch (error) {
+                    addLog(`❌ Ошибка обработки листа "${sheetName}": ${error.message}`, 'error');
+                    errors++;
+                }
+            }
+
+            return {sheets, rows, errors};
+        }
+
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите удалить ВСЕ данные из localStorage?')) {
+                const keys = Object.keys(localStorage);
+                const dataKeys = keys.filter(key => 
+                    key.endsWith('_data') || 
+                    key.includes('rb_') || 
+                    key.includes('pu_') ||
+                    key.includes('fot_')
+                );
+                
+                dataKeys.forEach(key => localStorage.removeItem(key));
+                
+                addLog(`🗑️ Очищено ${dataKeys.length} ключей из localStorage`, 'success');
+                updateStats(0, 0, 0);
+                document.getElementById('stats').style.display = 'none';
+                document.getElementById('progress').style.display = 'none';
+            }
+        });
+
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            const exportData = {};
+            const keys = Object.keys(localStorage);
+            
+            keys.forEach(key => {
+                if (key.endsWith('_data') || key.includes('rb_') || key.includes('pu_')) {
+                    try {
+                        exportData[key] = JSON.parse(localStorage.getItem(key));
+                    } catch (e) {
+                        exportData[key] = localStorage.getItem(key);
+                    }
+                }
+            });
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `budget_export_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            addLog(`💾 Экспорт выполнен: ${Object.keys(exportData).length} таблиц`, 'success');
+        });
+    </script>
+    <script src="shared-nav.js"></script>
+</body>
+</html>

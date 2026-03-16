@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="shared.css">
+    <title>Миграция данных localStorage</title>
+</head>
+<body class="page-util">
+    <div class="container">
+        <h1>🔄 Миграция данных localStorage</h1>
+        
+        <div class="info">
+            <h3>ℹ️ Информация</h3>
+            <p>Данные сохранялись со старыми ключами, а консолидация ищет новые. Эта утилита перенесёт данные на правильные ключи.</p>
+            <p><strong>Старые данные будут удалены после успешного переноса.</strong></p>
+        </div>
+
+        <h3>Будут выполнены следующие миграции:</h3>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
+            <div class="migration-item">svod_rb_* → rb_svod_*</div>
+            <div class="migration-item">income_rb_* → rb_income_*</div>
+            <div class="migration-item">svod_fzp_* → rb_fzp_*</div>
+            <div class="migration-item">kalkulyacia_2026_* → rb_kalkulyacia_*</div>
+            <div class="migration-item">plan_komandir_* → rb_plan_komandir_*</div>
+            <div class="migration-item">svodnaya_rb_* → rb_svodnaya_*</div>
+        </div>
+
+        <p>* - означает almaty, uralsk, astana</p>
+
+        <button onclick="migrateData()">Мигрировать данные</button>
+        <button class="secondary" onclick="window.location.href='index.html'">Вернуться к главной</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function migrateData() {
+            const migrations = [
+                { old: 'svod_rb', new: 'rb_svod' },
+                { old: 'income_rb', new: 'rb_income' },
+                { old: 'svod_fzp', new: 'rb_fzp' },
+                { old: 'kalkulyacia_2026', new: 'rb_kalkulyacia' },
+                { old: 'plan_komandir', new: 'rb_plan_komandir' },
+                { old: 'svodnaya_rb', new: 'rb_svodnaya' }
+            ];
+            
+            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+            const results = [];
+            let totalMigrated = 0;
+            
+            migrations.forEach(migration => {
+                branches.forEach(branch => {
+                    const oldKey = `${migration.old}_${branch}`;
+                    const newKey = `${migration.new}_${branch}`;
+                    
+                    const oldData = localStorage.getItem(oldKey);
+                    
+                    if (oldData) {
+                        // Копируем данные на новый ключ
+                        localStorage.setItem(newKey, oldData);
+                        
+                        // Удаляем старый ключ
+                        localStorage.removeItem(oldKey);
+                        
+                        results.push(`✅ ${oldKey} → ${newKey}`);
+                        totalMigrated++;
+                    }
+                });
+            });
+            
+            // Показываем результат
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            
+            if (totalMigrated > 0) {
+                result.innerHTML = `
+                    <h3>✅ Успешно мигрировано ${totalMigrated} записей</h3>
+                    <p>Детали миграции:</p>
+                    <ul>
+                        ${results.map(r => `<li>${r}</li>`).join('')}
+                    </ul>
+                    <p><strong>Теперь консолидация будет работать правильно!</strong></p>
+                    <p style="color: #856404; background: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 15px;">
+                        ⚠️ Рекомендуется перезагрузить страницы бюджета после миграции.
+                    </p>
+                `;
+            } else {
+                result.innerHTML = `
+                    <h3>ℹ️ Миграция не требуется</h3>
+                    <p>Старых данных не найдено. Возможно, миграция уже была выполнена ранее.</p>
+                `;
+            }
+        }
+    </script>
+    <script src="shared-nav.js"></script>
+</body>
+</html>

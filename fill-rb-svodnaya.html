@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="shared.css">
+    <title>Заполнение rb-svodnaya данными</title>
+</head>
+<body class="page-util">
+    <div class="container">
+        <h1>🎲 Заполнение rb-svodnaya данными</h1>
+        
+        <p>Заполнит таблицу rb-svodnaya случайными данными для всех 3 филиалов</p>
+        
+        <button onclick="fillData()">Заполнить данные</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function random(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        async function fillData() {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            result.innerHTML = '<p>Загрузка структуры...</p>';
+
+            try {
+                // Загружаем JSON со структурой
+                const response = await fetch('svodnaya_sections_full.json');
+                const jsonData = await response.json();
+
+                const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+                
+                branches.forEach(branch => {
+                    const data = {};
+                    
+                    // Проходим по всем разделам и строкам
+                    jsonData.sections.forEach(section => {
+                        section.rows.forEach(row => {
+                            row.data.forEach((cell, colIdx) => {
+                                // Пропускаем пустые ячейки и заголовки
+                                if (cell === "" || colIdx === 0 || colIdx === 1) return;
+                                
+                                const isHeader = row.data[1] === "№ п.п" || row.data[1] === "№ п/п";
+                                const isFormula = colIdx === row.data.length - 1;
+                                const isTextColumn = colIdx === 2; // Наименование
+                                
+                                // Заполняем только числовые ячейки
+                                if (!isHeader && !isFormula && !isTextColumn) {
+                                    const cellId = `sec${section.num}_row${row.idx}_col${colIdx}`;
+                                    // Генерируем разные числа для каждого филиала
+                                    const baseValue = random(1000, 50000);
+                                    const branchMultiplier = {
+                                        'almaty': 1.0,
+                                        'uralsk': 0.7,
+                                        'astana': 0.5,
+                                        'nao': 0.4
+                                    };
+                                    data[cellId] = Math.floor(baseValue * branchMultiplier[branch]);
+                                }
+                            });
+                        });
+                    });
+                    
+                    const key = `rb_svodnaya_${branch}`;
+                    localStorage.setItem(key, JSON.stringify(data));
+                    console.log(`✅ Заполнено ${branch}: ${Object.keys(data).length} ячеек`);
+                });
+
+                result.innerHTML = `
+                    <h3>✅ Готово!</h3>
+                    <p>Данные заполнены для всех 3 филиалов</p>
+                    <p><strong>Алматы:</strong> базовые значения<br>
+                    <strong>Уральск:</strong> 70% от Алматы<br>
+                    <strong>Астана:</strong> 50% от Алматы</p>
+                    <p><a href="rb-svodnaya.html">Открыть rb-svodnaya.html →</a></p>
+                `;
+
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">❌ Ошибка: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+    <script src="shared-nav.js"></script>
+</body>
+</html>

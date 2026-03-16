@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="shared.css">
+    <title>Сводная общая 2026 - Полная версия (572 строки)</title>
+</head>
+<body class="page-rb">
+    <div class="container">
+        <div class="header">
+            <h1>📊 Сводная общая 2026 - Полная версия</h1>
+            <div class="subtitle">ФНАО «Республиканская физико-математическая школа» в г.Алматы<br>
+            Бюджетная программа 004 • Подпрограмма 100 • 13 разделов • 572 строки</div>
+            
+            <div class="branch-selector">
+                <button class="branch-btn active" onclick="switchBranch('almaty')">🏛️ Алматы</button>
+                <button class="branch-btn" onclick="switchBranch('astana')">🏛️ Астана</button>
+                <button class="branch-btn" onclick="switchBranch('uralsk')">🏛️ Уральск</button>
+                <button class="branch-btn" onclick="switchBranch('nao')">🏛️ НАО</button>
+                <button class="branch-btn" onclick="switchBranch('consolidated')">📈 Консолидация</button>
+            </div>
+        </div>
+
+        <div class="info-bar">
+            <div>
+                <strong>Текущий филиал:</strong> <span id="current-branch">Алматы</span>
+            </div>
+            <div class="auto-save-status saved" id="save-status">✅ Сохранено</div>
+        </div>
+        
+        <div class="import-notice" id="import-notice">
+            🔒 Данные импортированы - автоматические формулы консолидации отключены. 
+            Начните редактировать любую ячейку для активации формул.
+        </div>
+
+        <div class="sections-nav">
+            <h3>📑 Быстрая навигация по разделам:</h3>
+            <div id="nav-links"></div>
+        </div>
+
+        <div id="sections-container"></div>
+
+        <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">⬆️ Наверх</button>
+    </div>
+
+    <script>
+        let currentBranch = 'almaty';
+        let saveTimeout = null;
+        let isDataImported = false; // Флаг для отслеживания импортированных данных
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSectionsData();
+            updateImportNotice();
+        });
+        
+        // Обновление отображения уведомления об импорте
+        function updateImportNotice() {
+            const notice = document.getElementById('import-notice');
+            const importFlag = localStorage.getItem('rb_svodnaya_import_flag');
+            
+            if (importFlag === 'true') {
+                notice.classList.add('active');
+            } else {
+                notice.classList.remove('active');
+            }
+        }
+
+        // Загрузка данных разделов
+        async function loadSectionsData() {
+            try {
+                const response = await fetch('svodnaya_sections_full.json');
+                const data = await response.json();
+                
+                // Генерируем навигацию
+                generateNavigation(data.sections);
+                
+                // Генерируем разделы
+                generateSections(data.sections);
+                
+                // Загружаем сохраненные данные
+                loadData();
+                
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+                // Fallback - генерируем пустую структуру
+                generateEmptySections();
+            }
+        }
+
+        // Генерация навигации
+        function generateNavigation(sections) {
+            const navContainer = document.getElementById('nav-links');
+            navContainer.innerHTML = sections.map(sec => 
+                `<a href="#section-${sec.num}" class="section-link">
+                    ${sec.num}. ${sec.title}
+                </a>`
+            ).join('');
+        }
+
+        // Генерация разделов
+        function generateSections(sections) {
+            const container = document.getElementById('sections-container');
+            container.innerHTML = sections.map(sec => `
+                <div class="section-container" id="section-${sec.num}">
+                    <div class="section-header" onclick="toggleSection(${sec.num})">
+                        <h2>${sec.num}. ${sec.title}</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content" id="content-${sec.num}">
+                        ${generateSectionTable(sec)}
+                        <div class="section-footer">
+                            <button class="btn-add-row" onclick="addNewRow(${sec.num})">
+                                ➕ Добавить новую строку
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Генерация таблицы раздела
+        function generateSectionTable(section) {
+            if (!section.rows || section.rows.length === 0) {
+                return '<p style="padding: 20px; color: #7f8c8d;">Нет данных</p>';
+            }
+
+            // Определяем количество столбцов из первой строки
+            const maxCols = Math.max(...section.rows.map(r => r.data.filter(c => c !== "").length));
+            
+            let html = '<table>';
+            
+            section.rows.forEach((row, idx) => {
+                const isHeader = idx === 0 || row.data[1] === "№ п.п" || row.data[1] === "№ п/п" || row.data[1] === "№ ";
+                const isSummary = row.data[2]?.includes("Всего") || row.data[2]?.includes("ИТОГО");
+                const rowId = `sec${section.num}_row${row.idx}`;
+                
+                html += '<tr id="' + rowId + '"' + (isSummary ? ' class="summary-row"' : '') + '>';
+                
+                row.data.forEach((cell, colIdx) => {
+                    if (cell === "") return; // Пропускаем пустые ячейки
+                    
+                    const cellTag = isHeader ? 'th' : 'td';
+                    const cellId = `sec${section.num}_row${row.idx}_col${colIdx}`;
+                    
+                    if (isHeader) {
+                        html += `<${cellTag}>${cell}</${cellTag}>`;
+                    } else {
+                        // Все ячейки теперь редактируемые
+                        html += `<td><input type="text" class="editable-cell" id="${cellId}" 
+                                value="${cell}" 
+                                oninput="handleInput('${cellId}')" 
+                                placeholder="-"></td>`;
+                    }
+                });
+                
+                // Добавляем кнопку удаления для не-заголовочных строк
+                if (!isHeader) {
+                    html += `<td style="width: 60px; text-align: center;">
+                        <button class="btn-delete-row" onclick="deleteRow('${rowId}', ${section.num})" title="Удалить строку">🗑️</button>
+                    </td>`;
+                } else {
+                    html += `<th style="width: 60px;">Действия</th>`;
+                }
+                
+                html += '</tr>';
+            });
+            
+            html += '</table>';
+            return html;
+        }
+
+        // Сворачивание/разворачивание раздела
+        function toggleSection(num) {
+            const header = document.querySelector(`#section-${num} .section-header`);
+            const content = document.getElementById(`content-${num}`);
+            
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+        
+        // Добавление новой строки
+        function addNewRow(sectionNum) {
+            const table = document.querySelector(`#section-${sectionNum} table`);
+            if (!table) return;
+            
+            // Находим последнюю строку (перед футером)
+            const rows = table.querySelectorAll('tr');
+            const lastRow = rows[rows.length - 1];
+            const newRowIndex = rows.length;
+            
+            // Определяем количество столбцов (исключая колонку действий)
+            const headerCells = rows[0].querySelectorAll('th, td');
+            const numCols = headerCells.length - 1; // Минус колонка действий
+            
+            // Создаем новую строку
+            const newRow = document.createElement('tr');
+            const rowId = `sec${sectionNum}_row${newRowIndex}`;
+            newRow.id = rowId;
+            
+            // Добавляем ячейки
+            for (let i = 0; i < numCols; i++) {
+                const td = document.createElement('td');
+                const cellId = `sec${sectionNum}_row${newRowIndex}_col${i}`;
+                td.innerHTML = `<input type="text" class="editable-cell" id="${cellId}" 
+                    value="" 
+                    oninput="handleInput('${cellId}')" 
+                    placeholder="${i === 0 ? '№' : i === 1 ? 'Наименование' : '-'}">`;
+                newRow.appendChild(td);
+            }
+            
+            // Добавляем кнопку удаления
+            const actionTd = document.createElement('td');
+            actionTd.style.width = '60px';
+            actionTd.style.textAlign = 'center';
+            actionTd.innerHTML = `<button class="btn-delete-row" onclick="deleteRow('${rowId}', ${sectionNum})" title="Удалить строку">🗑️</button>`;
+            newRow.appendChild(actionTd);
+            
+            // Вставляем строку перед последней строкой или в конец
+            table.appendChild(newRow);
+            
+            // Фокусируемся на первой ячейке новой строки
+            const firstInput = newRow.querySelector('input');
+            if (firstInput) {
+                firstInput.focus();
+            }
+            
+            console.log(`➕ Добавлена новая строка в раздел ${sectionNum}`);
+        }
+        
+        // Удаление строки
+        function deleteRow(rowId, sectionNum) {
+            if (!confirm('Удалить эту строку?')) return;
+            
+            const row = document.getElementById(rowId);
+            if (row) {
+                // Сохраняем данные всех ячеек строки для удаления из localStorage
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => {
+                    if (input.id) {
+                        localStorage.removeItem(input.id);
+                    }
+                });
+                
+                row.remove();
+                saveData(); // Сохраняем изменения
+                console.log(`🗑️ Удалена строка ${rowId} из раздела ${sectionNum}`);
+            }
+        }
+
+        // Переключение филиала
+        function switchBranch(branch) {
+            // Не сохраняем если текущий режим - консолидация
+            if (currentBranch !== 'consolidated') {
+                saveData();
+            }
+            
+            // Удаляем детали при переключении с консолидации
+            if (currentBranch === 'consolidated' && branch !== 'consolidated') {
+                removeDetailToggles();
+            }
+            
+            currentBranch = branch;
+            
+            // Обновляем кнопки
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Обновляем название филиала
+            const branchNames = {
+                'almaty': 'Алматы',
+                'uralsk': 'Уральск',
+                'astana': 'Астана',
+                'nao': 'НАО',
+                'consolidated': 'Консолидировано'
+            };
+            document.getElementById('current-branch').textContent = branchNames[branch];
+            
+            // Загружаем данные
+            if (branch === 'consolidated') {
+                document.querySelectorAll('input').forEach(input => {
+                    input.disabled = true;
+                });
+                loadConsolidatedData();
+            } else {
+                document.querySelectorAll('input').forEach(input => {
+                    input.disabled = false;
+                });
+                loadData();
+            }
+        }
+
+        // Обработка ввода
+        function handleInput(cellId) {
+            // Сбрасываем флаг импорта при первом ручном редактировании
+            if (isDataImported) {
+                isDataImported = false;
+                localStorage.removeItem('rb_svodnaya_import_flag');
+                console.log('🔓 Флаг импорта сброшен - формулы активированы');
+                updateImportNotice(); // Скрываем уведомление
+            }
+            
+            // Показываем статус сохранения
+            const status = document.getElementById('save-status');
+            status.textContent = '💾 Сохранение...';
+            status.className = 'auto-save-status saving';
+            
+            // Отложенное сохранение (debounce)
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveData();
+                status.textContent = '✅ Сохранено';
+                status.className = 'auto-save-status saved';
+            }, 1000);
+        }
+
+        // Сохранение данных
+        function saveData() {
+            // Не сохраняем в режиме консолидации
+            if (currentBranch === 'consolidated') return;
+            
+            const data = {};
+            
+            // Собираем все input элементы
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                if (input.id) {
+                    data[input.id] = input.value;
+                }
+            });
+            
+            const key = `rb_svodnaya_${currentBranch}`;
+            localStorage.setItem(key, JSON.stringify(data));
+            console.log(`✅ Данные сохранены для ${currentBranch}`);
+        }
+
+        // Загрузка данных
+        function loadData() {
+            const key = `rb_svodnaya_${currentBranch}`;
+            const saved = localStorage.getItem(key);
+            
+            // Проверяем флаг импорта
+            const importFlag = localStorage.getItem('rb_svodnaya_import_flag');
+            if (importFlag === 'true') {
+                isDataImported = true;
+            }
+            
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.keys(data).forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.value = data[id];
+                    }
+                });
+                console.log(`✅ Данные загружены для ${currentBranch}`);
+                
+                if (isDataImported) {
+                    console.log('📥 Данные были импортированы - формулы заблокированы до ручного редактирования');
+                    updateImportNotice(); // Показываем уведомление
+                }
+            }
+        }
+
+        // Загрузка консолидированных данных
+        function loadConsolidatedData() {
+            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+            const allData = {};
+            
+            // Проверяем флаг импорта
+            const importFlag = localStorage.getItem('rb_svodnaya_import_flag');
+            if (importFlag === 'true') {
+                isDataImported = true;
+                console.log('📥 Обнаружен флаг импорта - пропускаем автоматический пересчет консолидации');
+                console.log('ℹ️ Для активации формул начните редактировать любую ячейку');
+                updateImportNotice(); // Показываем уведомление
+                return; // Пропускаем автоматический пересчет
+            }
+            
+            // Загружаем данные всех филиалов
+            branches.forEach(b => {
+                const key = `rb_svodnaya_${b}`;
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    allData[b] = JSON.parse(saved);
+                }
+            });
+            
+            // Сохраняем данные для детализации
+            window.branchDetailsData = allData;
+            
+            // Суммируем только числовые данные
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                if (input.id) {
+                    let sum = 0;
+                    let hasNumericData = false;
+                    
+                    branches.forEach(b => {
+                        if (allData[b] && allData[b][input.id]) {
+                            const value = parseFloat(allData[b][input.id]);
+                            if (!isNaN(value) && value !== 0) {
+                                sum += value;
+                                hasNumericData = true;
+                            }
+                        }
+                    });
+                    
+                    // Обновляем только если есть числовые данные
+                    if (hasNumericData) {
+                        input.value = sum;
+                    }
+                    // Иначе оставляем поле как есть (не трогаем текстовые наименования)
+                }
+            });
+            
+            // Добавляем кнопки раскрытия деталей
+            addDetailToggles();
+            
+            console.log(`✅ Консолидация загружена из ${branches.length} филиалов`);
+        }
+
+        // Генерация пустой структуры (fallback)
+        function generateEmptySections() {
+            const container = document.getElementById('sections-container');
+            container.innerHTML = `
+                <div class="section-container">
+                    <div style="padding: 40px; text-align: center; color: #7f8c8d;">
+                        <h3>⚠️ Не удалось загрузить данные</h3>
+                        <p>Убедитесь, что файл svodnaya_sections_full.json находится в той же папке</p>
+                    </div>
+                </div>
+            `;
+        }
+        function addDetailToggles() {
+            // Удаляем существующие детальные строки и иконки
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+            
+            const dataRows = document.querySelectorAll('table tr');
+            const branches = ['almaty', 'astana', 'uralsk', 'nao'];
+            const branchNames = {
+                'almaty': 'Алматы',
+                'astana': 'Астана',
+                'uralsk': 'Уральск',
+                'nao': 'НАО'
+            };
+            
+            let processedCount = 0;
+            
+            dataRows.forEach((row, index) => {
+                // Ищем вторую ячейку (с названием строки)
+                const labelCell = row.querySelector('td:nth-child(2)');
+                // Ищем input элементы с id (в rb-svodnaya используется id вместо data-cell)
+                const firstInput = row.querySelector('input[type="text"]');
+                
+                const isTotalRow = row.classList.contains('summary-row') || 
+                                   row.textContent.includes('Итого') ||
+                                   row.textContent.includes('ИТОГО') ||
+                                   row.textContent.includes('Всего');
+                
+                const isHeader = row.querySelector('th') !== null;
+                
+                if (labelCell && firstInput && !isTotalRow && !isHeader) {
+                    const rowNum = row.id || `row_${index}`;
+                    
+                    // Проверяем есть ли данные хотя бы в одном филиале для этой строки
+                    const inputs = row.querySelectorAll('input[type="text"]');
+                    let hasData = false;
+                    inputs.forEach(input => {
+                        branches.forEach(b => {
+                            if (window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][input.id]) {
+                                const val = parseFloat(window.branchDetailsData[b][input.id]);
+                                if (!isNaN(val) && val !== 0) {
+                                    hasData = true;
+                                }
+                            }
+                        });
+                    });
+                    
+                    // Пропускаем строки без данных
+                    if (!hasData) return;
+                    
+                    labelCell.classList.add('expandable');
+                    const toggle = document.createElement('span');
+                    toggle.className = 'toggle-detail';
+                    toggle.textContent = '▶';
+                    toggle.dataset.row = rowNum;
+                    
+                    labelCell.insertBefore(toggle, labelCell.firstChild);
+                    
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'detail-row';
+                    detailRow.dataset.row = rowNum;
+                    
+                    // Первая колонка пустая
+                    const emptyCell = document.createElement('td');
+                    emptyCell.style.background = '#f8f9fa';
+                    detailRow.appendChild(emptyCell);
+                    
+                    // Вторая колонка - список филиалов
+                    const branchListCell = document.createElement('td');
+                    branchListCell.className = 'detail-cell';
+                    branchListCell.style.verticalAlign = 'top';
+                    
+                    let branchList = '<div style="padding: 5px 0;">';
+                    branches.forEach(b => {
+                        branchList += `<div style="margin: 5px 0; line-height: 20px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+                    });
+                    branchList += '</div>';
+                    branchListCell.innerHTML = branchList;
+                    detailRow.appendChild(branchListCell);
+                    
+                    // Колонки с данными - для каждого input в строке
+                    inputs.forEach(input => {
+                        const dataCell = document.createElement('td');
+                        dataCell.className = 'detail-cell';
+                        dataCell.style.verticalAlign = 'top';
+                        dataCell.style.textAlign = 'right';
+                        dataCell.style.paddingLeft = '8px';
+                        dataCell.style.paddingRight = '8px';
+                        
+                        let cellData = '<div style="padding: 5px 0;">';
+                        branches.forEach(b => {
+                            const cellId = input.id;
+                            let value = 0;
+                            if (window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId]) {
+                                const val = parseFloat(window.branchDetailsData[b][cellId]);
+                                if (!isNaN(val)) value = val;
+                            }
+                            cellData += `<div style="margin: 5px 0; line-height: 20px; color: #555; font-size: 12px;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                        });
+                        cellData += '</div>';
+                        dataCell.innerHTML = cellData;
+                        detailRow.appendChild(dataCell);
+                    });
+                    
+                    // Колонка действий (пустая)
+                    const actionCell = document.createElement('td');
+                    actionCell.style.background = '#f8f9fa';
+                    detailRow.appendChild(actionCell);
+                    
+                    // Вставляем детальную строку после текущей
+                    row.parentNode.insertBefore(detailRow, row.nextSibling);
+                    
+                    // Обработчик клика на всю ячейку с наименованием
+                    labelCell.addEventListener('click', function(e) {
+                        const toggle = this.querySelector('.toggle-detail');
+                        const detailRow = this.parentElement.nextElementSibling;
+                        
+                        if (detailRow && detailRow.classList.contains('detail-row')) {
+                            detailRow.classList.toggle('show');
+                            toggle.classList.toggle('expanded');
+                        }
+                    });
+                    
+                    processedCount++;
+                }
+            });
+            
+            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+        }
+
+        function removeDetailToggles() {
+            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+            document.querySelectorAll('.detail-row').forEach(row => row.remove());
+            document.querySelectorAll('.expandable').forEach(cell => {
+                cell.classList.remove('expandable');
+            });
+        }
+
+    </script>
+    <script src="shared-nav.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="shared.css">
+    <title>Очистка консолидированных данных</title>
+</head>
+<body class="page-util">
+    <div class="container">
+        <h1>🧹 Очистка консолидированных данных</h1>
+        
+        <div class="info">
+            <h3>⚠️ Внимание!</h3>
+            <p>Эта утилита удалит все ошибочно сохранённые консолидированные данные из localStorage.</p>
+            <p><strong>Данные городов (Алматы, Уральск, Астана) НЕ будут затронуты!</strong></p>
+            <p>Будут удалены только ключи, содержащие "_consolidated"</p>
+        </div>
+
+        <h3>Будут удалены следующие типы данных:</h3>
+        <ul>
+            <li>rb_svod_consolidated</li>
+            <li>rb_income_consolidated</li>
+            <li>rb_fzp_consolidated</li>
+            <li>rb_kalkulyacia_consolidated</li>
+            <li>rb_svodnaya_consolidated</li>
+            <li>rb_plan_komandir_consolidated</li>
+            <li>fot_consolidated</li>
+            <li>pu_svod_2026_consolidated</li>
+            <li>pu_ss_dotacia_consolidated</li>
+            <li>pu_income_pu_consolidated</li>
+            <li>pu_income_dt_consolidated</li>
+            <li>pu_income_dop_consolidated</li>
+            <li>pu_fot_consolidated</li>
+            <li>pu_grafik_consolidated</li>
+            <li>pu_kalkulyacia_consolidated</li>
+            <li>pu_plan_rk_consolidated</li>
+            <li>pu_plan_abroad_consolidated</li>
+        </ul>
+
+        <button onclick="clearConsolidatedData()">Очистить консолидированные данные</button>
+        <button class="secondary" onclick="window.location.href='index.html'">Вернуться к главной</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function clearConsolidatedData() {
+            let count = 0;
+            const keys = [];
+            
+            // Получаем все ключи localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes('_consolidated')) {
+                    keys.push(key);
+                }
+            }
+            
+            // Удаляем найденные ключи
+            keys.forEach(key => {
+                localStorage.removeItem(key);
+                count++;
+            });
+            
+            // Показываем результат
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            
+            if (count > 0) {
+                result.innerHTML = `
+                    <h3>✅ Успешно удалено ${count} записей</h3>
+                    <p>Удалённые ключи:</p>
+                    <ul>
+                        ${keys.map(k => `<li>${k}</li>`).join('')}
+                    </ul>
+                    <p><strong>Теперь консолидация будет работать корректно!</strong></p>
+                `;
+            } else {
+                result.innerHTML = `
+                    <h3>✅ Консолидированных данных не найдено</h3>
+                    <p>localStorage уже чист, ничего удалять не нужно.</p>
+                `;
+            }
+        }
+    </script>
+    <script src="shared-nav.js"></script>
+</body>
+</html>

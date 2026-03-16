@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="shared.css">
+    <title>Полный сброс и перезаполнение</title>
+</head>
+<body class="page-util">
+    <div class="container">
+        <h1>⚠️ Полный сброс и перезаполнение данных</h1>
+        
+        <div class="warning">
+            <h3>🚨 ВНИМАНИЕ!</h3>
+            <p>Эта утилита:</p>
+            <ol>
+                <li>Удалит ВСЕ данные из localStorage (все филиалы, все таблицы)</li>
+                <li>Заполнит таблицы свежими тестовыми данными</li>
+            </ol>
+            <p><strong>Используйте эту утилиту чтобы исправить поврежденные данные после багов с консолидацией!</strong></p>
+        </div>
+
+        <h3>Выберите действие:</h3>
+        <button onclick="resetAndRefill()">🔄 ПОЛНЫЙ СБРОС + ЗАПОЛНЕНИЕ</button>
+        <br><br>
+        <button class="success" onclick="justRefill()">✅ Только заполнение (без удаления)</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function random(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function resetAndRefill() {
+            if (!confirm('ВЫ УВЕРЕНЫ? Это удалит ВСЕ данные!')) {
+                return;
+            }
+
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            result.innerHTML = '<div class="step">Шаг 1: Очистка localStorage...</div>';
+
+            // Очищаем всё
+            localStorage.clear();
+
+            result.innerHTML += '<div class="step">Шаг 2: Заполнение данных...</div>';
+
+            // Заполняем
+            fillAllData();
+
+            result.innerHTML += '<div class="step">✅ Готово! Данные очищены и заполнены заново.</div>';
+        }
+
+        function justRefill() {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            result.innerHTML = '<div class="step">Заполнение данных...</div>';
+
+            fillAllData();
+
+            result.innerHTML += '<div class="step">✅ Готово! Данные заполнены.</div>';
+        }
+
+        function fillAllData() {
+            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+            
+            const rbSheets = [
+                'rb_svod',
+                'rb_income', 
+                'rb_fzp',
+                'rb_kalkulyacia',
+                'rb_svodnaya',
+                'rb_plan_komandir'
+            ];
+
+            const puSheets = [
+                'pu_svod_2026',
+                'pu_ss_dotacia',
+                'pu_income_pu',
+                'pu_income_dt',
+                'pu_income_dop',
+                'pu_fot',
+                'pu_grafik',
+                'pu_kalkulyacia',
+                'pu_plan_rk',
+                'pu_plan_abroad'
+            ];
+
+            const other = ['fot'];
+
+            // Заполняем RB
+            rbSheets.forEach(sheet => {
+                branches.forEach(branch => {
+                    const data = {
+                        branch: branch,
+                        sheet: sheet,
+                        lastModified: new Date().toISOString(),
+                        cells: {}
+                    };
+
+                    // Простые ячейки A1-Z200
+                    const cols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                    for (let row = 1; row <= 200; row++) {
+                        for (let col of cols) {
+                            data.cells[col + row] = random(1000, 50000).toString();
+                        }
+                    }
+
+                    // Двухбуквенные AA-CE50
+                    for (let first of ['A', 'B', 'C']) {
+                        for (let second of cols.slice(0, 5)) {
+                            for (let row = 1; row <= 50; row++) {
+                                data.cells[first + second + row] = random(1000, 50000).toString();
+                            }
+                        }
+                    }
+
+                    const key = `${sheet}_${branch}`;
+                    localStorage.setItem(key, JSON.stringify(data));
+                    console.log(`Заполнено: ${key} (${Object.keys(data.cells).length} ячеек)`);
+                });
+            });
+
+            // Заполняем PU (более простая структура)
+            puSheets.forEach(sheet => {
+                branches.forEach(branch => {
+                    const data = {
+                        branch: branch,
+                        sheet: sheet,
+                        lastModified: new Date().toISOString(),
+                        rows: {}
+                    };
+
+                    // Для PU используем структуру rows
+                    for (let r = 1; r <= 100; r++) {
+                        data.rows[r] = {
+                            cont: random(100, 500),
+                            total: random(10000, 100000)
+                        };
+                        
+                        // Месяцы
+                        for (let m = 1; m <= 12; m++) {
+                            data.rows[r]['m' + m] = random(5000, 20000);
+                        }
+                    }
+
+                    const key = `${sheet}_${branch}`;
+                    localStorage.setItem(key, JSON.stringify(data));
+                    console.log(`Заполнено: ${key} (${Object.keys(data.rows).length} строк)`);
+                });
+            });
+
+            // Заполняем FOT
+            other.forEach(sheet => {
+                branches.forEach(branch => {
+                    const data = {
+                        branch: branch,
+                        sheet: sheet,
+                        lastModified: new Date().toISOString(),
+                        cells: {}
+                    };
+
+                    // Простые ячейки
+                    const cols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                    for (let row = 1; row <= 100; row++) {
+                        for (let col of cols) {
+                            data.cells[col + row] = random(1000, 50000).toString();
+                        }
+                    }
+
+                    const key = `${sheet}_${branch}`;
+                    localStorage.setItem(key, JSON.stringify(data));
+                    console.log(`Заполнено: ${key} (${Object.keys(data.cells).length} ячеек)`);
+                });
+            });
+
+            console.log('✅ Все данные заполнены!');
+        }
+    </script>
+    <script src="shared-nav.js"></script>
+</body>
+</html>
