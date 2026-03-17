@@ -1,454 +1,1107 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="shared.css">
-    <title>Доходная часть ПУ - Бюджет ПУ 2026</title>
-    <script src="editable-table.js"></script>
-</head>
-<body class="page-pu">
-    <div class="container">
-        <div class="header">
-            <h1>Доходная часть ПУ (подушевое обучение)</h1>
-            <p>План поступлений по доходам на 2026 год - филиал г. Алматы</p>
-        </div>
-        
-        <div class="controls">
-            <div class="branch-selector">
-                <button class="branch-btn active" onclick="switchBranch('almaty')">Алматы</button>
-                <button class="branch-btn" onclick="switchBranch('astana')">Астана</button>
-                <button class="branch-btn" onclick="switchBranch('uralsk')">Уральск</button>
-                <button class="branch-btn" onclick="switchBranch('nao')">НАО</button>
-                <button class="branch-btn" onclick="switchBranch('consolidated')">Консолидация</button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="shared.css" />
+        <title>Доходная часть ПУ - Бюджет ПУ 2026</title>
+        <script src="editable-table.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+    </head>
+    <body class="page-pu">
+        <div class="container">
+            <div class="header">
+                <h1>Доходная часть ПУ (подушевое обучение)</h1>
+                <p>
+                    План поступлений по доходам на 2026 год - филиал г. Алматы
+                </p>
             </div>
-            <div class="save-status" id="saveStatus">Сохранено</div>
-        </div>
-        
-        <div class="content">
-            <a href="index.html" class="back-link">< Вернуться к списку</a>
-            
-            <div class="budget-table-wrapper">
-                <table id="budgetTable">
-                    <thead>
-                        <tr>
-                            <th class="num-col">№</th>
-                            <th class="name-col">Наименование</th>
-                            <th class="class-col">Классы</th>
-                            <th class="contingent-col">Контингент</th>
-                            <th class="month-col">Январь</th>
-                            <th class="month-col">Февраль</th>
-                            <th class="month-col">Март</th>
-                            <th class="month-col">Апрель</th>
-                            <th class="month-col">Май</th>
-                            <th class="month-col">Июнь</th>
-                            <th class="month-col">Июль</th>
-                            <th class="month-col">Август</th>
-                            <th class="month-col">Сентябрь</th>
-                            <th class="month-col">Октябрь</th>
-                            <th class="month-col">Ноябрь</th>
-                            <th class="month-col">Декабрь</th>
-                            <th class="month-col">Итого</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr>
-                            <td class="num-col">1</td>
-                            <td>Тариф ДОТ "РФМШ" в г Алматы</td>
-                            <td>менее класс 7 кл</td>
-                            <td><input type="number" id="row-1-cont" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m1" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m2" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m3" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m4" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m5" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m6" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m7" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m8" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m9" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m10" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m11" value="0" oninput="updateRow(1)"></td>
-                            <td><input type="number" id="row-1-m12" value="0" oninput="updateRow(1)"></td>
-                            <td class="formula-cell" id="row-1-total">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class="num-col">2</td>
-                            <td>Тариф ДОТ "РФМШ" в г Алматы</td>
-                            <td>7 классы</td>
-                            <td><input type="number" id="row-2-cont" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m1" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m2" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m3" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m4" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m5" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m6" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m7" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m8" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m9" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m10" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m11" value="0" oninput="updateRow(2)"></td>
-                            <td><input type="number" id="row-2-m12" value="0" oninput="updateRow(2)"></td>
-                            <td class="formula-cell" id="row-2-total">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class="num-col">3</td>
-                            <td>Тариф ДОТ "РФМШ" в г Алматы</td>
-                            <td>с 8 по 11 кл</td>
-                            <td><input type="number" id="row-3-cont" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m1" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m2" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m3" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m4" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m5" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m6" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m7" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m8" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m9" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m10" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m11" value="0" oninput="updateRow(3)"></td>
-                            <td><input type="number" id="row-3-m12" value="0" oninput="updateRow(3)"></td>
-                            <td class="formula-cell" id="row-3-total">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class="num-col">4</td>
-                            <td>Тариф ДОТ "РФМШ" в г Алматы вечерняя подгруппа</td>
-                            <td>с 8 по 11 кл</td>
-                            <td><input type="number" id="row-4-cont" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m1" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m2" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m3" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m4" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m5" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m6" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m7" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m8" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m9" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m10" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m11" value="0" oninput="updateRow(4)"></td>
-                            <td><input type="number" id="row-4-m12" value="0" oninput="updateRow(4)"></td>
-                            <td class="formula-cell" id="row-4-total">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class="num-col">5</td>
-                            <td>Тариф ДОТ "РФМШ" в г Алматы вечерний формат</td>
-                            <td>с 8 по 11 кл</td>
-                            <td><input type="number" id="row-5-cont" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m1" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m2" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m3" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m4" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m5" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m6" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m7" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m8" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m9" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m10" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m11" value="0" oninput="updateRow(5)"></td>
-                            <td><input type="number" id="row-5-m12" value="0" oninput="updateRow(5)"></td>
-                            <td class="formula-cell" id="row-5-total">0.00</td>
-                        </tr>
-                        <tr class="total-row">
-                            <td colspan="3"><strong>Итого по доходам</strong></td>
-                            <td class="formula-cell" id="total-cont">0</td>
-                            <td class="formula-cell" id="total-m1">0.00</td>
-                            <td class="formula-cell" id="total-m2">0.00</td>
-                            <td class="formula-cell" id="total-m3">0.00</td>
-                            <td class="formula-cell" id="total-m4">0.00</td>
-                            <td class="formula-cell" id="total-m5">0.00</td>
-                            <td class="formula-cell" id="total-m6">0.00</td>
-                            <td class="formula-cell" id="total-m7">0.00</td>
-                            <td class="formula-cell" id="total-m8">0.00</td>
-                            <td class="formula-cell" id="total-m9">0.00</td>
-                            <td class="formula-cell" id="total-m10">0.00</td>
-                            <td class="formula-cell" id="total-m11">0.00</td>
-                            <td class="formula-cell" id="total-m12">0.00</td>
-                            <td class="formula-cell" id="grand-total">0.00</td>
-                        </tr>
-                    </tbody>
-                </table>
+
+            <div class="controls">
+                <div class="branch-selector">
+                    <button
+                        class="branch-btn active"
+                        onclick="switchBranch('nao')"
+                    >
+                        НАО «РФМШ»
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('almaty')">
+                        Алматы
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('astana')">
+                        Астана
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('uralsk')">
+                        Уральск
+                    </button>
+                    <button
+                        class="branch-btn"
+                        onclick="switchBranch('consolidated')"
+                    >
+                        Консолидация
+                    </button>
+                </div>
+                <div
+                    style="
+                        display: flex;
+                        gap: 8px;
+                        flex-wrap: wrap;
+                        align-items: center;
+                    "
+                >
+                    <button
+                        onclick="
+                            SharedExport.exportTableToExcel({
+                                title: document.title,
+                            })
+                        "
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📥 Excel
+                    </button>
+                    <button
+                        onclick="SharedExport.exportToPDF()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📄 PDF
+                    </button>
+                    <button
+                        onclick="window.print()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        🖨️ Печать
+                    </button>
+                </div>
+                <div
+                    style="
+                        display: flex;
+                        gap: 8px;
+                        flex-wrap: wrap;
+                        align-items: center;
+                    "
+                >
+                    <button
+                        onclick="
+                            SharedExport.exportTableToExcel({
+                                title: document.title,
+                            })
+                        "
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📥 Excel
+                    </button>
+                    <button
+                        onclick="SharedExport.exportToPDF()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📄 PDF
+                    </button>
+                    <button
+                        onclick="window.print()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        🖨️ Печать
+                    </button>
+                </div>
+                <div class="save-status" id="saveStatus">Сохранено</div>
+            </div>
+
+            <div class="content">
+                <a href="index.html" class="back-link">← Вернуться к списку</a>
+
+                <div class="budget-table-wrapper">
+                    <table id="budgetTable">
+                        <thead>
+                            <tr>
+                                <th class="num-col">№</th>
+                                <th class="name-col">Наименование</th>
+                                <th class="class-col">Классы</th>
+                                <th class="contingent-col">Контингент</th>
+                                <th class="month-col">Январь</th>
+                                <th class="month-col">Февраль</th>
+                                <th class="month-col">Март</th>
+                                <th class="month-col">Апрель</th>
+                                <th class="month-col">Май</th>
+                                <th class="month-col">Июнь</th>
+                                <th class="month-col">Июль</th>
+                                <th class="month-col">Август</th>
+                                <th class="month-col">Сентябрь</th>
+                                <th class="month-col">Октябрь</th>
+                                <th class="month-col">Ноябрь</th>
+                                <th class="month-col">Декабрь</th>
+                                <th class="month-col">Итого</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td class="num-col">1</td>
+                                <td>Тариф ДОТ "РФМШ" в г Алматы</td>
+                                <td>менее класс 7 кл</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-cont"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m1"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m2"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m3"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m4"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m5"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m6"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m7"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m8"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m9"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m10"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m11"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-1-m12"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="row-1-total">
+                                    0.00
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="num-col">2</td>
+                                <td>Тариф ДОТ "РФМШ" в г Алматы</td>
+                                <td>7 классы</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-cont"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m1"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m2"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m3"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m4"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m5"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m6"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m7"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m8"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m9"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m10"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m11"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-2-m12"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="row-2-total">
+                                    0.00
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="num-col">3</td>
+                                <td>Тариф ДОТ "РФМШ" в г Алматы</td>
+                                <td>с 8 по 11 кл</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-cont"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m1"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m2"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m3"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m4"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m5"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m6"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m7"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m8"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m9"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m10"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m11"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-3-m12"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="row-3-total">
+                                    0.00
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="num-col">4</td>
+                                <td>
+                                    Тариф ДОТ "РФМШ" в г Алматы вечерняя
+                                    подгруппа
+                                </td>
+                                <td>с 8 по 11 кл</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-cont"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m1"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m2"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m3"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m4"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m5"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m6"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m7"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m8"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m9"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m10"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m11"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-4-m12"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="row-4-total">
+                                    0.00
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="num-col">5</td>
+                                <td>
+                                    Тариф ДОТ "РФМШ" в г Алматы вечерний формат
+                                </td>
+                                <td>с 8 по 11 кл</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-cont"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m1"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m2"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m3"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m4"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m5"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m6"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m7"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m8"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m9"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m10"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m11"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="row-5-m12"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="row-5-total">
+                                    0.00
+                                </td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="3">
+                                    <strong>Итого по доходам</strong>
+                                </td>
+                                <td class="formula-cell" id="total-cont">0</td>
+                                <td class="formula-cell" id="total-m1">0.00</td>
+                                <td class="formula-cell" id="total-m2">0.00</td>
+                                <td class="formula-cell" id="total-m3">0.00</td>
+                                <td class="formula-cell" id="total-m4">0.00</td>
+                                <td class="formula-cell" id="total-m5">0.00</td>
+                                <td class="formula-cell" id="total-m6">0.00</td>
+                                <td class="formula-cell" id="total-m7">0.00</td>
+                                <td class="formula-cell" id="total-m8">0.00</td>
+                                <td class="formula-cell" id="total-m9">0.00</td>
+                                <td class="formula-cell" id="total-m10">
+                                    0.00
+                                </td>
+                                <td class="formula-cell" id="total-m11">
+                                    0.00
+                                </td>
+                                <td class="formula-cell" id="total-m12">
+                                    0.00
+                                </td>
+                                <td class="formula-cell" id="grand-total">
+                                    0.00
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        const SHEET_KEY = 'pu_income_pu';
-        const ROWS = 5;
-        let currentBranch = 'almaty';
-        let saveTimeout;
+        <script>
+            const SHEET_KEY = "pu_income_pu";
+            const ROWS = 5;
+            let currentBranch = "nao";
+            let saveTimeout;
 
-        function updateRow(rowNum) {
-            let rowTotal = 0;
-            for (let m = 1; m <= 12; m++) {
-                const val = parseFloat(document.getElementById(`row-${rowNum}-m${m}`).value) || 0;
-                rowTotal += val;
-            }
-            document.getElementById(`row-${rowNum}-total`).textContent = rowTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            
-            updateTotals();
-            scheduleAutoSave();
-        }
-
-        function updateTotals() {
-            let totalCont = 0;
-            let monthTotals = Array(12).fill(0);
-            let grandTotal = 0;
-            
-            for (let r = 1; r <= ROWS; r++) {
-                const cont = parseFloat(document.getElementById(`row-${r}-cont`).value) || 0;
-                totalCont += cont;
-                
+            function updateRow(rowNum) {
+                let rowTotal = 0;
                 for (let m = 1; m <= 12; m++) {
-                    const val = parseFloat(document.getElementById(`row-${r}-m${m}`).value) || 0;
-                    monthTotals[m-1] += val;
-                    grandTotal += val;
+                    const val =
+                        parseFloat(
+                            document.getElementById(`row-${rowNum}-m${m}`)
+                                .value,
+                        ) || 0;
+                    rowTotal += val;
                 }
-            }
-            
-            document.getElementById('total-cont').textContent = totalCont;
-            for (let m = 1; m <= 12; m++) {
-                document.getElementById(`total-m${m}`).textContent = monthTotals[m-1].toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            }
-            document.getElementById('grand-total').textContent = grandTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        }
+                document.getElementById(`row-${rowNum}-total`).textContent =
+                    rowTotal.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
 
-        function scheduleAutoSave() {
-            document.getElementById('saveStatus').textContent = 'Сохраняю...';
-            document.getElementById('saveStatus').style.background = '#fff3cd';
-            document.getElementById('saveStatus').style.color = '#856404';
-            
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                saveData();
-            }, 1000);
-        }
-
-        function saveData() {
-            // Не сохранять в режиме консолидации
-            if (currentBranch === 'consolidated') return;
-            
-            const data = { rows: {} };
-            
-            for (let r = 1; r <= ROWS; r++) {
-                data.rows[r] = {
-                    cont: document.getElementById(`row-${r}-cont`).value
-                };
-                for (let m = 1; m <= 12; m++) {
-                    data.rows[r][`m${m}`] = document.getElementById(`row-${r}-m${m}`).value;
-                }
+                updateTotals();
+                scheduleAutoSave();
             }
-            
-            localStorage.setItem(`${SHEET_KEY}_${currentBranch}`, JSON.stringify(data));
-            
-            document.getElementById('saveStatus').textContent = 'Сохранено';
-            document.getElementById('saveStatus').style.background = '#d4edda';
-            document.getElementById('saveStatus').style.color = '#155724';
-        }
 
-        function loadData() {
-            const saved = localStorage.getItem(`${SHEET_KEY}_${currentBranch}`);
-            
-            // Рассчитываем все поля
-            for (let r = 1; r <= ROWS; r++) {
-                document.getElementById(`row-${r}-cont`).disabled = false;
-                document.getElementById(`row-${r}-cont`).value = '';
-                for (let m = 1; m <= 12; m++) {
-                    document.getElementById(`row-${r}-m${m}`).disabled = false;
-                    document.getElementById(`row-${r}-m${m}`).value = '';
-                }
-            }
-            
-            if (saved) {
-                const data = JSON.parse(saved);
+            function updateTotals() {
+                let totalCont = 0;
+                let monthTotals = Array(12).fill(0);
+                let grandTotal = 0;
+
                 for (let r = 1; r <= ROWS; r++) {
-                    if (data.rows && data.rows[r]) {
-                        document.getElementById(`row-${r}-cont`).value = data.rows[r].cont || '';
-                        for (let m = 1; m <= 12; m++) {
-                            document.getElementById(`row-${r}-m${m}`).value = data.rows[r][`m${m}`] || '';
+                    const cont =
+                        parseFloat(
+                            document.getElementById(`row-${r}-cont`).value,
+                        ) || 0;
+                    totalCont += cont;
+
+                    for (let m = 1; m <= 12; m++) {
+                        const val =
+                            parseFloat(
+                                document.getElementById(`row-${r}-m${m}`).value,
+                            ) || 0;
+                        monthTotals[m - 1] += val;
+                        grandTotal += val;
+                    }
+                }
+
+                document.getElementById("total-cont").textContent = totalCont;
+                for (let m = 1; m <= 12; m++) {
+                    document.getElementById(`total-m${m}`).textContent =
+                        monthTotals[m - 1].toLocaleString("ru-RU", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                        });
+                }
+                document.getElementById("grand-total").textContent =
+                    grandTotal.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
+            }
+
+            function scheduleAutoSave() {
+                document.getElementById("saveStatus").textContent =
+                    "Сохраняю...";
+                document.getElementById("saveStatus").style.background =
+                    "#fff3cd";
+                document.getElementById("saveStatus").style.color = "#856404";
+
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveData();
+                }, 1000);
+            }
+
+            function saveData() {
+                // Не сохранять в режиме консолидации
+                if (currentBranch === "consolidated") return;
+
+                const data = { rows: {} };
+
+                for (let r = 1; r <= ROWS; r++) {
+                    data.rows[r] = {
+                        cont: document.getElementById(`row-${r}-cont`).value,
+                    };
+                    for (let m = 1; m <= 12; m++) {
+                        data.rows[r][`m${m}`] = document.getElementById(
+                            `row-${r}-m${m}`,
+                        ).value;
+                    }
+                }
+
+                localStorage.setItem(
+                    `${SHEET_KEY}_${currentBranch}`,
+                    JSON.stringify(data),
+                );
+
+                document.getElementById("saveStatus").textContent = "Сохранено";
+                document.getElementById("saveStatus").style.background =
+                    "#d4edda";
+                document.getElementById("saveStatus").style.color = "#155724";
+            }
+
+            function loadData() {
+                const saved = localStorage.getItem(
+                    `${SHEET_KEY}_${currentBranch}`,
+                );
+
+                // Рассчитываем все поля
+                for (let r = 1; r <= ROWS; r++) {
+                    document.getElementById(`row-${r}-cont`).disabled = false;
+                    document.getElementById(`row-${r}-cont`).value = "";
+                    for (let m = 1; m <= 12; m++) {
+                        document.getElementById(`row-${r}-m${m}`).disabled =
+                            false;
+                        document.getElementById(`row-${r}-m${m}`).value = "";
+                    }
+                }
+
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    for (let r = 1; r <= ROWS; r++) {
+                        if (data.rows && data.rows[r]) {
+                            document.getElementById(`row-${r}-cont`).value =
+                                data.rows[r].cont || "";
+                            for (let m = 1; m <= 12; m++) {
+                                document.getElementById(
+                                    `row-${r}-m${m}`,
+                                ).value = data.rows[r][`m${m}`] || "";
+                            }
                         }
                     }
                 }
-            }
-            
-            updateTotals();
-        }
 
-        function switchBranch(newBranch) {
-            if (currentBranch !== 'consolidated' && currentBranch !== newBranch) {
-                saveData();
+                updateTotals();
             }
-            currentBranch = newBranch;
-            document.querySelectorAll('.branch-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            if (currentBranch === 'consolidated') {
-                loadConsolidatedData();
-            } else {
-                document.querySelectorAll('input').forEach(input => {
-                    input.disabled = false;
-                });
-                loadData();
-            }
-        }
 
-        function loadConsolidatedData() {
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const consolidated = { rows: {} };
-            
-            // Форматирование для вывода
-            for (let r = 1; r <= ROWS; r++) {
-                consolidated.rows[r] = { cont: 0 };
-                for (let m = 1; m <= 12; m++) {
-                    consolidated.rows[r][`m${m}`] = 0;
+            function switchBranch(newBranch) {
+                if (
+                    currentBranch !== "consolidated" &&
+                    currentBranch !== newBranch
+                ) {
+                    saveData();
+                }
+                currentBranch = newBranch;
+                document
+                    .querySelectorAll(".branch-btn")
+                    .forEach((btn) => btn.classList.remove("active"));
+                event.target.classList.add("active");
+                if (currentBranch === "consolidated") {
+                    loadConsolidatedData();
+                } else {
+                    document.querySelectorAll("input").forEach((input) => {
+                        input.disabled = false;
+                    });
+                    loadData();
                 }
             }
-            
-            // Обновляем данные по всем разделам
-            branches.forEach(b => {
-                const key = `${SHEET_KEY}_${b}`;
-                const saved = localStorage.getItem(key);
-                if (saved) {
-                    try {
-                        const data = JSON.parse(saved);
-                        if (data.rows) {
-                            for (let r = 1; r <= ROWS; r++) {
-                                if (data.rows[r]) {
-                                    consolidated.rows[r].cont += parseFloat(data.rows[r].cont) || 0;
-                                    for (let m = 1; m <= 12; m++) {
-                                        consolidated.rows[r][`m${m}`] += parseFloat(data.rows[r][`m${m}`]) || 0;
+
+            function loadConsolidatedData() {
+                const branches = ["almaty", "uralsk", "astana", "nao"];
+                const consolidated = { rows: {} };
+
+                // Форматирование для вывода
+                for (let r = 1; r <= ROWS; r++) {
+                    consolidated.rows[r] = { cont: 0 };
+                    for (let m = 1; m <= 12; m++) {
+                        consolidated.rows[r][`m${m}`] = 0;
+                    }
+                }
+
+                // Обновляем данные по всем разделам
+                branches.forEach((b) => {
+                    const key = `${SHEET_KEY}_${b}`;
+                    const saved = localStorage.getItem(key);
+                    if (saved) {
+                        try {
+                            const data = JSON.parse(saved);
+                            if (data.rows) {
+                                for (let r = 1; r <= ROWS; r++) {
+                                    if (data.rows[r]) {
+                                        consolidated.rows[r].cont +=
+                                            parseFloat(data.rows[r].cont) || 0;
+                                        for (let m = 1; m <= 12; m++) {
+                                            consolidated.rows[r][`m${m}`] +=
+                                                parseFloat(
+                                                    data.rows[r][`m${m}`],
+                                                ) || 0;
+                                        }
                                     }
                                 }
                             }
+                        } catch (e) {
+                            console.error("Error loading " + b, e);
                         }
-                    } catch (e) { console.error('Error loading ' + b, e); }
+                    }
+                });
+
+                // Обновляем свод в интерфейсе ПУ
+                for (let r = 1; r <= ROWS; r++) {
+                    document.getElementById(`row-${r}-cont`).value =
+                        consolidated.rows[r].cont;
+                    document.getElementById(`row-${r}-cont`).disabled = true;
+                    for (let m = 1; m <= 12; m++) {
+                        document.getElementById(`row-${r}-m${m}`).value =
+                            consolidated.rows[r][`m${m}`];
+                        document.getElementById(`row-${r}-m${m}`).disabled =
+                            true;
+                    }
                 }
-            });
-            
-            // Обновляем свод в интерфейсе ПУ
-            for (let r = 1; r <= ROWS; r++) {
-                document.getElementById(`row-${r}-cont`).value = consolidated.rows[r].cont;
-                document.getElementById(`row-${r}-cont`).disabled = true;
-                for (let m = 1; m <= 12; m++) {
-                    document.getElementById(`row-${r}-m${m}`).value = consolidated.rows[r][`m${m}`];
-                    document.getElementById(`row-${r}-m${m}`).disabled = true;
-                }
+
+                updateTotals();
             }
-            
-            updateTotals();
-        }
 
-        window.addEventListener('load', () => {
-            loadData();
-        });
-    </script>
-    <script>
-        // НЕ инициализируем редактируемые таблицы - структура уже готова
-            console.log(' Таблица готова к работе');
-        });
-        function addDetailToggles() {
-            // Удаляем существующие детальные строки и иконки
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
-            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
-            
-            const dataRows = document.querySelectorAll('tbody tr');
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const branchNames = {
-                'almaty': 'Алматы',
-                'uralsk': 'Уральск',
-                'astana': 'Астана',
-                'nao': 'НАО'
-            };
-            
-            let processedCount = 0;
-            
-            dataRows.forEach((row, index) => {
-                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
-                const firstInput = row.querySelector('input[data-cell]');
-                
-                const isTotalRow = row.classList.contains('total-row') || 
-                                   row.textContent.includes('Итого') ||
-                                   row.textContent.includes('ИТОГО');
-                
-                if (labelCell && firstInput && !isTotalRow) {
-                    const rowNum = firstInput.dataset.row || index;
-                    
-                    labelCell.classList.add('expandable');
-                    const toggle = document.createElement('span');
-                    toggle.className = 'toggle-detail';
-                    toggle.textContent = '▶';
-                    toggle.dataset.row = rowNum;
-                    
-                    labelCell.insertBefore(toggle, labelCell.firstChild);
-                    
-                    const detailRow = document.createElement('tr');
-                    detailRow.className = 'detail-row';
-                    detailRow.dataset.row = rowNum;
-                    
-                    const emptyCell = document.createElement('td');
-                    emptyCell.style.background = '#f8f9fa';
-                    detailRow.appendChild(emptyCell);
-                    
-                    const branchListCell = document.createElement('td');
-                    branchListCell.className = 'detail-cell';
-                    branchListCell.style.verticalAlign = 'top';
-                    
-                    let branchList = '<div style="padding: 5px 0;">';
-                    branches.forEach(b => {
-                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
-                    });
-                    branchList += '</div>';
-                    branchListCell.innerHTML = branchList;
-                    detailRow.appendChild(branchListCell);
-                    
-                    const inputs = row.querySelectorAll('input[data-cell]');
-                    inputs.forEach(input => {
-                        const yearCell = document.createElement('td');
-                        yearCell.className = 'detail-cell';
-                        yearCell.style.verticalAlign = 'top';
-                        yearCell.style.textAlign = 'right';
-                        
-                        let yearData = '<div style="padding: 5px 0;">';
+            window.addEventListener("load", () => {
+                loadData();
+            });
+        </script>
+        <script>
+            // НЕ инициализируем редактируемые таблицы - структура уже готова
+                console.log(' Таблица готова к работе');
+            });
+            function addDetailToggles() {
+                // Удаляем существующие детальные строки и иконки
+                document.querySelectorAll('.detail-row').forEach(row => row.remove());
+                document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+                document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+
+                const dataRows = document.querySelectorAll('tbody tr');
+                const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+                const branchNames = {
+                    'almaty': 'Алматы',
+                    'uralsk': 'Уральск',
+                    'astana': 'Астана',
+                    'nao': 'НАО «РФМШ»'
+                };
+
+                let processedCount = 0;
+
+                dataRows.forEach((row, index) => {
+                    const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
+                    const firstInput = row.querySelector('input[data-cell]');
+
+                    const isTotalRow = row.classList.contains('total-row') ||
+                                       row.textContent.includes('Итого') ||
+                                       row.textContent.includes('ИТОГО');
+
+                    if (labelCell && firstInput && !isTotalRow) {
+                        const rowNum = firstInput.dataset.row || index;
+
+                        labelCell.classList.add('expandable');
+                        const toggle = document.createElement('span');
+                        toggle.className = 'toggle-detail';
+                        toggle.textContent = '▶';
+                        toggle.dataset.row = rowNum;
+
+                        labelCell.insertBefore(toggle, labelCell.firstChild);
+
+                        const detailRow = document.createElement('tr');
+                        detailRow.className = 'detail-row';
+                        detailRow.dataset.row = rowNum;
+
+                        const emptyCell = document.createElement('td');
+                        emptyCell.style.background = '#f8f9fa';
+                        detailRow.appendChild(emptyCell);
+
+                        const branchListCell = document.createElement('td');
+                        branchListCell.className = 'detail-cell';
+                        branchListCell.style.verticalAlign = 'top';
+
+                        let branchList = '<div style="padding: 5px 0;">';
                         branches.forEach(b => {
-                            const cellId = input.dataset.cell;
-                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
-                                ? parseFloat(window.branchDetailsData[b][cellId]) 
-                                : 0;
-                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                            branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
                         });
-                        yearData += '</div>';
-                        yearCell.innerHTML = yearData;
-                        detailRow.appendChild(yearCell);
-                    });
-                    
-                    row.parentNode.insertBefore(detailRow, row.nextSibling);
-                    
-                    labelCell.addEventListener('click', function(e) {
-                        const toggle = this.querySelector('.toggle-detail');
-                        const detailRow = this.parentElement.nextElementSibling;
-                        
-                        if (detailRow && detailRow.classList.contains('detail-row')) {
-                            detailRow.classList.toggle('show');
-                            toggle.classList.toggle('expanded');
-                        }
-                    });
-                    
-                    processedCount++;
-                }
-            });
-            
-            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
-        }
+                        branchList += '</div>';
+                        branchListCell.innerHTML = branchList;
+                        detailRow.appendChild(branchListCell);
 
-        function removeDetailToggles() {
-            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.expandable').forEach(cell => {
-                cell.classList.remove('expandable');
-            });
-        }
+                        const inputs = row.querySelectorAll('input[data-cell]');
+                        inputs.forEach(input => {
+                            const yearCell = document.createElement('td');
+                            yearCell.className = 'detail-cell';
+                            yearCell.style.verticalAlign = 'top';
+                            yearCell.style.textAlign = 'right';
 
-    </script>
-    <script src="shared-nav.js"></script>
-</body>
+                            let yearData = '<div style="padding: 5px 0;">';
+                            branches.forEach(b => {
+                                const cellId = input.dataset.cell;
+                                const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId]
+                                    ? parseFloat(window.branchDetailsData[b][cellId])
+                                    : 0;
+                                yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                            });
+                            yearData += '</div>';
+                            yearCell.innerHTML = yearData;
+                            detailRow.appendChild(yearCell);
+                        });
+
+                        row.parentNode.insertBefore(detailRow, row.nextSibling);
+
+                        labelCell.addEventListener('click', function(e) {
+                            const toggle = this.querySelector('.toggle-detail');
+                            const detailRow = this.parentElement.nextElementSibling;
+
+                            if (detailRow && detailRow.classList.contains('detail-row')) {
+                                detailRow.classList.toggle('show');
+                                toggle.classList.toggle('expanded');
+                            }
+                        });
+
+                        processedCount++;
+                    }
+                });
+
+                console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+            }
+
+            function removeDetailToggles() {
+                document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+                document.querySelectorAll('.detail-row').forEach(row => row.remove());
+                document.querySelectorAll('.expandable').forEach(cell => {
+                    cell.classList.remove('expandable');
+                });
+            }
+        </script>
+        <script src="shared-nav.js"></script>
+    </body>
 </html>
-
-

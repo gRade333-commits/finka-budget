@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +6,10 @@
     <link rel="stylesheet" href="shared.css">
     <title>Свод ФОТ Алматы - Бюджет ПУ 2026</title>
     <script src="editable-table.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="shared-export.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="shared-export.js"></script>
 </head>
 <body class="page-pu">
     <div class="container">
@@ -15,11 +19,21 @@
         </div>
         <div class="controls">
             <div class="branch-selector">
-                <button class="branch-btn active" onclick="switchBranch('almaty')">Алматы</button>
+                <button class="branch-btn active" onclick="switchBranch('nao')">НАО «РФМШ»</button>
+                <button class="branch-btn" onclick="switchBranch('almaty')">Алматы</button>
                 <button class="branch-btn" onclick="switchBranch('astana')">Астана</button>
                 <button class="branch-btn" onclick="switchBranch('uralsk')">Уральск</button>
-                <button class="branch-btn" onclick="switchBranch('nao')">НАО</button>
                 <button class="branch-btn" onclick="switchBranch('consolidated')">Консолидация</button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                <button onclick="SharedExport.exportTableToExcel({title:document.title})" style="padding:6px 14px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:13px">📥 Excel</button>
+                <button onclick="SharedExport.exportToPDF()" style="padding:6px 14px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:13px">📄 PDF</button>
+                <button onclick="window.print()" style="padding:6px 14px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:13px">🖨️ Печать</button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                <button onclick="SharedExport.exportTableToExcel({title:document.title})" style="padding:6px 14px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:13px">📥 Excel</button>
+                <button onclick="SharedExport.exportToPDF()" style="padding:6px 14px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:13px">📄 PDF</button>
+                <button onclick="window.print()" style="padding:6px 14px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:13px">🖨️ Печать</button>
             </div>
             <div class="save-status" id="saveStatus">Сохранено</div>
         </div>
@@ -51,7 +65,7 @@
     </div>
     <script>
         const KEY = 'pu_fot_almaty';
-        let branch = 'almaty';
+        let branch = 'nao';
         let timeout;
         function calc() {
             let sum = 0;
@@ -144,7 +158,7 @@
                 'almaty': 'Алматы',
                 'uralsk': 'Уральск',
                 'astana': 'Астана',
-                'nao': 'НАО'
+                'nao': 'НАО «РФМШ»'
             };
             
             let processedCount = 0;

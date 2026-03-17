@@ -47,10 +47,10 @@
     --c-gray-900: #111827;
 
     /* Shadows */
-    --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
-    --shadow-sm: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
-    --shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, .05);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .06);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -1px rgba(0, 0, 0, .06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);
 
     /* Misc */
     --radius: 8px;
@@ -59,13 +59,17 @@
 }
 
 /* ── Global Base ───────────────────────────────────────────────── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-html { scroll-behavior: smooth; }
+html {
+    scroll-behavior: smooth;
+}
 
 body {
     font-family: var(--font) !important;
@@ -75,10 +79,23 @@ body {
 }
 
 /* ── Custom Scrollbar ──────────────────────────────────────────── */
-::-webkit-scrollbar { width: 7px; height: 7px; }
-::-webkit-scrollbar-track { background: var(--c-gray-100); }
-::-webkit-scrollbar-thumb { background: var(--c-gray-300); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--c-gray-400); }
+::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--c-gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--c-gray-300);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--c-gray-400);
+}
 
 /* ── Top Navigation Bar ────────────────────────────────────────── */
 .finka-nav {
@@ -90,7 +107,7 @@ body {
     background: var(--c-brand);
     color: #fff;
     z-index: 9999;
-    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
     user-select: none;
 }
 
@@ -162,12 +179,12 @@ body {
 
 .finka-nav-btn:hover {
     color: #fff;
-    background: rgba(255,255,255,.1);
+    background: rgba(255, 255, 255, .1);
 }
 
 .finka-nav-item.active .finka-nav-btn {
     color: #fff;
-    background: rgba(255,255,255,.12);
+    background: rgba(255, 255, 255, .12);
 }
 
 .finka-arrow {
@@ -188,7 +205,7 @@ body {
     min-width: 260px;
     background: #fff;
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0,0,0,.05);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 0, 0, .05);
     padding: 6px;
     opacity: 0;
     visibility: hidden;
@@ -249,7 +266,7 @@ body {
     align-items: center;
     gap: 6px;
     padding: 5px 12px;
-    background: rgba(255,255,255,.08);
+    background: rgba(255, 255, 255, .08);
     border-radius: 20px;
     font-size: 12px;
     font-weight: 500;
@@ -272,7 +289,7 @@ body {
 }
 
 .finka-nav-mobile-btn:hover {
-    background: rgba(255,255,255,.1);
+    background: rgba(255, 255, 255, .1);
 }
 
 /* ── Page Theme Variables ──────────────────────────────────────── */
@@ -363,7 +380,7 @@ body.page-rb .container {
 }
 
 /* ПУ Header: flush top inside container */
-body.page-pu .container > .header {
+body.page-pu .container>.header {
     border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
     margin-bottom: 0;
     border-top: 4px solid var(--accent, var(--c-pu));
@@ -400,7 +417,7 @@ body.page-pu .container > .header {
     background: var(--accent, var(--c-primary)) !important;
     color: #fff !important;
     border-color: var(--accent, var(--c-primary)) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
 }
 
 /* ── Controls Bar ──────────────────────────────────────────────── */
@@ -440,7 +457,7 @@ body.page-pu .container > .header {
 .control-group select:focus {
     outline: none;
     border-color: var(--accent, var(--c-primary)) !important;
-    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
 }
 
 .control-group button {
@@ -461,7 +478,7 @@ body.page-pu .container > .header {
 }
 
 /* Standalone buttons in controls bar */
-.controls > button:not(.branch-btn) {
+.controls>button:not(.branch-btn) {
     padding: 8px 16px;
     background: var(--accent, var(--c-primary));
     color: #fff;
@@ -474,7 +491,7 @@ body.page-pu .container > .header {
     transition: all var(--transition);
 }
 
-.controls > button:not(.branch-btn):hover {
+.controls>button:not(.branch-btn):hover {
     background: var(--accent-hover, var(--c-primary-hover));
     transform: translateY(-1px);
 }
@@ -554,7 +571,8 @@ table {
     font-size: 13px;
 }
 
-th, td {
+th,
+td {
     border: 1px solid var(--c-gray-200) !important;
     padding: 10px 12px !important;
     text-align: center;
@@ -647,6 +665,24 @@ th {
     font-weight: 700;
 }
 
+.btn-section-excel {
+    padding: 2px 8px;
+    border-radius: 5px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    margin-left: auto;
+    margin-right: 8px;
+    opacity: .6;
+    transition: opacity .2s;
+}
+
+.btn-section-excel:hover {
+    opacity: 1;
+}
+
 /* ── Expandable Detail Rows ────────────────────────────────────── */
 .detail-row {
     background: var(--c-gray-50);
@@ -716,7 +752,7 @@ input[type="text"]:focus,
 .editable-cell:focus {
     outline: none !important;
     border-color: var(--accent, var(--c-primary)) !important;
-    box-shadow: 0 0 0 3px rgba(79,70,229,.1) !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, .1) !important;
     background: #fff;
 }
 
@@ -912,8 +948,15 @@ input[type="text"]:focus,
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .7; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .7;
+    }
 }
 
 /* ── Summary Cards ─────────────────────────────────────────────── */
@@ -1088,7 +1131,7 @@ body.page-util .container {
     border: 1px solid var(--c-gray-200);
 }
 
-body.page-util .container > h1 {
+body.page-util .container>h1 {
     color: var(--c-gray-800);
     font-size: 24px;
     font-weight: 700;
@@ -1297,13 +1340,24 @@ body.page-util p {
 
 .log-entry {
     padding: 4px 0;
-    border-bottom: 1px solid rgba(255,255,255,.05);
+    border-bottom: 1px solid rgba(255, 255, 255, .05);
 }
 
-.log-success { color: #34d399; }
-.log-error { color: #f87171; }
-.log-warning { color: #fbbf24; }
-.log-info { color: #60a5fa; }
+.log-success {
+    color: #34d399;
+}
+
+.log-error {
+    color: #f87171;
+}
+
+.log-warning {
+    color: #fbbf24;
+}
+
+.log-info {
+    color: #60a5fa;
+}
 
 /* ── Status Bar ────────────────────────────────────────────────── */
 .status-bar {
@@ -1380,6 +1434,7 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
 }
 
 @media (max-width: 768px) {
+
     body.page-rb,
     body.page-pu,
     body.page-util {
@@ -1437,7 +1492,8 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
         font-size: 11px;
     }
 
-    th, td {
+    th,
+    td {
         padding: 6px 4px !important;
     }
 
@@ -1507,7 +1563,7 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
     padding: 12px 20px;
     background: #fff;
     border-radius: var(--radius);
-    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0,0,0,.05);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 0, 0, .05);
     font-family: var(--font);
     font-size: 13.5px;
     font-weight: 500;
@@ -1526,23 +1582,60 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
     flex-shrink: 0;
 }
 
-.finka-toast.success { border-left: 4px solid var(--c-success); }
-.finka-toast.success .finka-toast-icon { color: var(--c-success); }
-.finka-toast.error { border-left: 4px solid var(--c-danger); }
-.finka-toast.error .finka-toast-icon { color: var(--c-danger); }
-.finka-toast.warning { border-left: 4px solid var(--c-warning); }
-.finka-toast.warning .finka-toast-icon { color: var(--c-warning); }
-.finka-toast.info { border-left: 4px solid var(--c-primary); }
-.finka-toast.info .finka-toast-icon { color: var(--c-primary); }
+.finka-toast.success {
+    border-left: 4px solid var(--c-success);
+}
+
+.finka-toast.success .finka-toast-icon {
+    color: var(--c-success);
+}
+
+.finka-toast.error {
+    border-left: 4px solid var(--c-danger);
+}
+
+.finka-toast.error .finka-toast-icon {
+    color: var(--c-danger);
+}
+
+.finka-toast.warning {
+    border-left: 4px solid var(--c-warning);
+}
+
+.finka-toast.warning .finka-toast-icon {
+    color: var(--c-warning);
+}
+
+.finka-toast.info {
+    border-left: 4px solid var(--c-primary);
+}
+
+.finka-toast.info .finka-toast-icon {
+    color: var(--c-primary);
+}
 
 @keyframes finkaToastIn {
-    from { opacity: 0; transform: translateX(40px); }
-    to   { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 @keyframes finkaToastOut {
-    from { opacity: 1; transform: translateX(0); }
-    to   { opacity: 0; transform: translateX(40px); }
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(40px);
+    }
 }
 
 /* ── Keyboard Shortcut Badge ───────────────────────────────────── */
@@ -1562,6 +1655,7 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
 
 /* ── Print Styles ──────────────────────────────────────────────── */
 @media print {
+
     .finka-nav,
     .finka-toast-container,
     .buttons,
@@ -1574,13 +1668,41 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
     .row-actions,
     .section-footer,
     .btn-add-row,
-    .btn-delete-row {
+    .btn-delete-row,
+    .export-bar,
+    .import-zone,
+    .params-bar,
+    .summary-cards,
+    .month-selector,
+    .import-notice,
+    .back-to-top,
+    .save-status,
+    .auto-save-status,
+    .btn-export,
+    .btn-section-excel,
+    [onclick*="exportToPDF"],
+    [onclick*="SharedExport"],
+    [onclick*="print()"],
+    [onclick*="exportExcel"],
+    [onclick*="exportXlsx"],
+    [onclick*="exportToExcel"],
+    [onclick*="exportSection"],
+    [onclick*="exportConsXlsx"],
+    [onclick*="exportSectionXlsx"],
+    [onclick*="exportSectionExcel"] {
         display: none !important;
+    }
+
+    @page {
+        size: landscape;
+        margin: 10mm;
     }
 
     body {
         padding-top: 0 !important;
         background: #fff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 
     .header {
@@ -1612,7 +1734,8 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
         print-color-adjust: exact;
     }
 
-    th, td {
+    th,
+    td {
         padding: 4px 6px !important;
     }
 
@@ -1626,6 +1749,30 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
         background: #fff9e6 !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    input:not([type]) {
+        border: none !important;
+        background: none !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        font-size: inherit !important;
+        color: #000 !important;
+        text-align: right;
+    }
+
+    select {
+        border: none !important;
+        background: none !important;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    td,
+    th {
+        border: 1px solid #999 !important;
     }
 }
 
@@ -1641,7 +1788,7 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
         flex-direction: column;
         padding: 8px;
         box-shadow: var(--shadow-lg);
-        border-top: 1px solid rgba(255,255,255,.08);
+        border-top: 1px solid rgba(255, 255, 255, .08);
     }
 
     .finka-nav.open .finka-nav-links {
@@ -1663,7 +1810,7 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
 
     .finka-dropdown {
         position: static;
-        background: rgba(255,255,255,.05);
+        background: rgba(255, 255, 255, .05);
         box-shadow: none;
         transform: none;
         border-radius: var(--radius);
@@ -1686,7 +1833,7 @@ table tbody tr:hover td:not(.title-cell):not(.total-row):not(.formula-cell):not(
     }
 
     .finka-dropdown a:hover {
-        background: rgba(255,255,255,.08);
+        background: rgba(255, 255, 255, .08);
         color: #fff;
     }
 

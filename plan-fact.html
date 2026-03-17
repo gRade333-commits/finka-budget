@@ -1,0 +1,1033 @@
+﻿<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="shared.css" />
+        <title>План-Факт РБ</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+        <style>
+            .month-selector {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+                margin-top: 12px;
+            }
+            .month-btn {
+                padding: 7px 14px;
+                border: 2px solid var(--accent);
+                background: #fff;
+                color: var(--accent);
+                border-radius: 8px;
+                cursor: pointer;
+                font-family: var(--font);
+                font-weight: 600;
+                font-size: 12.5px;
+                transition: all 150ms ease;
+            }
+            .month-btn:hover {
+                background: var(--accent-light);
+            }
+            .month-btn.active {
+                background: var(--accent);
+                color: #fff;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            }
+
+            /* Table column widths */
+            #pfTable {
+                table-layout: fixed;
+            }
+            #pfTable col.col-no {
+                width: 36px;
+            }
+            #pfTable col.col-code {
+                width: 60px;
+            }
+            #pfTable col.col-name {
+                width: 260px;
+            }
+            #pfTable col.col-fin {
+                width: 110px;
+            }
+            #pfTable col.col-data {
+                width: 100px;
+            }
+
+            /* Section grouping */
+            .section-title-row td {
+                background: #e0e7ff !important;
+                font-weight: 700;
+                text-align: center;
+                font-size: 13px;
+            }
+
+            /* Auto-calc cells */
+            td.auto-cell {
+                background: #ecfdf5 !important;
+                color: #065f46 !important;
+                font-weight: 600;
+            }
+
+            /* Subtotal row for ФОТ */
+            .fot-row td {
+                background: #dbeafe !important;
+                font-weight: 700 !important;
+            }
+
+            /* Summary cards */
+            .summary-cards {
+                display: flex;
+                gap: 16px;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+            }
+            .summary-card {
+                flex: 1;
+                min-width: 200px;
+                background: #fff;
+                border-radius: 10px;
+                padding: 16px 20px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                border-top: 3px solid var(--accent);
+            }
+            .summary-card .sc-label {
+                font-size: 12px;
+                color: #6b7280;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+            }
+            .summary-card .sc-value {
+                font-size: 22px;
+                font-weight: 700;
+                color: #1f2937;
+                margin-top: 4px;
+            }
+
+            /* Negative value highlight */
+            .negative {
+                color: #dc2626 !important;
+            }
+
+            @media print {
+                .header,
+                .info-bar,
+                .buttons,
+                .month-selector,
+                .branch-selector,
+                .finka-nav,
+                .summary-cards {
+                    display: none !important;
+                }
+                body {
+                    padding-top: 0 !important;
+                }
+                table {
+                    font-size: 10px;
+                }
+                td,
+                th {
+                    padding: 4px 6px !important;
+                }
+            }
+        </style>
+    </head>
+    <body class="page-rb">
+        <div class="header">
+            <h1>📊 ОТЧЕТ исполнения ПЛАН-ФАКТ</h1>
+            <p>Республиканский бюджет • НАО «РФМШ»</p>
+
+            <div class="branch-selector">
+                <button class="branch-btn active" data-branch="nao">
+                    НАО «РФМШ»
+                </button>
+                <button class="branch-btn" data-branch="almaty">Алматы</button>
+                <button class="branch-btn" data-branch="astana">Астана</button>
+                <button class="branch-btn" data-branch="uralsk">Уральск</button>
+                <button
+                    class="branch-btn"
+                    data-branch="consolidated"
+                    style="border-color: #8e44ad; color: #8e44ad"
+                >
+                    📈 Сводный
+                </button>
+            </div>
+
+            <div class="month-selector" id="monthSelector"></div>
+        </div>
+
+        <div class="info-bar">
+            <div>
+                <span style="font-weight: bold">Филиал:</span>
+                <span id="currentBranch">НАО «РФМШ»</span>
+            </div>
+            <div>
+                <span style="font-weight: bold">Период:</span>
+                <span id="currentPeriod">Январь 2026</span>
+            </div>
+            <div>
+                <span style="font-weight: bold">Последнее изменение:</span>
+                <span id="lastUpdate">-</span>
+            </div>
+            <div class="auto-save-status saved" id="saveStatus">
+                ✓ Сохранено
+            </div>
+        </div>
+
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="sc-label">План (год)</div>
+                <div class="sc-value" id="cardFinPlan">0,00</div>
+            </div>
+            <div class="summary-card">
+                <div class="sc-label">Факт (нарастающий)</div>
+                <div class="sc-value" id="cardFactCum">0,00</div>
+            </div>
+            <div class="summary-card" style="border-top-color: #10b981">
+                <div class="sc-label">Остатки (нарастающий)</div>
+                <div class="sc-value" id="cardOstCum">0,00</div>
+            </div>
+            <div class="summary-card" style="border-top-color: #f59e0b">
+                <div class="sc-label">Экономия</div>
+                <div class="sc-value" id="cardEcon">0,00</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="pfTable">
+                <colgroup>
+                    <col class="col-no" />
+                    <col class="col-code" />
+                    <col class="col-name" />
+                    <col class="col-fin" />
+                    <col class="col-data" />
+                    <col class="col-data" />
+                    <col class="col-data" />
+                    <col class="col-data" />
+                    <col class="col-data" />
+                    <col class="col-data" />
+                    <col class="col-data" />
+                    <col class="col-data" />
+                    <col class="col-data" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th rowspan="3">№</th>
+                        <th rowspan="3">Спе-<br />ци-<br />фика</th>
+                        <th rowspan="3">Наименование расходов</th>
+                        <th rowspan="3">
+                            Финансовый<br />план на<br /><span class="dyn-year"
+                                >2026</span
+                            >
+                            год
+                        </th>
+                        <th colspan="5">ЯНВАРЬ ПЛАН-ФАКТ</th>
+                        <th colspan="4">
+                            ОТЧЕТ исполнения ПЛАН-ФАКТ нарастающим
+                        </th>
+                    </tr>
+                    <tr>
+                        <th rowspan="2">ПЛАН<br />за отчетный<br />месяц</th>
+                        <th rowspan="2">СПРАВКА</th>
+                        <th rowspan="2">План с<br />остатками</th>
+                        <th rowspan="2">ФАКТ</th>
+                        <th rowspan="2">ОСТАТКИ</th>
+                        <th>ПЛАН со</th>
+                        <th>ФАКТ с</th>
+                        <th>ФАКТ с</th>
+                        <th rowspan="2">ОСТАТКИ за<br />отчетный<br />месяц</th>
+                    </tr>
+                    <tr>
+                        <th>справками с<br />нарастающим</th>
+                        <th>за отчетный<br />месяц</th>
+                        <th>нарастающим</th>
+                    </tr>
+                </thead>
+                <thead id="theadMonthLabel" style="display: none">
+                    <!-- dynamically updated -->
+                </thead>
+                <tbody id="pfBody"></tbody>
+                <tfoot>
+                    <tr class="total-row" id="rowTotal">
+                        <td></td>
+                        <td></td>
+                        <td class="label-cell" style="font-weight: 800">
+                            Итого:
+                        </td>
+                        <td class="formula-cell" id="tFinPlan">0,00</td>
+                        <td class="formula-cell" id="tPlan">0,00</td>
+                        <td class="formula-cell" id="tSpravka">0,00</td>
+                        <td class="formula-cell" id="tPlanOst">0,00</td>
+                        <td class="formula-cell" id="tFact">0,00</td>
+                        <td class="formula-cell" id="tOstatki">0,00</td>
+                        <td class="formula-cell" id="tPlanCum">0,00</td>
+                        <td class="formula-cell" id="tFactMonth">0,00</td>
+                        <td class="formula-cell" id="tFactCum">0,00</td>
+                        <td class="formula-cell" id="tOstCum">0,00</td>
+                    </tr>
+                    <tr class="fot-row" id="rowFot">
+                        <td></td>
+                        <td>111-124</td>
+                        <td class="label-cell" style="font-weight: 800">
+                            Фонд оплаты труда
+                        </td>
+                        <td class="formula-cell" id="fotFinPlan">0,00</td>
+                        <td class="formula-cell" id="fotPlan">0,00</td>
+                        <td class="formula-cell" id="fotSpravka">0,00</td>
+                        <td class="formula-cell" id="fotPlanOst">0,00</td>
+                        <td class="formula-cell" id="fotFact">0,00</td>
+                        <td class="formula-cell" id="fotOstatki">0,00</td>
+                        <td class="formula-cell" id="fotPlanCum">0,00</td>
+                        <td class="formula-cell" id="fotFactMonth">0,00</td>
+                        <td class="formula-cell" id="fotFactCum">0,00</td>
+                        <td class="formula-cell" id="fotOstCum">0,00</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="saveData()">
+                💾 Сохранить
+            </button>
+            <button class="btn btn-success" onclick="exportExcel()">
+                📥 Excel
+            </button>
+            <button
+                class="btn btn-success"
+                onclick="SharedExport.exportToPDF()"
+                style="background: #6366f1"
+            >
+                📄 PDF
+            </button>
+            <button class="btn btn-secondary" onclick="window.print()">
+                🖨️ Печать
+            </button>
+        </div>
+
+        <script src="shared-nav.js"></script>
+        <script>
+            (function () {
+                "use strict";
+
+                /* ── Constants ────────────────────────────────────────── */
+                var MONTHS = [
+                    "Январь",
+                    "Февраль",
+                    "Март",
+                    "Апрель",
+                    "Май",
+                    "Июнь",
+                    "Июль",
+                    "Август",
+                    "Сентябрь",
+                    "Октябрь",
+                    "Ноябрь",
+                    "Декабрь",
+                ];
+
+                var BRANCHES = {
+                    nao: { label: "НАО «РФМШ»", contingent: null },
+                    almaty: { label: "Алматы", contingent: 1186 },
+                    astana: { label: "Астана", contingent: 400 },
+                    uralsk: { label: "Уральск", contingent: 300 },
+                    consolidated: { label: "Сводный", contingent: null },
+                };
+
+                var ROWS = [
+                    { n: 1, code: "111", name: "Оплата труда", fot: true },
+                    {
+                        n: 2,
+                        code: "113",
+                        name: "Компенсационные выплаты",
+                        fot: true,
+                    },
+                    {
+                        n: 3,
+                        code: "116",
+                        name: "Обязательные пенсионные взносы за счет работодателя",
+                        fot: true,
+                    },
+                    { n: 4, code: "121", name: "Социальный налог", fot: true },
+                    {
+                        n: 5,
+                        code: "122",
+                        name: "Социальные отчисления в Государственный фонд социального страхования",
+                        fot: true,
+                    },
+                    {
+                        n: 6,
+                        code: "124",
+                        name: "Отчисления на обязательное социальное медицинское страхование",
+                        fot: true,
+                    },
+                    {
+                        n: 7,
+                        code: "141",
+                        name: "Приобретение продуктов питания",
+                        fot: false,
+                    },
+                    {
+                        n: 8,
+                        code: "142",
+                        name: "Приобретение лекарственных средств и прочих изделий медицинского назначения",
+                        fot: false,
+                    },
+                    {
+                        n: 9,
+                        code: "144",
+                        name: "Приобретение топлива, горюче-смазочных материалов",
+                        fot: false,
+                    },
+                    {
+                        n: 10,
+                        code: "149",
+                        name: "Приобретение прочих запасов",
+                        fot: false,
+                    },
+                    {
+                        n: 11,
+                        code: "151",
+                        name: "Оплата коммунальных услуг",
+                        fot: false,
+                    },
+                    {
+                        n: 12,
+                        code: "152",
+                        name: "Оплата услуг связи",
+                        fot: false,
+                    },
+                    {
+                        n: 13,
+                        code: "159",
+                        name: "Оплата прочих услуг и работ",
+                        fot: false,
+                    },
+                    {
+                        n: 14,
+                        code: "161",
+                        name: "Командировки и служебные разъезды внутри страны",
+                        fot: false,
+                    },
+                    {
+                        n: 15,
+                        code: "163",
+                        name: "Затраты фонда всеобщего обязательного среднего образования/Услуги по организации пятиразовым питанием для воспитанников Интерната",
+                        fot: false,
+                    },
+                    {
+                        n: 16,
+                        code: "169",
+                        name: "Прочие текущие затраты",
+                        fot: false,
+                    },
+                ];
+
+                // Column keys: finPlan, plan, spravka, planOst, fact, ostatki, planCum, factMonth, factCum, ostCum
+                // User inputs: finPlan, plan, spravka, fact
+                // Auto-calc: planOst, ostatki, planCum (cumulative), factMonth (= fact), factCum (cumulative), ostCum
+                var INPUT_COLS = ["finPlan", "plan", "spravka", "fact"];
+                var ALL_COLS = [
+                    "finPlan",
+                    "plan",
+                    "spravka",
+                    "planOst",
+                    "fact",
+                    "ostatki",
+                    "planCum",
+                    "factMonth",
+                    "factCum",
+                    "ostCum",
+                ];
+
+                var STORAGE_KEY = "plan_fact_rb";
+                var activeBranch = "nao";
+                var activeMonth = 0; // 0 = January
+                var saveTimer = null;
+
+                /* ── Build Month Selector ─────────────────────────────── */
+                var msEl = document.getElementById("monthSelector");
+                MONTHS.forEach(function (m, i) {
+                    var btn = document.createElement("button");
+                    btn.className = "month-btn" + (i === 0 ? " active" : "");
+                    btn.textContent = m;
+                    btn.dataset.month = i;
+                    btn.addEventListener("click", function () {
+                        activeMonth = i;
+                        document
+                            .querySelectorAll(".month-btn")
+                            .forEach(function (b) {
+                                b.classList.remove("active");
+                            });
+                        btn.classList.add("active");
+                        updateMonthHeaders();
+                        loadData();
+                    });
+                    msEl.appendChild(btn);
+                });
+
+                /* ── Build Table Body ─────────────────────────────────── */
+                var tbody = document.getElementById("pfBody");
+
+                function buildRows() {
+                    tbody.innerHTML = "";
+                    ROWS.forEach(function (row) {
+                        var tr = document.createElement("tr");
+                        tr.dataset.code = row.code;
+                        tr.dataset.fot = row.fot ? "1" : "0";
+
+                        // №
+                        var tdN = document.createElement("td");
+                        tdN.className = "label-cell";
+                        tdN.style.textAlign = "center";
+                        tdN.textContent = row.n;
+                        tr.appendChild(tdN);
+
+                        // Специфика
+                        var tdCode = document.createElement("td");
+                        tdCode.className = "label-cell";
+                        tdCode.style.textAlign = "center";
+                        tdCode.textContent = row.code;
+                        tr.appendChild(tdCode);
+
+                        // Наименование
+                        var tdName = document.createElement("td");
+                        tdName.className = "label-cell";
+                        tdName.style.textAlign = "left";
+                        tdName.style.whiteSpace = "normal";
+                        tdName.textContent = row.name;
+                        tr.appendChild(tdName);
+
+                        // Data columns
+                        ALL_COLS.forEach(function (col) {
+                            var td = document.createElement("td");
+                            if (INPUT_COLS.indexOf(col) !== -1) {
+                                td.className = "editable";
+                                var inp = document.createElement("input");
+                                inp.type = "number";
+                                inp.step = "0.01";
+                                inp.value = "0";
+                                inp.dataset.row = row.code;
+                                inp.dataset.col = col;
+                                inp.addEventListener("input", function () {
+                                    recalcRow(row.code);
+                                    recalcTotals();
+                                    scheduleSave();
+                                });
+                                td.appendChild(inp);
+                            } else {
+                                td.className = "auto-cell";
+                                td.id = "cell_" + row.code + "_" + col;
+                                td.textContent = "0,00";
+                            }
+                            tr.appendChild(td);
+                        });
+
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                buildRows();
+
+                /* ── Month-Dependent Header Update ────────────────────── */
+                function updateMonthHeaders() {
+                    var mName = MONTHS[activeMonth];
+                    var year =
+                        localStorage.getItem("budget_year") ||
+                        new Date().getFullYear();
+                    document.getElementById("currentPeriod").textContent =
+                        mName + " " + year;
+
+                    // Update header text
+                    var ths = document.querySelectorAll(
+                        "#pfTable > thead:first-of-type th",
+                    );
+                    // The 5th th in row 1 (colspan=5) = month ПЛАН-ФАКТ
+                    if (ths.length >= 5) {
+                        ths[4].innerHTML = mName.toUpperCase() + " ПЛАН-ФАКТ";
+                    }
+                }
+                updateMonthHeaders();
+
+                /* ── Recalculate ──────────────────────────────────────── */
+                function getInput(code, col) {
+                    var inp = document.querySelector(
+                        'input[data-row="' +
+                            code +
+                            '"][data-col="' +
+                            col +
+                            '"]',
+                    );
+                    return inp ? parseFloat(inp.value) || 0 : 0;
+                }
+
+                function setAutoCell(code, col, val) {
+                    var el = document.getElementById(
+                        "cell_" + code + "_" + col,
+                    );
+                    if (el) {
+                        el.textContent = fmt(val);
+                        el.classList.toggle("negative", val < 0);
+                    }
+                }
+
+                function recalcRow(code) {
+                    var finPlan = getInput(code, "finPlan");
+                    var plan = getInput(code, "plan");
+                    var spravka = getInput(code, "spravka");
+                    var fact = getInput(code, "fact");
+
+                    // Current month calculations
+                    var planOst = plan + spravka; // План с остатками = План + Справка
+                    var ostatki = planOst - fact; // Остатки = План с остатками − Факт
+
+                    // Get cumulative data from previous months
+                    var prevCum = getCumulativePrev(code);
+                    var planCum = prevCum.planCum + planOst; // План со справками нарастающим
+                    var factMonth = fact; // Факт за отчетный месяц
+                    var factCum = prevCum.factCum + fact; // Факт нарастающим
+                    var ostCum = planCum - factCum; // Остатки нарастающим
+
+                    setAutoCell(code, "planOst", planOst);
+                    setAutoCell(code, "ostatki", ostatki);
+                    setAutoCell(code, "planCum", planCum);
+                    setAutoCell(code, "factMonth", factMonth);
+                    setAutoCell(code, "factCum", factCum);
+                    setAutoCell(code, "ostCum", ostCum);
+                }
+
+                function getCumulativePrev(code) {
+                    // Sum plan and fact from months 0..(activeMonth-1) for this row
+                    var data = loadRawData();
+                    var planCum = 0,
+                        factCum = 0;
+                    for (var m = 0; m < activeMonth; m++) {
+                        var mKey = "m" + m;
+                        if (data[mKey] && data[mKey][code]) {
+                            var r = data[mKey][code];
+                            var p =
+                                (parseFloat(r.plan) || 0) +
+                                (parseFloat(r.spravka) || 0);
+                            planCum += p;
+                            factCum += parseFloat(r.fact) || 0;
+                        }
+                    }
+                    return { planCum: planCum, factCum: factCum };
+                }
+
+                function recalcTotals() {
+                    var sums = {};
+                    ALL_COLS.forEach(function (c) {
+                        sums[c] = 0;
+                    });
+                    var fotSums = {};
+                    ALL_COLS.forEach(function (c) {
+                        fotSums[c] = 0;
+                    });
+
+                    ROWS.forEach(function (row) {
+                        ALL_COLS.forEach(function (col) {
+                            var val;
+                            if (INPUT_COLS.indexOf(col) !== -1) {
+                                val = getInput(row.code, col);
+                            } else {
+                                var el = document.getElementById(
+                                    "cell_" + row.code + "_" + col,
+                                );
+                                val = el ? parseFmt(el.textContent) : 0;
+                            }
+                            sums[col] += val;
+                            if (row.fot) fotSums[col] += val;
+                        });
+                    });
+
+                    // Total row
+                    ALL_COLS.forEach(function (col) {
+                        var el = document.getElementById("t" + capitalize(col));
+                        if (el) {
+                            el.textContent = fmt(sums[col]);
+                            el.classList.toggle("negative", sums[col] < 0);
+                        }
+                    });
+
+                    // FOT row
+                    ALL_COLS.forEach(function (col) {
+                        var el = document.getElementById(
+                            "fot" + capitalize(col),
+                        );
+                        if (el) {
+                            el.textContent = fmt(fotSums[col]);
+                            el.classList.toggle("negative", fotSums[col] < 0);
+                        }
+                    });
+
+                    // Summary cards
+                    document.getElementById("cardFinPlan").textContent = fmt(
+                        sums.finPlan,
+                    );
+                    document.getElementById("cardFactCum").textContent = fmt(
+                        sums.factCum,
+                    );
+                    document.getElementById("cardOstCum").textContent = fmt(
+                        sums.ostCum,
+                    );
+                    document.getElementById("cardEcon").textContent = fmt(
+                        sums.ostCum,
+                    );
+                    // Highlight negative
+                    ["cardOstCum", "cardEcon"].forEach(function (id) {
+                        var el = document.getElementById(id);
+                        el.classList.toggle(
+                            "negative",
+                            parseFmt(el.textContent) < 0,
+                        );
+                    });
+                }
+
+                /* ── Storage ──────────────────────────────────────────── */
+                function storageKey() {
+                    return STORAGE_KEY + "_" + activeBranch;
+                }
+
+                function loadRawData() {
+                    try {
+                        return (
+                            JSON.parse(localStorage.getItem(storageKey())) || {}
+                        );
+                    } catch (e) {
+                        return {};
+                    }
+                }
+
+                function loadData() {
+                    var data = loadRawData();
+                    var mKey = "m" + activeMonth;
+                    var mData = data[mKey] || {};
+
+                    ROWS.forEach(function (row) {
+                        var rd = mData[row.code] || {};
+                        INPUT_COLS.forEach(function (col) {
+                            var inp = document.querySelector(
+                                'input[data-row="' +
+                                    row.code +
+                                    '"][data-col="' +
+                                    col +
+                                    '"]',
+                            );
+                            if (inp)
+                                inp.value = rd[col] !== undefined ? rd[col] : 0;
+                        });
+                        recalcRow(row.code);
+                    });
+
+                    recalcTotals();
+                    updateLastSaved(data._lastUpdate);
+                    updateConsolidatedState();
+                }
+
+                function saveData() {
+                    if (activeBranch === "consolidated") return;
+                    var data = loadRawData();
+                    var mKey = "m" + activeMonth;
+                    if (!data[mKey]) data[mKey] = {};
+
+                    ROWS.forEach(function (row) {
+                        var rd = {};
+                        INPUT_COLS.forEach(function (col) {
+                            rd[col] = getInput(row.code, col);
+                        });
+                        data[mKey][row.code] = rd;
+                    });
+
+                    data._lastUpdate = new Date().toLocaleString("ru-RU");
+                    localStorage.setItem(storageKey(), JSON.stringify(data));
+                    updateLastSaved(data._lastUpdate);
+                    showSaveStatus();
+                }
+
+                window.saveData = saveData;
+
+                function scheduleSave() {
+                    if (activeBranch === "consolidated") return;
+                    clearTimeout(saveTimer);
+                    document.getElementById("saveStatus").textContent =
+                        "⏳ Сохранение...";
+                    document.getElementById("saveStatus").className =
+                        "auto-save-status saving";
+                    saveTimer = setTimeout(function () {
+                        saveData();
+                    }, 1000);
+                }
+
+                function showSaveStatus() {
+                    var el = document.getElementById("saveStatus");
+                    el.textContent = "✓ Сохранено";
+                    el.className = "auto-save-status saved";
+                }
+
+                function updateLastSaved(ts) {
+                    document.getElementById("lastUpdate").textContent =
+                        ts || "-";
+                }
+
+                /* ── Consolidation ────────────────────────────────────── */
+                function loadConsolidated() {
+                    var branches = ["nao", "almaty", "astana", "uralsk"];
+                    var mKey = "m" + activeMonth;
+
+                    ROWS.forEach(function (row) {
+                        // Sum input cols from all branches for current month
+                        INPUT_COLS.forEach(function (col) {
+                            var sum = 0;
+                            branches.forEach(function (br) {
+                                try {
+                                    var d =
+                                        JSON.parse(
+                                            localStorage.getItem(
+                                                STORAGE_KEY + "_" + br,
+                                            ),
+                                        ) || {};
+                                    if (d[mKey] && d[mKey][row.code]) {
+                                        sum +=
+                                            parseFloat(
+                                                d[mKey][row.code][col],
+                                            ) || 0;
+                                    }
+                                } catch (e) {}
+                            });
+                            var inp = document.querySelector(
+                                'input[data-row="' +
+                                    row.code +
+                                    '"][data-col="' +
+                                    col +
+                                    '"]',
+                            );
+                            if (inp) inp.value = sum;
+                        });
+
+                        // Recalc cumulative from all branches
+                        recalcRowConsolidated(row.code, branches);
+                    });
+
+                    recalcTotals();
+                }
+
+                function recalcRowConsolidated(code, branches) {
+                    var finPlan = getInput(code, "finPlan");
+                    var plan = getInput(code, "plan");
+                    var spravka = getInput(code, "spravka");
+                    var fact = getInput(code, "fact");
+
+                    var planOst = plan + spravka;
+                    var ostatki = planOst - fact;
+
+                    // Cumulative from all branches, all previous months
+                    var prevPlanCum = 0,
+                        prevFactCum = 0;
+                    var mKey;
+                    for (var m = 0; m < activeMonth; m++) {
+                        mKey = "m" + m;
+                        branches.forEach(function (br) {
+                            try {
+                                var d =
+                                    JSON.parse(
+                                        localStorage.getItem(
+                                            STORAGE_KEY + "_" + br,
+                                        ),
+                                    ) || {};
+                                if (d[mKey] && d[mKey][code]) {
+                                    var r = d[mKey][code];
+                                    prevPlanCum +=
+                                        (parseFloat(r.plan) || 0) +
+                                        (parseFloat(r.spravka) || 0);
+                                    prevFactCum += parseFloat(r.fact) || 0;
+                                }
+                            } catch (e) {}
+                        });
+                    }
+
+                    var planCum = prevPlanCum + planOst;
+                    var factMonth = fact;
+                    var factCum = prevFactCum + fact;
+                    var ostCum = planCum - factCum;
+
+                    setAutoCell(code, "planOst", planOst);
+                    setAutoCell(code, "ostatki", ostatki);
+                    setAutoCell(code, "planCum", planCum);
+                    setAutoCell(code, "factMonth", factMonth);
+                    setAutoCell(code, "factCum", factCum);
+                    setAutoCell(code, "ostCum", ostCum);
+                }
+
+                function updateConsolidatedState() {
+                    var isConsolidated = activeBranch === "consolidated";
+                    document
+                        .querySelectorAll("#pfTable input")
+                        .forEach(function (inp) {
+                            inp.disabled = isConsolidated;
+                            inp.style.opacity = isConsolidated ? ".7" : "1";
+                        });
+                }
+
+                /* ── Branch Switching ─────────────────────────────────── */
+                document
+                    .querySelectorAll(".branch-btn")
+                    .forEach(function (btn) {
+                        btn.addEventListener("click", function () {
+                            document
+                                .querySelectorAll(".branch-btn")
+                                .forEach(function (b) {
+                                    b.classList.remove("active");
+                                });
+                            btn.classList.add("active");
+                            activeBranch = btn.dataset.branch;
+                            document.getElementById(
+                                "currentBranch",
+                            ).textContent = BRANCHES[activeBranch].label;
+
+                            if (activeBranch === "consolidated") {
+                                loadConsolidated();
+                                updateConsolidatedState();
+                            } else {
+                                loadData();
+                            }
+                        });
+                    });
+
+                /* ── Excel Export ─────────────────────────────────────── */
+                function exportExcel() {
+                    var wb = XLSX.utils.book_new();
+                    var year =
+                        localStorage.getItem("budget_year") ||
+                        new Date().getFullYear();
+                    var mName = MONTHS[activeMonth];
+                    var brLabel = BRANCHES[activeBranch].label;
+
+                    var header = [
+                        [
+                            "ОТЧЕТ исполнения ПЛАН-ФАКТ за " +
+                                mName.toLowerCase() +
+                                " " +
+                                year +
+                                " год",
+                        ],
+                        ["Филиал: " + brLabel],
+                        [],
+                        [
+                            "№",
+                            "Специфика",
+                            "Наименование расходов",
+                            "Фин. план " + year,
+                            "ПЛАН",
+                            "СПРАВКА",
+                            "План с ост.",
+                            "ФАКТ",
+                            "ОСТАТКИ",
+                            "ПЛАН нараст.",
+                            "ФАКТ за мес.",
+                            "ФАКТ нараст.",
+                            "ОСТАТКИ нараст.",
+                        ],
+                    ];
+
+                    var rows = [];
+                    ROWS.forEach(function (row) {
+                        var r = [row.n, row.code, row.name];
+                        ALL_COLS.forEach(function (col) {
+                            if (INPUT_COLS.indexOf(col) !== -1) {
+                                r.push(getInput(row.code, col));
+                            } else {
+                                var el = document.getElementById(
+                                    "cell_" + row.code + "_" + col,
+                                );
+                                r.push(el ? parseFmt(el.textContent) : 0);
+                            }
+                        });
+                        rows.push(r);
+                    });
+
+                    // Total row
+                    var totR = ["", "", "Итого:"];
+                    ALL_COLS.forEach(function (col) {
+                        var el = document.getElementById("t" + capitalize(col));
+                        totR.push(el ? parseFmt(el.textContent) : 0);
+                    });
+                    rows.push(totR);
+
+                    // FOT row
+                    var fotR = ["", "111-124", "Фонд оплаты труда"];
+                    ALL_COLS.forEach(function (col) {
+                        var el = document.getElementById(
+                            "fot" + capitalize(col),
+                        );
+                        fotR.push(el ? parseFmt(el.textContent) : 0);
+                    });
+                    rows.push(fotR);
+
+                    var wsData = header.concat(rows);
+                    var ws = XLSX.utils.aoa_to_sheet(wsData);
+
+                    // Column widths
+                    ws["!cols"] = [
+                        { wch: 4 },
+                        { wch: 8 },
+                        { wch: 40 },
+                        { wch: 14 },
+                        { wch: 12 },
+                        { wch: 12 },
+                        { wch: 12 },
+                        { wch: 12 },
+                        { wch: 12 },
+                        { wch: 14 },
+                        { wch: 12 },
+                        { wch: 14 },
+                        { wch: 14 },
+                    ];
+
+                    XLSX.utils.book_append_sheet(wb, ws, brLabel);
+                    var fname =
+                        "План-Факт_" +
+                        brLabel +
+                        "_" +
+                        mName +
+                        "_" +
+                        year +
+                        ".xlsx";
+                    XLSX.writeFile(wb, fname);
+                }
+                window.exportExcel = exportExcel;
+
+                /* ── Helpers ──────────────────────────────────────────── */
+                function fmt(v) {
+                    return (v || 0).toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
+                }
+                function parseFmt(s) {
+                    return (
+                        parseFloat(
+                            String(s).replace(/\s/g, "").replace(",", "."),
+                        ) || 0
+                    );
+                }
+                function capitalize(s) {
+                    return s.charAt(0).toUpperCase() + s.slice(1);
+                }
+
+                /* ── Keyboard shortcut ────────────────────────────────── */
+                document.addEventListener("keydown", function (e) {
+                    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+                        e.preventDefault();
+                        saveData();
+                    }
+                });
+
+                /* ── Init ─────────────────────────────────────────────── */
+                loadData();
+            })();
+        </script>
+    </body>
+</html>

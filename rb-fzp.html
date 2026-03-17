@@ -1,353 +1,781 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="shared.css">
-    <title>Свод ФЗП 2026</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="editable-table.js"></script>
-</head>
-<body class="page-rb">
-    <div class="header">
-        <h1>📊 Свод ФЗП (Фонд заработной платы) 2026</h1>
-        <p style="color: #7f8c8d; margin-top: 5px;">Консолидированный бюджет • Лист 4 из 6</p>
-        
-        <div class="branch-selector">
-            <button class="branch-btn active" data-branch="almaty">Алматы</button>
-            <button class="branch-btn" data-branch="astana">Астана</button>
-            <button class="branch-btn" data-branch="uralsk">Уральск</button>
-            <button class="branch-btn" data-branch="nao">НАО</button>
-            <button class="branch-btn" data-branch="consolidated" style="border-color: #8e44ad; color: #8e44ad;">
-                📈 Консолидация
-            </button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="shared.css" />
+        <title>Свод ФЗП 2026 — РБ</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+        <style>
+            /* ── params bar ── */
+            .params-bar {
+                display: flex;
+                gap: 20px;
+                align-items: center;
+                flex-wrap: wrap;
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 14px 18px;
+                margin-bottom: 16px;
+            }
+            .param-group {
+                display: flex;
+                flex-direction: column;
+                gap: 3px;
+            }
+            .param-group label {
+                font-size: 11px;
+                font-weight: 600;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 0.4px;
+            }
+            .param-group input {
+                width: 140px;
+                padding: 6px 10px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 600;
+                text-align: right;
+            }
+            .param-group input:focus {
+                outline: none;
+                border-color: #6366f1;
+                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+            }
+            .param-group .param-val {
+                font-size: 13px;
+                color: #334155;
+                font-weight: 600;
+            }
+
+            /* ── table ── */
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 12px;
+            }
+            th,
+            td {
+                border: 1px solid #cbd5e1;
+                padding: 4px 6px;
+                text-align: right;
+            }
+            th {
+                background: #f1f5f9;
+                text-align: center;
+                font-size: 11px;
+                font-weight: 600;
+            }
+            td:nth-child(1) {
+                text-align: center;
+                width: 34px;
+            }
+            td:nth-child(2) {
+                text-align: left;
+                min-width: 220px;
+            }
+
+            .section-hdr td {
+                background: #eef2f7;
+                text-align: left !important;
+                font-weight: 600;
+                padding: 8px !important;
+            }
+            .sub-row td {
+                background: #fef9ee;
+                font-weight: 600;
+            }
+            .grand-row td {
+                background: #fef3cd;
+                font-weight: 700;
+            }
+
+            input[type="number"],
+            input.cell-input {
+                width: 100%;
+                border: none;
+                background: transparent;
+                text-align: right;
+                font-size: 12px;
+                padding: 2px 0;
+                -moz-appearance: textfield;
+                appearance: textfield;
+            }
+            input[type="number"]::-webkit-outer-spin-button,
+            input[type="number"]::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+            }
+            input[type="number"]:focus,
+            input.cell-input:focus {
+                background: #eff6ff;
+                outline: 1px solid #93c5fd;
+                border-radius: 2px;
+            }
+
+            .formula-cell {
+                color: #1e40af;
+                font-weight: 600;
+            }
+
+            /* ── import zone ── */
+            .import-zone {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .import-zone input[type="file"] {
+                font-size: 12px;
+            }
+            .import-zone .hint {
+                font-size: 11px;
+                color: #94a3b8;
+            }
+
+            @media print {
+                .controls,
+                .back-link,
+                .import-zone,
+                .params-bar {
+                    display: none !important;
+                }
+            }
+        </style>
+    </head>
+    <body class="page-rb">
+        <div class="container" style="max-width: 1400px">
+            <div class="header">
+                <h1>Свод ФЗП (Фонд заработной платы) 2026</h1>
+                <p>Республиканский бюджет — тарификация и штатное расписание</p>
+            </div>
+            <div class="controls">
+                <div class="branch-selector">
+                    <button
+                        class="branch-btn active"
+                        onclick="switchBranch('nao')"
+                    >
+                        НАО «РФМШ»
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('almaty')">
+                        Алматы
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('astana')">
+                        Астана
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('uralsk')">
+                        Уральск
+                    </button>
+                    <button
+                        class="branch-btn"
+                        onclick="switchBranch('consolidated')"
+                    >
+                        📈 Консолидация
+                    </button>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                    <button onclick="exportXlsx()">📥 Excel</button>
+                    <button onclick="SharedExport.exportToPDF()">📄 PDF</button>
+                    <button onclick="window.print()">🖨️ Печать</button>
+                </div>
+                <div class="save-status" id="saveStatus">Сохранено</div>
+            </div>
+
+            <div class="content">
+                <a href="index.html" class="back-link">← Вернуться к списку</a>
+
+                <!-- МРП / БДО -->
+                <div class="params-bar">
+                    <div class="param-group">
+                        <label>МРП (месячный расчётный показатель)</label>
+                        <input
+                            type="number"
+                            id="mrp"
+                            value="4325"
+                            step="1"
+                            oninput="calc()"
+                        />
+                    </div>
+                    <div class="param-group">
+                        <label>БДО (базовая должностной оклад)</label>
+                        <input
+                            type="number"
+                            id="bdo"
+                            value="29684"
+                            step="1"
+                            oninput="calc()"
+                        />
+                    </div>
+                    <div class="param-group">
+                        <label>Филиал</label>
+                        <div class="param-val" id="branchLabel">Алматы</div>
+                    </div>
+                </div>
+
+                <!-- Import Excel -->
+                <div class="import-zone" id="importZone">
+                    <label style="font-size: 13px; font-weight: 600"
+                        >Импорт из Excel:</label
+                    >
+                    <input
+                        type="file"
+                        id="xlsxFile"
+                        accept=".xlsx,.xls"
+                        onchange="importExcel(this)"
+                    />
+                    <span class="hint"
+                        >Загрузите тарификацию или штатку — данные заполнят
+                        соответствующие строки</span
+                    >
+                </div>
+
+                <!-- Table -->
+                <div style="overflow-x: auto; margin-top: 12px">
+                    <table id="fzpTable">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">№</th>
+                                <th rowspan="2">Наименование</th>
+                                <th rowspan="2">Факт. численность</th>
+                                <th rowspan="2">Кол-во часов</th>
+                                <th rowspan="2">Зарплата в месяц</th>
+                                <th rowspan="2">Годовой ФЗП за 2026 год</th>
+                                <th colspan="5">Начисления</th>
+                                <th rowspan="2">Годовой ФОТ на 2026 год</th>
+                            </tr>
+                            <tr>
+                                <th>Компенсац. выплаты</th>
+                                <th>ОПВР</th>
+                                <th>Соц. налог</th>
+                                <th>Соц. отчисления</th>
+                                <th>Обяз. мед. страх.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="info-bar">
-        <div><span style="font-weight: bold;">Филиал:</span> <span id="currentBranch">Алматы</span></div>
-        <div><span style="font-weight: bold;">Последнее обновление:</span> <span id="lastUpdate">-</span></div>
-        <div class="auto-save-status saved" id="saveStatus">✓ Сохранено</div>
-    </div>
-
-    <div class="table-container">
-        <table id="fzpTable">
-            <tbody>
-                <tr>
-                    <td colspan="11" class="title-cell">План по заработной платежке с отчислениями на 2026 год</td>
-                </tr>
-                <tr>
-                    <th style="width: 5%;">№ п/п</th>
-                    <th style="width: 20%;">Наименование подразделения</th>
-                    <th style="width: 10%;">Плановая численность (академ.)</th>
-                    <th style="width: 10%;">Ст времени по ГОЗ</th>
-                    <th style="width: 10%;">Количество часов по адрес</th>
-                    <th style="width: 10%;">Оплата ФЗП на 2026 год</th>
-                    <th style="width: 10%;">Учебно-вспомогательная работа</th>
-                    <th style="width: 8%;">Социальный налог 6%</th>
-                    <th style="width: 8%;">Социальные отчисления 5%</th>
-                    <th style="width: 10%;">Обязательное социальное медицинское страхование 3%</th>
-                    <th style="width: 10%;">Итого</th>
-                </tr>
-                <tr>
-                    <td class="label-cell">1</td>
-                    <td class="editable"><input type="text" data-cell="B5" value="Преподаватели"></td>
-                    <td class="editable"><input type="number" data-cell="C5" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="D5" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="E5" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="F5" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="G5" value="0"></td>
-                    <td class="formula-cell" id="tax1_1">0.00</td>
-                    <td class="formula-cell" id="tax2_1">0.00</td>
-                    <td class="formula-cell" id="tax3_1">0.00</td>
-                    <td class="formula-cell" id="total_1">0.00</td>
-                </tr>
-                <tr class="total-row">
-                    <td colspan="2" class="label-cell">Итого</td>
-                    <td class="formula-cell" id="totalQuantity">0</td>
-                    <td class="formula-cell" id="totalTime">0.00</td>
-                    <td class="formula-cell" id="totalHours">0.00</td>
-                    <td class="formula-cell" id="totalPayment">0.00</td>
-                    <td class="formula-cell" id="totalWork">0.00</td>
-                    <td class="formula-cell" id="totalTax1">0.00</td>
-                    <td class="formula-cell" id="totalTax2">0.00</td>
-                    <td class="formula-cell" id="totalTax3">0.00</td>
-                    <td class="formula-cell" id="grandTotal">0.00</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="buttons">
-        <button class="btn btn-primary" onclick="saveData()">💾 Сохранить данные</button>
-        <button class="btn btn-success" onclick="exportToExcel()">📥 Скачать в Excel</button>
-        <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Назад в Главное</button>
-    </div>
-
-    <script>
-        let currentBranch = 'almaty';
-        let tableData = { branch: 'almaty', sheet: 'rb_fzp', lastModified: new Date().toISOString(), cells: {} };
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-            setupEventListeners();
-            calculateTotals();
-            
-            // НЕ инициализируем редактируемые таблицы - структура уже готова
-            console.log('✅ Таблица готова к работе');
-        });
-
-        function setupEventListeners() {
-            document.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', function() {
-                    this.parentElement.classList.add('changed');
-                    calculateTotals();
-                    autoSave();
-                });
-            });
-
-            document.querySelectorAll('.branch-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    switchBranch(this.dataset.branch);
-                });
-            });
-        }
-
-        function getValue(cell) {
-            const input = document.querySelector(`input[data-cell="${cell}"]`);
-            return parseFloat(input?.value || 0) || 0;
-        }
-
-        function calculateTotals() {
-            const payment = getValue('F5');
-            const work = getValue('G5');
-            const total = payment + work;
-            
-            const tax1 = total * 0.06;
-            const tax2 = total * 0.05;
-            const tax3 = total * 0.03;
-            const grandTotal = total + tax1 + tax2 + tax3;
-            
-            document.getElementById('tax1_1').textContent = tax1.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('tax2_1').textContent = tax2.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('tax3_1').textContent = tax3.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('total_1').textContent = grandTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            
-            document.getElementById('totalQuantity').textContent = getValue('C5');
-            document.getElementById('totalTime').textContent = getValue('D5').toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('totalHours').textContent = getValue('E5').toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('totalPayment').textContent = payment.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('totalWork').textContent = work.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('totalTax1').textContent = tax1.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('totalTax2').textContent = tax2.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('totalTax3').textContent = tax3.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('grandTotal').textContent = grandTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-        }
-
-        let saveTimeout;
-        function autoSave() {
-            clearTimeout(saveTimeout);
-            const status = document.getElementById('saveStatus');
-            status.className = 'auto-save-status';
-            status.style.background = '#fff3cd';
-            status.style.color = '#856404';
-            status.textContent = '⏳ Сохранение...';
-            saveTimeout = setTimeout(() => { saveData(); status.className = 'auto-save-status saved'; status.textContent = '✓ Сохранено'; }, 1000);
-        }
-
-        function saveData() {
-            if (currentBranch === 'consolidated') return;
-            document.querySelectorAll('input').forEach(input => { tableData.cells[input.dataset.cell] = input.value; input.parentElement.classList.remove('changed'); });
-            tableData.lastModified = new Date().toISOString();
-            const storageKey = `${tableData.sheet}_${tableData.branch}`;
-            localStorage.setItem(storageKey, JSON.stringify(tableData));
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ru-RU');
-        }
-
-        function loadData() {
-            const storageKey = `${tableData.sheet}_${tableData.branch}`;
-            const saved = localStorage.getItem(storageKey);
-            if (saved) {
-                const data = JSON.parse(saved);
-                tableData = data;
-                Object.keys(data.cells).forEach(cell => {
-                    const input = document.querySelector(`input[data-cell="${cell}"]`);
-                    if (input) input.value = data.cells[cell];
-                });
-                document.getElementById('lastUpdate').textContent = new Date(data.lastModified).toLocaleString('ru-RU');
-            } else {
-                document.getElementById('lastUpdate').textContent = 'Нет данных';
-            }
-            calculateTotals();
-        }
-
-        function switchBranch(branch) {
-            if (currentBranch !== 'consolidated') saveData();
-            // Удаляем детали при переключении с консолидации
-            if (currentBranch === 'consolidated' && branch !== 'consolidated') {
-                removeDetailToggles();
-            }
-            
-            currentBranch = branch;
-            tableData.branch = branch;
-            document.querySelectorAll('.branch-btn').forEach(btn => { btn.classList.remove('active'); if (btn.dataset.branch === branch) btn.classList.add('active'); });
-            if (branch === 'consolidated') loadConsolidatedData(); else loadData();
-        }
-
-        function loadConsolidatedData() {
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const allData = {};
-
-            // Сохраняем данные для детализации
-            window.branchDetailsData = {};
-            branches.forEach(b => {
-                const key = `rb_fzp_${b}`;
-                const saved = localStorage.getItem(key);
-                if (saved) allData[b] = JSON.Parse(saved).cells || {};
-            });
-            document.querySelectorAll('input').forEach(input => {
-                const cellId = input.dataset.cell;
-                let sum = 0;
-                branches.forEach(b => { if (allData[b] && allData[b][cellId]) sum += parseFloat(allData[b][cellId]) || 0; });
-                input.value = sum;
-            });
-            calculateTotals();
-            document.getElementById('lastUpdate').textContent = 'Консолидация из 3 филиалов';
-        }
-
-        function exportToExcel() {
-            const data = [];
-            const table = document.querySelector('table');
-            const rows = table.querySelectorAll('tr');
-            rows.forEach(row => {
-                const rowData = [];
-                row.querySelectorAll('th, td').forEach(cell => {
-                    const input = cell.querySelector('input');
-                    rowData.push(input ? input.value || '' : cell.textContent.trim());
-                });
-                data.push(rowData);
-            });
-            const csvContent = data.map(row => row.join('\t')).join('\n');
-            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            const branchNames = {'almaty': 'Алматы', 'uralsk': 'Уральск', 'astana': 'Астана', 'nao': 'НАО', 'consolidated': 'Консолидированная'};
-            const filename = `ФЗП_${branchNames[currentBranch]}_${new Date().toISOString().slice(0,10)}.csv`;
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-        function addDetailToggles() {
-            // Удаляем существующие детальные строки и иконки
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
-            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
-            
-            const dataRows = document.querySelectorAll('tbody tr');
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const branchNames = {
-                'almaty': 'Алматы',
-                'uralsk': 'Уральск',
-                'astana': 'Астана',
-                'nao': 'НАО'
+        <script>
+            var MRP_BY_YEAR = {
+                2024: 3692,
+                2025: 3932,
+                2026: 4325,
+                2027: 4325,
+                2028: 4325,
             };
-            
-            let processedCount = 0;
-            
-            dataRows.forEach((row, index) => {
-                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
-                const firstInput = row.querySelector('input[data-cell]');
-                
-                const isTotalRow = row.classList.contains('total-row') || 
-                                   row.textContent.includes('Итого') ||
-                                   row.textContent.includes('ИТОГО');
-                
-                if (labelCell && firstInput && !isTotalRow) {
-                    const rowNum = firstInput.dataset.row || index;
-                    
-                    labelCell.classList.add('expandable');
-                    const toggle = document.createElement('span');
-                    toggle.className = 'toggle-detail';
-                    toggle.textContent = '▶';
-                    toggle.dataset.row = rowNum;
-                    
-                    labelCell.insertBefore(toggle, labelCell.firstChild);
-                    
-                    const detailRow = document.createElement('tr');
-                    detailRow.className = 'detail-row';
-                    detailRow.dataset.row = rowNum;
-                    
-                    const emptyCell = document.createElement('td');
-                    emptyCell.style.background = '#f8f9fa';
-                    detailRow.appendChild(emptyCell);
-                    
-                    const branchListCell = document.createElement('td');
-                    branchListCell.className = 'detail-cell';
-                    branchListCell.style.verticalAlign = 'top';
-                    
-                    let branchList = '<div style="padding: 5px 0;">';
-                    branches.forEach(b => {
-                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+            var BDO_BY_YEAR = {
+                2024: 23578,
+                2025: 29684,
+                2026: 29684,
+                2027: 29684,
+                2028: 29684,
+            };
+            (function () {
+                var y =
+                    parseInt(localStorage.getItem("budget_year")) ||
+                    new Date().getFullYear();
+                var mrpEl = document.getElementById("mrp");
+                var bdoEl = document.getElementById("bdo");
+                if (mrpEl && !localStorage.getItem("rb_fzp_nao"))
+                    mrpEl.value = MRP_BY_YEAR[y] || 4325;
+                if (bdoEl && !localStorage.getItem("rb_fzp_nao"))
+                    bdoEl.value = BDO_BY_YEAR[y] || 29684;
+            })();
+            const KEY = "rb_fzp";
+            const BRANCHES = ["almaty", "astana", "uralsk", "nao"];
+            const BRANCH_NAMES = {
+                almaty: "Алматы",
+                astana: "Астана",
+                uralsk: "Уральск",
+                nao: "НАО «РФМШ»",
+                consolidated: "Консолидация",
+            };
+            const COLS = 9; // c1..c9: числ, часы, зп_мес, ФЗП, компен, ОПВР, соцналог, соцотч, медстрах
+            let branch = "nao";
+            let timeout;
+
+            /* ── Row definitions ── */
+            // Each data row: { id, n, name }
+            // section headers and subtotals defined separately
+            const ROWS = [
+                { type: "hdr", text: "Штатное расписание" },
+                {
+                    type: "data",
+                    id: "sr1",
+                    n: "1",
+                    name: "Штатное расписание Преподаватели",
+                },
+                {
+                    type: "data",
+                    id: "sr2",
+                    n: "2",
+                    name: "Штатное расписание АУП",
+                },
+                {
+                    type: "data",
+                    id: "sr3",
+                    n: "3",
+                    name: "Штатное расписание Прочие",
+                },
+                {
+                    type: "sub",
+                    id: "sumSR",
+                    text: "Итого штатное расписание",
+                    sum: ["sr1", "sr2", "sr3"],
+                },
+
+                { type: "hdr", text: "Тарификация" },
+                {
+                    type: "data",
+                    id: "tr1",
+                    n: "1",
+                    name: "Тарификация Преподаватели",
+                },
+                {
+                    type: "data",
+                    id: "tr2",
+                    n: "2",
+                    name: "Тарификация по совместительству",
+                },
+                { type: "data", id: "tr3", n: "3", name: "Тарификация Прочие" },
+                {
+                    type: "sub",
+                    id: "sumTR",
+                    text: "Итого тарификация",
+                    sum: ["tr1", "tr2", "tr3"],
+                },
+
+                {
+                    type: "grand",
+                    id: "sumAll",
+                    text: "ИТОГО по филиалу",
+                    sum: ["sr1", "sr2", "sr3", "tr1", "tr2", "tr3"],
+                },
+            ];
+
+            const DATA_IDS = ROWS.filter((r) => r.type === "data").map(
+                (r) => r.id,
+            );
+
+            /* ── Build table ── */
+            function buildTable() {
+                const tbody = document.getElementById("tableBody");
+                tbody.innerHTML = "";
+
+                ROWS.forEach((r) => {
+                    const tr = document.createElement("tr");
+
+                    if (r.type === "hdr") {
+                        tr.classList.add("section-hdr");
+                        tr.innerHTML =
+                            '<td colspan="12"><strong>' +
+                            r.text +
+                            "</strong></td>";
+                    } else if (r.type === "data") {
+                        tr.dataset.row = r.id;
+                        let html =
+                            "<td>" +
+                            r.n +
+                            '</td><td style="text-align:left;">' +
+                            r.name +
+                            "</td>";
+                        for (let c = 1; c <= COLS; c++) {
+                            html +=
+                                '<td><input type="number" id="' +
+                                r.id +
+                                "-c" +
+                                c +
+                                '" value="0" step="any" oninput="calc()"></td>';
+                        }
+                        html +=
+                            '<td class="formula-cell" id="' +
+                            r.id +
+                            '-fot">0,00</td>';
+                        tr.innerHTML = html;
+                    } else if (r.type === "sub") {
+                        tr.classList.add("sub-row");
+                        tr.id = r.id;
+                        let html =
+                            "<td></td><td><strong>" + r.text + "</strong></td>";
+                        for (let c = 1; c <= COLS; c++)
+                            html += '<td class="formula-cell"></td>';
+                        html += '<td class="formula-cell"></td>';
+                        tr.innerHTML = html;
+                    } else if (r.type === "grand") {
+                        tr.classList.add("grand-row");
+                        tr.id = r.id;
+                        let html =
+                            "<td></td><td><strong>" + r.text + "</strong></td>";
+                        for (let c = 1; c <= COLS; c++)
+                            html += '<td class="formula-cell"></td>';
+                        html += '<td class="formula-cell"></td>';
+                        tr.innerHTML = html;
+                    }
+                    tbody.appendChild(tr);
+                });
+            }
+
+            /* ── Calculation ── */
+            function getRowVals(id) {
+                const v = [];
+                for (let c = 1; c <= COLS; c++)
+                    v.push(
+                        parseFloat(
+                            document.getElementById(id + "-c" + c).value,
+                        ) || 0,
+                    );
+                return v;
+            }
+
+            function sumRowArrays(ids) {
+                const s = new Array(COLS).fill(0);
+                ids.forEach((id) => {
+                    const v = getRowVals(id);
+                    v.forEach((val, i) => {
+                        s[i] += val;
                     });
-                    branchList += '</div>';
-                    branchListCell.innerHTML = branchList;
-                    detailRow.appendChild(branchListCell);
-                    
-                    const inputs = row.querySelectorAll('input[data-cell]');
-                    inputs.forEach(input => {
-                        const yearCell = document.createElement('td');
-                        yearCell.className = 'detail-cell';
-                        yearCell.style.verticalAlign = 'top';
-                        yearCell.style.textAlign = 'right';
-                        
-                        let yearData = '<div style="padding: 5px 0;">';
-                        branches.forEach(b => {
-                            const cellId = input.dataset.cell;
-                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
-                                ? parseFloat(window.branchDetailsData[b][cellId]) 
-                                : 0;
-                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                });
+                return s;
+            }
+
+            function fotFromVals(v) {
+                // FOT = ФЗП(c4) + Компенс(c5) + ОПВР(c6) + Соцналог(c7) + Соцотч(c8) + Медстрах(c9)
+                return v[3] + v[4] + v[5] + v[6] + v[7] + v[8];
+            }
+
+            function fmt(n) {
+                return n.toLocaleString("ru-RU", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
+            }
+
+            function writeSumRow(id, vals) {
+                const tr = document.getElementById(id);
+                if (!tr) return;
+                const tds = tr.querySelectorAll("td");
+                for (let c = 0; c < COLS; c++)
+                    tds[c + 2].textContent = fmt(vals[c]);
+                tds[COLS + 2].textContent = fmt(fotFromVals(vals));
+            }
+
+            function calc() {
+                // Per-row FOT
+                DATA_IDS.forEach((id) => {
+                    const v = getRowVals(id);
+                    document.getElementById(id + "-fot").textContent = fmt(
+                        fotFromVals(v),
+                    );
+                });
+
+                // Subtotals
+                ROWS.filter(
+                    (r) => r.type === "sub" || r.type === "grand",
+                ).forEach((r) => {
+                    writeSumRow(r.id, sumRowArrays(r.sum));
+                });
+
+                schedSave();
+            }
+
+            /* ── Save / Load ── */
+            function schedSave() {
+                document.getElementById("saveStatus").textContent =
+                    "Изменено...";
+                document.getElementById("saveStatus").style.background =
+                    "#fff3cd";
+                clearTimeout(timeout);
+                timeout = setTimeout(save, 1000);
+            }
+
+            function save() {
+                if (branch === "consolidated") return;
+                const data = {
+                    mrp: document.getElementById("mrp").value,
+                    bdo: document.getElementById("bdo").value,
+                    rows: {},
+                };
+                DATA_IDS.forEach((id) => {
+                    const row = {};
+                    for (let c = 1; c <= COLS; c++)
+                        row["c" + c] = document.getElementById(
+                            id + "-c" + c,
+                        ).value;
+                    data.rows[id] = row;
+                });
+                localStorage.setItem(KEY + "_" + branch, JSON.stringify(data));
+                document.getElementById("saveStatus").textContent = "Сохранено";
+                document.getElementById("saveStatus").style.background =
+                    "#d4edda";
+            }
+
+            function load() {
+                const raw = localStorage.getItem(KEY + "_" + branch);
+                // Reset
+                DATA_IDS.forEach((id) => {
+                    for (let c = 1; c <= COLS; c++) {
+                        const el = document.getElementById(id + "-c" + c);
+                        el.value = "0";
+                        el.disabled = false;
+                    }
+                });
+                document.getElementById("mrp").disabled = false;
+                document.getElementById("bdo").disabled = false;
+                document.getElementById("importZone").style.display = "";
+
+                if (raw) {
+                    try {
+                        const data = JSON.parse(raw);
+                        if (data.mrp)
+                            document.getElementById("mrp").value = data.mrp;
+                        if (data.bdo)
+                            document.getElementById("bdo").value = data.bdo;
+                        if (data.rows) {
+                            DATA_IDS.forEach((id) => {
+                                if (data.rows[id]) {
+                                    for (let c = 1; c <= COLS; c++) {
+                                        const el = document.getElementById(
+                                            id + "-c" + c,
+                                        );
+                                        if (
+                                            data.rows[id]["c" + c] !== undefined
+                                        )
+                                            el.value = data.rows[id]["c" + c];
+                                    }
+                                }
+                            });
+                        }
+                    } catch (e) {}
+                }
+                calc();
+            }
+
+            /* ── Branch switching ── */
+            function switchBranch(b) {
+                if (branch !== "consolidated" && branch !== b) save();
+                branch = b;
+                document.getElementById("branchLabel").textContent =
+                    BRANCH_NAMES[b];
+                document
+                    .querySelectorAll(".branch-btn")
+                    .forEach((btn) => btn.classList.remove("active"));
+                event.target.classList.add("active");
+                if (b === "consolidated") loadConsolidated();
+                else load();
+            }
+
+            function loadConsolidated() {
+                // Sum all branches
+                const sumData = {};
+                DATA_IDS.forEach((id) => {
+                    sumData[id] = new Array(COLS).fill(0);
+                });
+
+                BRANCHES.forEach((b) => {
+                    const raw = localStorage.getItem(KEY + "_" + b);
+                    if (!raw) return;
+                    try {
+                        const data = JSON.parse(raw);
+                        if (data.rows) {
+                            DATA_IDS.forEach((id) => {
+                                if (data.rows[id]) {
+                                    for (let c = 1; c <= COLS; c++) {
+                                        sumData[id][c - 1] +=
+                                            parseFloat(
+                                                data.rows[id]["c" + c],
+                                            ) || 0;
+                                    }
+                                }
+                            });
+                        }
+                    } catch (e) {}
+                });
+
+                DATA_IDS.forEach((id) => {
+                    for (let c = 1; c <= COLS; c++) {
+                        const el = document.getElementById(id + "-c" + c);
+                        el.value = sumData[id][c - 1];
+                        el.disabled = true;
+                    }
+                });
+                document.getElementById("mrp").disabled = true;
+                document.getElementById("bdo").disabled = true;
+                document.getElementById("importZone").style.display = "none";
+                calc();
+            }
+
+            /* ── Excel Import ── */
+            function importExcel(fileInput) {
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const wb = XLSX.read(e.target.result, {
+                            type: "array",
                         });
-                        yearData += '</div>';
-                        yearCell.innerHTML = yearData;
-                        detailRow.appendChild(yearCell);
-                    });
-                    
-                    row.parentNode.insertBefore(detailRow, row.nextSibling);
-                    
-                    labelCell.addEventListener('click', function(e) {
-                        const toggle = this.querySelector('.toggle-detail');
-                        const detailRow = this.parentElement.nextElementSibling;
-                        
-                        if (detailRow && detailRow.classList.contains('detail-row')) {
-                            detailRow.classList.toggle('show');
-                            toggle.classList.toggle('expanded');
+                        const ws = wb.Sheets[wb.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(ws, {
+                            header: 1,
+                            defval: "",
+                        });
+
+                        if (jsonData.length < 2) {
+                            alert("Файл пуст или не содержит данных");
+                            return;
+                        }
+
+                        // Try to detect column mapping from header row
+                        // Expected: Name | Count | Hours | Salary/month | FZP/year | Compensations | OPVR | SocTax | SocDeductions | MedInsurance
+                        let imported = 0;
+                        let targetRow = null;
+
+                        // Heuristic: scan rows for keywords to find which data row to fill
+                        const nameCol = 0; // or 1 if first col is №
+
+                        jsonData.forEach((row, idx) => {
+                            if (idx === 0) return; // skip header
+                            const name = String(
+                                row[0] || row[1] || "",
+                            ).toLowerCase();
+
+                            // Try to map data rows by matching keywords
+                            let matchedId = null;
+                            if (/итого|всего/i.test(name)) return; // skip totals
+
+                            // Find first data row to fill — simple sequential approach
+                            // The user fills the specific row they need
+                        });
+
+                        // Simple approach: fill ALL data from Excel sequentially into data rows
+                        const dataRows = jsonData.filter((row, i) => {
+                            if (i === 0) return false; // header
+                            const txt = String(row[0] || "");
+                            return txt && !/итого|всего|^$/i.test(txt);
+                        });
+
+                        const colOffset =
+                            typeof dataRows[0]?.[0] === "number" ? 1 : 0; // skip № column
+
+                        dataRows.forEach((excelRow, idx) => {
+                            if (idx >= DATA_IDS.length) return;
+                            const rid = DATA_IDS[idx];
+
+                            // Map: col offset+1=name(skip), offset+2=count, offset+3=hours, offset+4=salary ...
+                            for (let c = 1; c <= COLS; c++) {
+                                const val =
+                                    parseFloat(excelRow[colOffset + c]) || 0;
+                                const el = document.getElementById(
+                                    rid + "-c" + c,
+                                );
+                                if (el) el.value = val;
+                            }
+                            imported++;
+                        });
+
+                        calc();
+                        alert(
+                            "Импортировано строк: " +
+                                imported +
+                                " из " +
+                                dataRows.length,
+                        );
+                    } catch (err) {
+                        alert("Ошибка при чтении файла: " + err.message);
+                    }
+                    fileInput.value = "";
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            /* ── Export Excel ── */
+            function exportXlsx() {
+                const wb = XLSX.utils.book_new();
+                const rows = [];
+                rows.push([
+                    "Свод ФЗП — НАО «РФМШ» — " +
+                        BRANCH_NAMES[branch] +
+                        " — 2026 год",
+                ]);
+                rows.push([
+                    "МРП: " + document.getElementById("mrp").value,
+                    "БДО: " + document.getElementById("bdo").value,
+                ]);
+                rows.push([]);
+
+                const HDR = [
+                    "№",
+                    "Наименование",
+                    "Факт. числ.",
+                    "Кол-во часов",
+                    "Зарплата в мес.",
+                    "Годовой ФЗП",
+                    "Компенсац. выплаты",
+                    "ОПВР",
+                    "Соц. налог",
+                    "Соц. отчисл.",
+                    "Обяз. мед. страх.",
+                    "Годовой ФОТ",
+                ];
+                rows.push(HDR);
+
+                const table = document.getElementById("fzpTable");
+                table.querySelectorAll("tbody tr").forEach((tr) => {
+                    if (tr.classList.contains("section-hdr")) {
+                        rows.push([tr.textContent.trim()]);
+                        return;
+                    }
+                    const tds = tr.querySelectorAll("td");
+                    const rowData = [];
+                    tds.forEach((td, i) => {
+                        const inp = td.querySelector("input");
+                        if (inp) {
+                            rowData.push(parseFloat(inp.value) || 0);
+                        } else {
+                            const txt = td.textContent.trim();
+                            const num = parseFloat(
+                                txt.replace(/\s/g, "").replace(",", "."),
+                            );
+                            rowData.push(isNaN(num) || i < 2 ? txt : num);
                         }
                     });
-                    
-                    processedCount++;
-                }
-            });
-            
-            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
-        }
+                    rows.push(rowData);
+                });
 
-        function removeDetailToggles() {
-            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.expandable').forEach(cell => {
-                cell.classList.remove('expandable');
-            });
-        }
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+                ws["!cols"] = [
+                    { wch: 5 },
+                    { wch: 38 },
+                    { wch: 12 },
+                    { wch: 12 },
+                    { wch: 16 },
+                    { wch: 16 },
+                    { wch: 16 },
+                    { wch: 14 },
+                    { wch: 14 },
+                    { wch: 14 },
+                    { wch: 16 },
+                    { wch: 16 },
+                ];
+                XLSX.utils.book_append_sheet(wb, ws, "ФЗП");
+                XLSX.writeFile(
+                    wb,
+                    "ФЗП_" + BRANCH_NAMES[branch] + "_2026.xlsx",
+                );
+            }
 
-    </script>
-    <script src="shared-nav.js"></script>
-</body>
+            /* ── Init ── */
+            buildTable();
+            load();
+        </script>
+        <script src="shared-nav.js"></script>
+    </body>
 </html>
-
-

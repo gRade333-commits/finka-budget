@@ -1,554 +1,1131 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="shared.css">
-    <title>СС Дотация - Бюджет ПУ 2026</title>
-    <script src="editable-table.js"></script>
-</head>
-<body class="page-pu">
-    <div class="container">
-        <div class="header">
-            <h1>Сводный расчет расходов собственных средств (Дотация)</h1>
-            <p>За счет дотаций на 2026 год - филиал г. Алматы</p>
-        </div>
-        
-        <div class="controls">
-            <div class="branch-selector">
-                <button class="branch-btn active" onclick="switchBranch('almaty')">Алматы</button>
-                <button class="branch-btn" onclick="switchBranch('astana')">Астана</button>
-                <button class="branch-btn" onclick="switchBranch('uralsk')">Уральск</button>
-                <button class="branch-btn" onclick="switchBranch('nao')">НАО</button>
-                <button class="branch-btn" onclick="switchBranch('consolidated')">Консолидация</button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="shared.css" />
+        <title>СС Дотация - Бюджет ПУ 2026</title>
+        <script src="editable-table.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+    </head>
+    <body class="page-pu">
+        <div class="container">
+            <div class="header">
+                <h1>Сводный расчет расходов собственных средств (Дотация)</h1>
+                <p>За счет дотаций на 2026 год - филиал г. Алматы</p>
             </div>
-            <div class="save-status" id="saveStatus">Сохранено</div>
-        </div>
-        
-        <div class="content">
-            <a href="index.html" class="back-link">← Вернуться к списку</a>
-            
-            <div class="budget-table-wrapper">
-                <table id="budgetTable">
-                    <thead>
-                        <tr>
-                            <th class="num-col">№</th>
-                            <th class="name-col">Наименование расходов</th>
-                            <th class="value-col">ВСЕГО</th>
-                            <th class="value-col">Школа г. Алматы</th>
-                            <th class="value-col">АО "Финансовый центр"</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="contingent-row">
-                            <td></td>
-                            <td><strong>Контингент учащихся</strong></td>
-                            <td class="formula-cell" id="total-contingent">323</td>
-                            <td><input type="number" id="contingent-school" value="159" oninput="updateCalculations()"></td>
-                            <td><input type="number" id="contingent-fc" value="164" oninput="updateCalculations()"></td>
-                        </tr>
-                        
-                        <tr class="section-title">
-                            <td colspan="5"><strong>ФОНД ОПЛАТЫ ТРУДА</strong></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">1</td>
-                            <td>Оплата труда работников НАО "РФМШ"</td>
-                            <td><input type="number" id="item-1-total" value="0" oninput="updateRow(1)"></td>
-                            <td class="formula-cell" id="item-1-school">0</td>
-                            <td><input type="number" id="item-1-fc" value="0" oninput="updateRow(1)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">2</td>
-                            <td>Оплата труда иностранных специалистов</td>
-                            <td><input type="number" id="item-2-total" value="0" oninput="updateRow(2)"></td>
-                            <td class="formula-cell" id="item-2-school">0</td>
-                            <td><input type="number" id="item-2-fc" value="0" oninput="updateRow(2)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">3</td>
-                            <td>Дополнительные денежные выплаты</td>
-                            <td><input type="number" id="item-3-total" value="0" oninput="updateRow(3)"></td>
-                            <td class="formula-cell" id="item-3-school">0</td>
-                            <td><input type="number" id="item-3-fc" value="0" oninput="updateRow(3)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">4</td>
-                            <td>Отчисления в Пенсионный фонд</td>
-                            <td><input type="number" id="item-4-total" value="0" oninput="updateRow(4)"></td>
-                            <td class="formula-cell" id="item-4-school">0</td>
-                            <td><input type="number" id="item-4-fc" value="0" oninput="updateRow(4)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">5</td>
-                            <td>Отчисления в ОСМС</td>
-                            <td><input type="number" id="item-5-total" value="0" oninput="updateRow(5)"></td>
-                            <td class="formula-cell" id="item-5-school">0</td>
-                            <td><input type="number" id="item-5-fc" value="0" oninput="updateRow(5)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">6</td>
-                            <td>Социальный налог</td>
-                            <td><input type="number" id="item-6-total" value="0" oninput="updateRow(6)"></td>
-                            <td class="formula-cell" id="item-6-school">0</td>
-                            <td><input type="number" id="item-6-fc" value="0" oninput="updateRow(6)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">7</td>
-                            <td>Социальные отчисления</td>
-                            <td><input type="number" id="item-7-total" value="0" oninput="updateRow(7)"></td>
-                            <td class="formula-cell" id="item-7-school">0</td>
-                            <td><input type="number" id="item-7-fc" value="0" oninput="updateRow(7)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">8</td>
-                            <td>Отчисления на ОСМС</td>
-                            <td><input type="number" id="item-8-total" value="0" oninput="updateRow(8)"></td>
-                            <td class="formula-cell" id="item-8-school">0</td>
-                            <td><input type="number" id="item-8-fc" value="0" oninput="updateRow(8)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">9</td>
-                            <td>Отчисления ОСМС за счет работодателя</td>
-                            <td><input type="number" id="item-9-total" value="0" oninput="updateRow(9)"></td>
-                            <td class="formula-cell" id="item-9-school">0</td>
-                            <td><input type="number" id="item-9-fc" value="0" oninput="updateRow(9)"></td>
-                        </tr>
-                        
-                        <tr class="total-row">
-                            <td class="num-col"></td>
-                            <td><strong>ИТОГО ФОТ</strong></td>
-                            <td class="formula-cell" id="fot-total">0</td>
-                            <td class="formula-cell" id="fot-school">0</td>
-                            <td class="formula-cell" id="fot-fc">0</td>
-                        </tr>
-                        
-                        <tr class="section-title">
-                            <td colspan="5"><strong>ПРИОБРЕТЕНИЕ И УСЛУГИ</strong></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">10</td>
-                            <td>Продукты питания</td>
-                            <td><input type="number" id="item-10-total" value="0" oninput="updateRow(10)"></td>
-                            <td class="formula-cell" id="item-10-school">0</td>
-                            <td><input type="number" id="item-10-fc" value="0" oninput="updateRow(10)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">11</td>
-                            <td>Коммунальные услуги</td>
-                            <td><input type="number" id="item-11-total" value="0" oninput="updateRow(11)"></td>
-                            <td class="formula-cell" id="item-11-school">0</td>
-                            <td><input type="number" id="item-11-fc" value="0" oninput="updateRow(11)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">12</td>
-                            <td>Услуги связи</td>
-                            <td><input type="number" id="item-12-total" value="0" oninput="updateRow(12)"></td>
-                            <td class="formula-cell" id="item-12-school">0</td>
-                            <td><input type="number" id="item-12-fc" value="0" oninput="updateRow(12)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">13</td>
-                            <td>Прочие услуги</td>
-                            <td><input type="number" id="item-13-total" value="0" oninput="updateRow(13)"></td>
-                            <td class="formula-cell" id="item-13-school">0</td>
-                            <td><input type="number" id="item-13-fc" value="0" oninput="updateRow(13)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">14</td>
-                            <td>Материалы и предметы</td>
-                            <td><input type="number" id="item-14-total" value="0" oninput="updateRow(14)"></td>
-                            <td class="formula-cell" id="item-14-school">0</td>
-                            <td><input type="number" id="item-14-fc" value="0" oninput="updateRow(14)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">15</td>
-                            <td>Медикаменты</td>
-                            <td><input type="number" id="item-15-total" value="0" oninput="updateRow(15)"></td>
-                            <td class="formula-cell" id="item-15-school">0</td>
-                            <td><input type="number" id="item-15-fc" value="0" oninput="updateRow(15)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">16</td>
-                            <td>Командировочные расходы</td>
-                            <td><input type="number" id="item-16-total" value="0" oninput="updateRow(16)"></td>
-                            <td class="formula-cell" id="item-16-school">0</td>
-                            <td><input type="number" id="item-16-fc" value="0" oninput="updateRow(16)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">17</td>
-                            <td>Транспортные услуги</td>
-                            <td><input type="number" id="item-17-total" value="0" oninput="updateRow(17)"></td>
-                            <td class="formula-cell" id="item-17-school">0</td>
-                            <td><input type="number" id="item-17-fc" value="0" oninput="updateRow(17)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">18</td>
-                            <td>Аренда помещений</td>
-                            <td><input type="number" id="item-18-total" value="0" oninput="updateRow(18)"></td>
-                            <td class="formula-cell" id="item-18-school">0</td>
-                            <td><input type="number" id="item-18-fc" value="0" oninput="updateRow(18)"></td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="num-col">19</td>
-                            <td>Прочие расходы</td>
-                            <td><input type="number" id="item-19-total" value="0" oninput="updateRow(19)"></td>
-                            <td class="formula-cell" id="item-19-school">0</td>
-                            <td><input type="number" id="item-19-fc" value="0" oninput="updateRow(19)"></td>
-                        </tr>
-                        
-                        <tr class="total-row">
-                            <td class="num-col"></td>
-                            <td><strong>ИТОГО</strong></td>
-                            <td class="formula-cell" id="grand-total">0</td>
-                            <td class="formula-cell" id="grand-school">0</td>
-                            <td class="formula-cell" id="grand-fc">0</td>
-                        </tr>
-                    </tbody>
-                </table>
+
+            <div class="controls">
+                <div class="branch-selector">
+                    <button
+                        class="branch-btn active"
+                        onclick="switchBranch('nao')"
+                    >
+                        НАО «РФМШ»
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('almaty')">
+                        Алматы
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('astana')">
+                        Астана
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('uralsk')">
+                        Уральск
+                    </button>
+                    <button
+                        class="branch-btn"
+                        onclick="switchBranch('consolidated')"
+                    >
+                        Консолидация
+                    </button>
+                </div>
+                <div
+                    style="
+                        display: flex;
+                        gap: 8px;
+                        flex-wrap: wrap;
+                        align-items: center;
+                    "
+                >
+                    <button
+                        onclick="
+                            SharedExport.exportTableToExcel({
+                                title: document.title,
+                            })
+                        "
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📥 Excel
+                    </button>
+                    <button
+                        onclick="SharedExport.exportToPDF()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📄 PDF
+                    </button>
+                    <button
+                        onclick="window.print()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        🖨️ Печать
+                    </button>
+                </div>
+                <div
+                    style="
+                        display: flex;
+                        gap: 8px;
+                        flex-wrap: wrap;
+                        align-items: center;
+                    "
+                >
+                    <button
+                        onclick="
+                            SharedExport.exportTableToExcel({
+                                title: document.title,
+                            })
+                        "
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📥 Excel
+                    </button>
+                    <button
+                        onclick="SharedExport.exportToPDF()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📄 PDF
+                    </button>
+                    <button
+                        onclick="window.print()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        🖨️ Печать
+                    </button>
+                </div>
+                <div class="save-status" id="saveStatus">Сохранено</div>
+            </div>
+
+            <div class="content">
+                <a href="index.html" class="back-link">← Вернуться к списку</a>
+
+                <div class="budget-table-wrapper">
+                    <table id="budgetTable">
+                        <thead>
+                            <tr>
+                                <th class="num-col">№</th>
+                                <th class="name-col">Наименование расходов</th>
+                                <th style="width: 70px; text-align: center">
+                                    Специфика
+                                </th>
+                                <th class="value-col">ВСЕГО</th>
+                                <th class="value-col">Школа г. Алматы</th>
+                                <th class="value-col">АО "Финансовый центр"</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="contingent-row">
+                                <td></td>
+                                <td><strong>Контингент учащихся</strong></td>
+                                <td></td>
+                                <td class="formula-cell" id="total-contingent">
+                                    323
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="contingent-school"
+                                        value="159"
+                                        oninput="updateCalculations()"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="contingent-fc"
+                                        value="164"
+                                        oninput="updateCalculations()"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr class="section-title">
+                                <td colspan="6">
+                                    <strong>ФОНД ОПЛАТЫ ТРУДА</strong>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">1</td>
+                                <td>Оплата труда</td>
+                                <td style="text-align: center">111</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-1-total"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-1-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-1-fc"
+                                        value="0"
+                                        oninput="updateRow(1)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">2</td>
+                                <td>Компенсационные выплаты</td>
+                                <td style="text-align: center">113</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-2-total"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-2-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-2-fc"
+                                        value="0"
+                                        oninput="updateRow(2)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">3</td>
+                                <td>
+                                    Обязательные пенсионные взносы работодателей
+                                </td>
+                                <td style="text-align: center">116</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-3-total"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-3-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-3-fc"
+                                        value="0"
+                                        oninput="updateRow(3)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">4</td>
+                                <td>Социальный налог</td>
+                                <td style="text-align: center">121</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-4-total"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-4-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-4-fc"
+                                        value="0"
+                                        oninput="updateRow(4)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">5</td>
+                                <td>
+                                    Социальные отчисления в Государственный фонд
+                                    социального страхования
+                                </td>
+                                <td style="text-align: center">122</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-5-total"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-5-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-5-fc"
+                                        value="0"
+                                        oninput="updateRow(5)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">6</td>
+                                <td>
+                                    Отчисления на обязательное социальное
+                                    медицинское страхование
+                                </td>
+                                <td style="text-align: center">124</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-6-total"
+                                        value="0"
+                                        oninput="updateRow(6)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-6-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-6-fc"
+                                        value="0"
+                                        oninput="updateRow(6)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr class="total-row">
+                                <td class="num-col"></td>
+                                <td><strong>ИТОГО ФОТ</strong></td>
+                                <td></td>
+                                <td class="formula-cell" id="fot-total">0</td>
+                                <td class="formula-cell" id="fot-school">0</td>
+                                <td class="formula-cell" id="fot-fc">0</td>
+                            </tr>
+
+                            <tr class="section-title">
+                                <td colspan="6">
+                                    <strong>ПРИОБРЕТЕНИЕ И УСЛУГИ</strong>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">7</td>
+                                <td>Приобретение продуктов питания</td>
+                                <td style="text-align: center">141</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-7-total"
+                                        value="0"
+                                        oninput="updateRow(7)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-7-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-7-fc"
+                                        value="0"
+                                        oninput="updateRow(7)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">8</td>
+                                <td>
+                                    Приобретение лекарственных средств и прочих
+                                    изделий медицинского назначения
+                                </td>
+                                <td style="text-align: center">142</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-8-total"
+                                        value="0"
+                                        oninput="updateRow(8)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-8-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-8-fc"
+                                        value="0"
+                                        oninput="updateRow(8)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">9</td>
+                                <td>
+                                    Приобретение топлива, горюче-смазочных
+                                    материалов
+                                </td>
+                                <td style="text-align: center">144</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-9-total"
+                                        value="0"
+                                        oninput="updateRow(9)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-9-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-9-fc"
+                                        value="0"
+                                        oninput="updateRow(9)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">10</td>
+                                <td>Приобретение прочих запасов</td>
+                                <td style="text-align: center">149</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-10-total"
+                                        value="0"
+                                        oninput="updateRow(10)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-10-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-10-fc"
+                                        value="0"
+                                        oninput="updateRow(10)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">11</td>
+                                <td>Оплата коммунальных услуг</td>
+                                <td style="text-align: center">151</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-11-total"
+                                        value="0"
+                                        oninput="updateRow(11)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-11-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-11-fc"
+                                        value="0"
+                                        oninput="updateRow(11)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">12</td>
+                                <td>Оплата услуги связи</td>
+                                <td style="text-align: center">152</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-12-total"
+                                        value="0"
+                                        oninput="updateRow(12)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-12-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-12-fc"
+                                        value="0"
+                                        oninput="updateRow(12)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">13</td>
+                                <td>Оплата прочих услуг и работ</td>
+                                <td style="text-align: center">159</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-13-total"
+                                        value="0"
+                                        oninput="updateRow(13)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-13-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-13-fc"
+                                        value="0"
+                                        oninput="updateRow(13)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">14</td>
+                                <td>
+                                    Командировки и служебные разъезды внутри
+                                    страны
+                                </td>
+                                <td style="text-align: center">161</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-14-total"
+                                        value="0"
+                                        oninput="updateRow(14)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-14-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-14-fc"
+                                        value="0"
+                                        oninput="updateRow(14)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">15</td>
+                                <td>
+                                    Командировки и служебные разъезды за пределы
+                                    страны
+                                </td>
+                                <td style="text-align: center">162</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-15-total"
+                                        value="0"
+                                        oninput="updateRow(15)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-15-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-15-fc"
+                                        value="0"
+                                        oninput="updateRow(15)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">15</td>
+                                <td>
+                                    Затраты Фонда всеобщего обязательного
+                                    среднего образования
+                                </td>
+                                <td style="text-align: center">163</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-16-total"
+                                        value="0"
+                                        oninput="updateRow(16)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-16-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-16-fc"
+                                        value="0"
+                                        oninput="updateRow(16)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">16</td>
+                                <td>Прочие текущие затраты</td>
+                                <td style="text-align: center">169</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-17-total"
+                                        value="0"
+                                        oninput="updateRow(17)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-17-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-17-fc"
+                                        value="0"
+                                        oninput="updateRow(17)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">17</td>
+                                <td>
+                                    Приобретение машин, оборудования,
+                                    инструментов, производственного и
+                                    хозяйственного инвентаря
+                                </td>
+                                <td style="text-align: center">414</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-18-total"
+                                        value="0"
+                                        oninput="updateRow(18)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-18-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-18-fc"
+                                        value="0"
+                                        oninput="updateRow(18)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="num-col">18</td>
+                                <td>Приобретение прочих основных средств</td>
+                                <td style="text-align: center">419</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-19-total"
+                                        value="0"
+                                        oninput="updateRow(19)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="item-19-school">
+                                    0
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="item-19-fc"
+                                        value="0"
+                                        oninput="updateRow(19)"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr class="total-row">
+                                <td class="num-col"></td>
+                                <td><strong>ИТОГО</strong></td>
+                                <td></td>
+                                <td class="formula-cell" id="grand-total">0</td>
+                                <td class="formula-cell" id="grand-school">
+                                    0
+                                </td>
+                                <td class="formula-cell" id="grand-fc">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        const SHEET_KEY = 'pu_ss_dotacia';
-        let currentBranch = 'almaty';
-        let saveTimeout;
+        <script>
+            const SHEET_KEY = "pu_ss_dotacia";
+            let currentBranch = "nao";
+            let saveTimeout;
 
-        function updateRow(itemNum) {
-            const total = parseFloat(document.getElementById(`item-${itemNum}-total`).value) || 0;
-            const fc = parseFloat(document.getElementById(`item-${itemNum}-fc`).value) || 0;
-            const school = total - fc;
-            
-            document.getElementById(`item-${itemNum}-school`).textContent = school.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            
-            updateTotals();
-            scheduleAutoSave();
-        }
-
-        function updateCalculations() {
-            const school = parseFloat(document.getElementById('contingent-school').value) || 0;
-            const fc = parseFloat(document.getElementById('contingent-fc').value) || 0;
-            document.getElementById('total-contingent').textContent = school + fc;
-            
-            scheduleAutoSave();
-        }
-
-        function updateTotals() {
-            let fotTotal = 0, fotSchool = 0, fotFc = 0;
-            let grandTotal = 0, grandSchool = 0, grandFc = 0;
-            
-            for (let i = 1; i <= 19; i++) {
-                const total = parseFloat(document.getElementById(`item-${i}-total`).value) || 0;
-                const fc = parseFloat(document.getElementById(`item-${i}-fc`).value) || 0;
+            function updateRow(itemNum) {
+                const total =
+                    parseFloat(
+                        document.getElementById(`item-${itemNum}-total`).value,
+                    ) || 0;
+                const fc =
+                    parseFloat(
+                        document.getElementById(`item-${itemNum}-fc`).value,
+                    ) || 0;
                 const school = total - fc;
-                
-                grandTotal += total;
-                grandSchool += school;
-                grandFc += fc;
-                
-                if (i <= 9) {
-                    fotTotal += total;
-                    fotSchool += school;
-                    fotFc += fc;
-                }
-            }
-            
-            document.getElementById('fot-total').textContent = fotTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('fot-school').textContent = fotSchool.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('fot-fc').textContent = fotFc.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            
-            document.getElementById('grand-total').textContent = grandTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('grand-school').textContent = grandSchool.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('grand-fc').textContent = grandFc.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        }
 
-        function scheduleAutoSave() {
-            document.getElementById('saveStatus').textContent = 'Изменено...';
-            document.getElementById('saveStatus').style.background = '#fff3cd';
-            document.getElementById('saveStatus').style.color = '#856404';
-            
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                saveData();
-            }, 1000);
-        }
+                document.getElementById(`item-${itemNum}-school`).textContent =
+                    school.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
 
-        function saveData() {
-            // Не сохраняем в режиме консолидации
-            if (currentBranch === 'consolidated') return;
-            
-            const data = {
-                contingent: {
-                    school: document.getElementById('contingent-school').value,
-                    fc: document.getElementById('contingent-fc').value
-                },
-                items: {}
-            };
-            
-            for (let i = 1; i <= 19; i++) {
-                data.items[i] = {
-                    total: document.getElementById(`item-${i}-total`).value,
-                    fc: document.getElementById(`item-${i}-fc`).value
-                };
+                updateTotals();
+                scheduleAutoSave();
             }
-            
-            localStorage.setItem(`${SHEET_KEY}_${currentBranch}`, JSON.stringify(data));
-            
-            document.getElementById('saveStatus').textContent = 'Сохранено';
-            document.getElementById('saveStatus').style.background = '#d4edda';
-            document.getElementById('saveStatus').style.color = '#155724';
-        }
 
-        function loadData() {
-            const saved = localStorage.getItem(`${SHEET_KEY}_${currentBranch}`);
-            
-            // Разблокируем поля
-            document.getElementById('contingent-school').disabled = false;
-            document.getElementById('contingent-fc').disabled = false;
-            for (let i = 1; i <= 19; i++) {
-                document.getElementById(`item-${i}-total`).disabled = false;
-                document.getElementById(`item-${i}-fc`).disabled = false;
+            function updateCalculations() {
+                const school =
+                    parseFloat(
+                        document.getElementById("contingent-school").value,
+                    ) || 0;
+                const fc =
+                    parseFloat(
+                        document.getElementById("contingent-fc").value,
+                    ) || 0;
+                document.getElementById("total-contingent").textContent =
+                    school + fc;
+
+                scheduleAutoSave();
             }
-            
-            document.getElementById('contingent-school').value = '';
-            document.getElementById('contingent-fc').value = '';
-            for (let i = 1; i <= 19; i++) {
-                document.getElementById(`item-${i}-total`).value = '';
-                document.getElementById(`item-${i}-fc`).value = '';
-            }
-            
-            if (saved) {
-                const data = JSON.parse(saved);
-                
-                if (data.contingent) {
-                    document.getElementById('contingent-school').value = data.contingent.school || '';
-                    document.getElementById('contingent-fc').value = data.contingent.fc || '';
-                }
-                
+
+            function updateTotals() {
+                let fotTotal = 0,
+                    fotSchool = 0,
+                    fotFc = 0;
+                let grandTotal = 0,
+                    grandSchool = 0,
+                    grandFc = 0;
+
                 for (let i = 1; i <= 19; i++) {
-                    if (data.items && data.items[i]) {
-                        document.getElementById(`item-${i}-total`).value = data.items[i].total || '';
-                        document.getElementById(`item-${i}-fc`).value = data.items[i].fc || '';
-                        updateRow(i);
+                    const total =
+                        parseFloat(
+                            document.getElementById(`item-${i}-total`).value,
+                        ) || 0;
+                    const fc =
+                        parseFloat(
+                            document.getElementById(`item-${i}-fc`).value,
+                        ) || 0;
+                    const school = total - fc;
+
+                    grandTotal += total;
+                    grandSchool += school;
+                    grandFc += fc;
+
+                    if (i <= 6) {
+                        fotTotal += total;
+                        fotSchool += school;
+                        fotFc += fc;
                     }
                 }
-            } else {
-                document.getElementById('contingent-school').value = '159';
-                document.getElementById('contingent-fc').value = '164';
-            }
-            
-            updateCalculations();
-            updateTotals();
-        }
 
-        function switchBranch(newBranch) {
-            if (currentBranch !== 'consolidated' && currentBranch !== newBranch) {
-                saveData();
-            }
-            currentBranch = newBranch;
-            document.querySelectorAll('.branch-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            if (currentBranch === 'consolidated') {
-                loadConsolidatedData();
-            } else {
-                document.querySelectorAll('input').forEach(input => {
-                    input.disabled = false;
-                });
-                loadData();
-            }
-        }
+                document.getElementById("fot-total").textContent =
+                    fotTotal.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
+                document.getElementById("fot-school").textContent =
+                    fotSchool.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
+                document.getElementById("fot-fc").textContent =
+                    fotFc.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
 
-        function loadConsolidatedData() {
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const consolidated = {
-                contingent: { school: 0, fc: 0 },
-                items: {}
-            };
-            
-            // Инициализируем items
-            for (let i = 1; i <= 19; i++) {
-                consolidated.items[i] = { total: 0, fc: 0 };
+                document.getElementById("grand-total").textContent =
+                    grandTotal.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
+                document.getElementById("grand-school").textContent =
+                    grandSchool.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
+                document.getElementById("grand-fc").textContent =
+                    grandFc.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
             }
-            
-            // Суммируем данные из всех филиалов
-            branches.forEach(b => {
-                const key = `${SHEET_KEY}_${b}`;
-                const saved = localStorage.getItem(key);
+
+            function scheduleAutoSave() {
+                document.getElementById("saveStatus").textContent =
+                    "Изменено...";
+                document.getElementById("saveStatus").style.background =
+                    "#fff3cd";
+                document.getElementById("saveStatus").style.color = "#856404";
+
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveData();
+                }, 1000);
+            }
+
+            function saveData() {
+                // Не сохраняем в режиме консолидации
+                if (currentBranch === "consolidated") return;
+
+                const data = {
+                    contingent: {
+                        school: document.getElementById("contingent-school")
+                            .value,
+                        fc: document.getElementById("contingent-fc").value,
+                    },
+                    items: {},
+                };
+
+                for (let i = 1; i <= 19; i++) {
+                    data.items[i] = {
+                        total: document.getElementById(`item-${i}-total`).value,
+                        fc: document.getElementById(`item-${i}-fc`).value,
+                    };
+                }
+
+                localStorage.setItem(
+                    `${SHEET_KEY}_${currentBranch}`,
+                    JSON.stringify(data),
+                );
+
+                document.getElementById("saveStatus").textContent = "Сохранено";
+                document.getElementById("saveStatus").style.background =
+                    "#d4edda";
+                document.getElementById("saveStatus").style.color = "#155724";
+            }
+
+            function loadData() {
+                const saved = localStorage.getItem(
+                    `${SHEET_KEY}_${currentBranch}`,
+                );
+
+                // Разблокируем поля
+                document.getElementById("contingent-school").disabled = false;
+                document.getElementById("contingent-fc").disabled = false;
+                for (let i = 1; i <= 19; i++) {
+                    document.getElementById(`item-${i}-total`).disabled = false;
+                    document.getElementById(`item-${i}-fc`).disabled = false;
+                }
+
+                document.getElementById("contingent-school").value = "";
+                document.getElementById("contingent-fc").value = "";
+                for (let i = 1; i <= 19; i++) {
+                    document.getElementById(`item-${i}-total`).value = "";
+                    document.getElementById(`item-${i}-fc`).value = "";
+                }
+
                 if (saved) {
-                    try {
-                        const data = JSON.parse(saved);
-                        
-                        if (data.contingent) {
-                            consolidated.contingent.school += parseFloat(data.contingent.school) || 0;
-                            consolidated.contingent.fc += parseFloat(data.contingent.fc) || 0;
+                    const data = JSON.parse(saved);
+
+                    if (data.contingent) {
+                        document.getElementById("contingent-school").value =
+                            data.contingent.school || "";
+                        document.getElementById("contingent-fc").value =
+                            data.contingent.fc || "";
+                    }
+
+                    for (let i = 1; i <= 19; i++) {
+                        if (data.items && data.items[i]) {
+                            document.getElementById(`item-${i}-total`).value =
+                                data.items[i].total || "";
+                            document.getElementById(`item-${i}-fc`).value =
+                                data.items[i].fc || "";
+                            updateRow(i);
                         }
-                        
-                        if (data.items) {
-                            for (let i = 1; i <= 19; i++) {
-                                if (data.items[i]) {
-                                    consolidated.items[i].total += parseFloat(data.items[i].total) || 0;
-                                    consolidated.items[i].fc += parseFloat(data.items[i].fc) || 0;
+                    }
+                } else {
+                    document.getElementById("contingent-school").value = "159";
+                    document.getElementById("contingent-fc").value = "164";
+                }
+
+                updateCalculations();
+                updateTotals();
+            }
+
+            function switchBranch(newBranch) {
+                if (
+                    currentBranch !== "consolidated" &&
+                    currentBranch !== newBranch
+                ) {
+                    saveData();
+                }
+                currentBranch = newBranch;
+                document
+                    .querySelectorAll(".branch-btn")
+                    .forEach((btn) => btn.classList.remove("active"));
+                event.target.classList.add("active");
+                if (currentBranch === "consolidated") {
+                    loadConsolidatedData();
+                } else {
+                    document.querySelectorAll("input").forEach((input) => {
+                        input.disabled = false;
+                    });
+                    loadData();
+                }
+            }
+
+            function loadConsolidatedData() {
+                const branches = ["almaty", "uralsk", "astana", "nao"];
+                const consolidated = {
+                    contingent: { school: 0, fc: 0 },
+                    items: {},
+                };
+
+                // Инициализируем items
+                for (let i = 1; i <= 19; i++) {
+                    consolidated.items[i] = { total: 0, fc: 0 };
+                }
+
+                // Суммируем данные из всех филиалов
+                branches.forEach((b) => {
+                    const key = `${SHEET_KEY}_${b}`;
+                    const saved = localStorage.getItem(key);
+                    if (saved) {
+                        try {
+                            const data = JSON.parse(saved);
+
+                            if (data.contingent) {
+                                consolidated.contingent.school +=
+                                    parseFloat(data.contingent.school) || 0;
+                                consolidated.contingent.fc +=
+                                    parseFloat(data.contingent.fc) || 0;
+                            }
+
+                            if (data.items) {
+                                for (let i = 1; i <= 19; i++) {
+                                    if (data.items[i]) {
+                                        consolidated.items[i].total +=
+                                            parseFloat(data.items[i].total) ||
+                                            0;
+                                        consolidated.items[i].fc +=
+                                            parseFloat(data.items[i].fc) || 0;
+                                    }
                                 }
                             }
+                        } catch (e) {
+                            console.error("Error loading data from " + b, e);
                         }
-                    } catch (e) {
-                        console.error('Error loading data from ' + b, e);
                     }
+                });
+
+                // Заполняем поля суммированными данными
+                document.getElementById("contingent-school").value =
+                    consolidated.contingent.school;
+                document.getElementById("contingent-fc").value =
+                    consolidated.contingent.fc;
+                document.getElementById("contingent-school").disabled = true;
+                document.getElementById("contingent-fc").disabled = true;
+
+                for (let i = 1; i <= 19; i++) {
+                    document.getElementById(`item-${i}-total`).value =
+                        consolidated.items[i].total;
+                    document.getElementById(`item-${i}-fc`).value =
+                        consolidated.items[i].fc;
+                    document.getElementById(`item-${i}-total`).disabled = true;
+                    document.getElementById(`item-${i}-fc`).disabled = true;
+                    updateRow(i);
                 }
-            });
-            
-            // Заполняем поля суммированными данными
-            document.getElementById('contingent-school').value = consolidated.contingent.school;
-            document.getElementById('contingent-fc').value = consolidated.contingent.fc;
-            document.getElementById('contingent-school').disabled = true;
-            document.getElementById('contingent-fc').disabled = true;
-            
-            for (let i = 1; i <= 19; i++) {
-                document.getElementById(`item-${i}-total`).value = consolidated.items[i].total;
-                document.getElementById(`item-${i}-fc`).value = consolidated.items[i].fc;
-                document.getElementById(`item-${i}-total`).disabled = true;
-                document.getElementById(`item-${i}-fc`).disabled = true;
-                updateRow(i);
+
+                updateCalculations();
+                updateTotals();
             }
-            
-            updateCalculations();
-            updateTotals();
-        }
 
-        window.addEventListener('load', () => {
-            loadData();
-        });
-    </script>
-    <script>
-        // НЕ инициализируем редактируемые таблицы - структура уже готова
-            console.log(' Таблица готова к работе');
-        });
-        function addDetailToggles() {
-            // Удаляем существующие детальные строки и иконки
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
-            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
-            
-            const dataRows = document.querySelectorAll('tbody tr');
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const branchNames = {
-                'almaty': 'Алматы',
-                'uralsk': 'Уральск',
-                'astana': 'Астана',
-                'nao': 'НАО'
-            };
-            
-            let processedCount = 0;
-            
-            dataRows.forEach((row, index) => {
-                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
-                const firstInput = row.querySelector('input[data-cell]');
-                
-                const isTotalRow = row.classList.contains('total-row') || 
-                                   row.textContent.includes('Итого') ||
-                                   row.textContent.includes('ИТОГО');
-                
-                if (labelCell && firstInput && !isTotalRow) {
-                    const rowNum = firstInput.dataset.row || index;
-                    
-                    labelCell.classList.add('expandable');
-                    const toggle = document.createElement('span');
-                    toggle.className = 'toggle-detail';
-                    toggle.textContent = '▶';
-                    toggle.dataset.row = rowNum;
-                    
-                    labelCell.insertBefore(toggle, labelCell.firstChild);
-                    
-                    const detailRow = document.createElement('tr');
-                    detailRow.className = 'detail-row';
-                    detailRow.dataset.row = rowNum;
-                    
-                    const emptyCell = document.createElement('td');
-                    emptyCell.style.background = '#f8f9fa';
-                    detailRow.appendChild(emptyCell);
-                    
-                    const branchListCell = document.createElement('td');
-                    branchListCell.className = 'detail-cell';
-                    branchListCell.style.verticalAlign = 'top';
-                    
-                    let branchList = '<div style="padding: 5px 0;">';
-                    branches.forEach(b => {
-                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
-                    });
-                    branchList += '</div>';
-                    branchListCell.innerHTML = branchList;
-                    detailRow.appendChild(branchListCell);
-                    
-                    const inputs = row.querySelectorAll('input[data-cell]');
-                    inputs.forEach(input => {
-                        const yearCell = document.createElement('td');
-                        yearCell.className = 'detail-cell';
-                        yearCell.style.verticalAlign = 'top';
-                        yearCell.style.textAlign = 'right';
-                        
-                        let yearData = '<div style="padding: 5px 0;">';
+            window.addEventListener("load", () => {
+                loadData();
+            });
+        </script>
+        <script>
+            // НЕ инициализируем редактируемые таблицы - структура уже готова
+                console.log(' Таблица готова к работе');
+            });
+            function addDetailToggles() {
+                // Удаляем существующие детальные строки и иконки
+                document.querySelectorAll('.detail-row').forEach(row => row.remove());
+                document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+                document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+
+                const dataRows = document.querySelectorAll('tbody tr');
+                const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+                const branchNames = {
+                    'almaty': 'Алматы',
+                    'uralsk': 'Уральск',
+                    'astana': 'Астана',
+                    'nao': 'НАО «РФМШ»'
+                };
+
+                let processedCount = 0;
+
+                dataRows.forEach((row, index) => {
+                    const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
+                    const firstInput = row.querySelector('input[data-cell]');
+
+                    const isTotalRow = row.classList.contains('total-row') ||
+                                       row.textContent.includes('Итого') ||
+                                       row.textContent.includes('ИТОГО');
+
+                    if (labelCell && firstInput && !isTotalRow) {
+                        const rowNum = firstInput.dataset.row || index;
+
+                        labelCell.classList.add('expandable');
+                        const toggle = document.createElement('span');
+                        toggle.className = 'toggle-detail';
+                        toggle.textContent = '▶';
+                        toggle.dataset.row = rowNum;
+
+                        labelCell.insertBefore(toggle, labelCell.firstChild);
+
+                        const detailRow = document.createElement('tr');
+                        detailRow.className = 'detail-row';
+                        detailRow.dataset.row = rowNum;
+
+                        const emptyCell = document.createElement('td');
+                        emptyCell.style.background = '#f8f9fa';
+                        detailRow.appendChild(emptyCell);
+
+                        const branchListCell = document.createElement('td');
+                        branchListCell.className = 'detail-cell';
+                        branchListCell.style.verticalAlign = 'top';
+
+                        let branchList = '<div style="padding: 5px 0;">';
                         branches.forEach(b => {
-                            const cellId = input.dataset.cell;
-                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
-                                ? parseFloat(window.branchDetailsData[b][cellId]) 
-                                : 0;
-                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                            branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
                         });
-                        yearData += '</div>';
-                        yearCell.innerHTML = yearData;
-                        detailRow.appendChild(yearCell);
-                    });
-                    
-                    row.parentNode.insertBefore(detailRow, row.nextSibling);
-                    
-                    labelCell.addEventListener('click', function(e) {
-                        const toggle = this.querySelector('.toggle-detail');
-                        const detailRow = this.parentElement.nextElementSibling;
-                        
-                        if (detailRow && detailRow.classList.contains('detail-row')) {
-                            detailRow.classList.toggle('show');
-                            toggle.classList.toggle('expanded');
-                        }
-                    });
-                    
-                    processedCount++;
-                }
-            });
-            
-            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
-        }
+                        branchList += '</div>';
+                        branchListCell.innerHTML = branchList;
+                        detailRow.appendChild(branchListCell);
 
-        function removeDetailToggles() {
-            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.expandable').forEach(cell => {
-                cell.classList.remove('expandable');
-            });
-        }
+                        const inputs = row.querySelectorAll('input[data-cell]');
+                        inputs.forEach(input => {
+                            const yearCell = document.createElement('td');
+                            yearCell.className = 'detail-cell';
+                            yearCell.style.verticalAlign = 'top';
+                            yearCell.style.textAlign = 'right';
 
-    </script>
-    <script src="shared-nav.js"></script>
-</body>
+                            let yearData = '<div style="padding: 5px 0;">';
+                            branches.forEach(b => {
+                                const cellId = input.dataset.cell;
+                                const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId]
+                                    ? parseFloat(window.branchDetailsData[b][cellId])
+                                    : 0;
+                                yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                            });
+                            yearData += '</div>';
+                            yearCell.innerHTML = yearData;
+                            detailRow.appendChild(yearCell);
+                        });
+
+                        row.parentNode.insertBefore(detailRow, row.nextSibling);
+
+                        labelCell.addEventListener('click', function(e) {
+                            const toggle = this.querySelector('.toggle-detail');
+                            const detailRow = this.parentElement.nextElementSibling;
+
+                            if (detailRow && detailRow.classList.contains('detail-row')) {
+                                detailRow.classList.toggle('show');
+                                toggle.classList.toggle('expanded');
+                            }
+                        });
+
+                        processedCount++;
+                    }
+                });
+
+                console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+            }
+
+            function removeDetailToggles() {
+                document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+                document.querySelectorAll('.detail-row').forEach(row => row.remove());
+                document.querySelectorAll('.expandable').forEach(cell => {
+                    cell.classList.remove('expandable');
+                });
+            }
+        </script>
+        <script src="shared-nav.js"></script>
+    </body>
 </html>
-
-

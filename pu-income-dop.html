@@ -1,350 +1,680 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="shared.css">
-    <title>Доходная часть Доп - Бюджет ПУ 2026</title>
-    <script src="editable-table.js"></script>
-</head>
-<body class="page-pu">
-    <div class="container">
-        <div class="header">
-            <h1>Дополнительные доходные части</h1>
-            <p>План поступлений на 2026 год - филиал г. Алматы</p>
-        </div>
-        
-        <div class="controls">
-            <div class="branch-selector">
-                <button class="branch-btn active" onclick="switchBranch('almaty')">Алматы</button>
-                <button class="branch-btn" onclick="switchBranch('astana')">Астана</button>
-                <button class="branch-btn" onclick="switchBranch('uralsk')">Уральск</button>
-                <button class="branch-btn" onclick="switchBranch('nao')">НАО</button>
-                <button class="branch-btn" onclick="switchBranch('consolidated')">Консолидация</button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="shared.css" />
+        <title>Доходная часть Доп - Бюджет ПУ 2026</title>
+        <script src="editable-table.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+    </head>
+    <body class="page-pu">
+        <div class="container">
+            <div class="header">
+                <h1>Дополнительные доходные части</h1>
+                <p>План поступлений на 2026 год - филиал г. Алматы</p>
             </div>
-            <div class="save-status" id="saveStatus">Сохранено</div>
-        </div>
-        
-        <div class="content">
-            <a href="index.html" class="back-link">< Вернуться к списку</a>
-            
-            <div class="budget-table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="num-col">№</th>
-                            <th class="name-col">Источник дохода</th>
-                            <th class="month-col">Январь</th>
-                            <th class="month-col">Февраль</th>
-                            <th class="month-col">Март</th>
-                            <th class="month-col">Апрель</th>
-                            <th class="month-col">Май</th>
-                            <th class="month-col">Июнь</th>
-                            <th class="month-col">Июль</th>
-                            <th class="month-col">Август</th>
-                            <th class="month-col">Сентябрь</th>
-                            <th class="month-col">Октябрь</th>
-                            <th class="month-col">Ноябрь</th>
-                            <th class="month-col">Декабрь</th>
-                            <th class="month-col">Итого</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="num-col">1</td>
-                            <td>Дополнительные поступления</td>
-                            <td><input type="number" id="r1-m1" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m2" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m3" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m4" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m5" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m6" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m7" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m8" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m9" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m10" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m11" value="0" oninput="update(1)"></td>
-                            <td><input type="number" id="r1-m12" value="0" oninput="update(1)"></td>
-                            <td class="formula-cell" id="r1-total">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class="num-col">2</td>
-                            <td>Прочие доходы</td>
-                            <td><input type="number" id="r2-m1" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m2" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m3" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m4" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m5" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m6" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m7" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m8" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m9" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m10" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m11" value="0" oninput="update(2)"></td>
-                            <td><input type="number" id="r2-m12" value="0" oninput="update(2)"></td>
-                            <td class="formula-cell" id="r2-total">0.00</td>
-                        </tr>
-                        <tr class="total-row">
-                            <td colspan="2"><strong>Итого</strong></td>
-                            <td class="formula-cell" id="total-m1">0.00</td>
-                            <td class="formula-cell" id="total-m2">0.00</td>
-                            <td class="formula-cell" id="total-m3">0.00</td>
-                            <td class="formula-cell" id="total-m4">0.00</td>
-                            <td class="formula-cell" id="total-m5">0.00</td>
-                            <td class="formula-cell" id="total-m6">0.00</td>
-                            <td class="formula-cell" id="total-m7">0.00</td>
-                            <td class="formula-cell" id="total-m8">0.00</td>
-                            <td class="formula-cell" id="total-m9">0.00</td>
-                            <td class="formula-cell" id="total-m10">0.00</td>
-                            <td class="formula-cell" id="total-m11">0.00</td>
-                            <td class="formula-cell" id="total-m12">0.00</td>
-                            <td class="formula-cell" id="grand-total">0.00</td>
-                        </tr>
-                    </tbody>
-                </table>
+
+            <div class="controls">
+                <div class="branch-selector">
+                    <button
+                        class="branch-btn active"
+                        onclick="switchBranch('nao')"
+                    >
+                        НАО «РФМШ»
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('almaty')">
+                        Алматы
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('astana')">
+                        Астана
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('uralsk')">
+                        Уральск
+                    </button>
+                    <button
+                        class="branch-btn"
+                        onclick="switchBranch('consolidated')"
+                    >
+                        Консолидация
+                    </button>
+                </div>
+                <div
+                    style="
+                        display: flex;
+                        gap: 8px;
+                        flex-wrap: wrap;
+                        align-items: center;
+                    "
+                >
+                    <button
+                        onclick="
+                            SharedExport.exportTableToExcel({
+                                title: document.title,
+                            })
+                        "
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📥 Excel
+                    </button>
+                    <button
+                        onclick="SharedExport.exportToPDF()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📄 PDF
+                    </button>
+                    <button
+                        onclick="window.print()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        🖨️ Печать
+                    </button>
+                </div>
+                <div
+                    style="
+                        display: flex;
+                        gap: 8px;
+                        flex-wrap: wrap;
+                        align-items: center;
+                    "
+                >
+                    <button
+                        onclick="
+                            SharedExport.exportTableToExcel({
+                                title: document.title,
+                            })
+                        "
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📥 Excel
+                    </button>
+                    <button
+                        onclick="SharedExport.exportToPDF()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📄 PDF
+                    </button>
+                    <button
+                        onclick="window.print()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        🖨️ Печать
+                    </button>
+                </div>
+                <div class="save-status" id="saveStatus">Сохранено</div>
+            </div>
+
+            <div class="content">
+                <a href="index.html" class="back-link">← Вернуться к списку</a>
+
+                <div class="budget-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="num-col">№</th>
+                                <th class="name-col">Источник дохода</th>
+                                <th class="month-col">Январь</th>
+                                <th class="month-col">Февраль</th>
+                                <th class="month-col">Март</th>
+                                <th class="month-col">Апрель</th>
+                                <th class="month-col">Май</th>
+                                <th class="month-col">Июнь</th>
+                                <th class="month-col">Июль</th>
+                                <th class="month-col">Август</th>
+                                <th class="month-col">Сентябрь</th>
+                                <th class="month-col">Октябрь</th>
+                                <th class="month-col">Ноябрь</th>
+                                <th class="month-col">Декабрь</th>
+                                <th class="month-col">Итого</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="num-col">1</td>
+                                <td>Дополнительные поступления</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m1"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m2"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m3"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m4"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m5"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m6"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m7"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m8"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m9"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m10"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m11"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r1-m12"
+                                        value="0"
+                                        oninput="update(1)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="r1-total">0.00</td>
+                            </tr>
+                            <tr>
+                                <td class="num-col">2</td>
+                                <td>Прочие доходы</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m1"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m2"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m3"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m4"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m5"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m6"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m7"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m8"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m9"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m10"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m11"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        id="r2-m12"
+                                        value="0"
+                                        oninput="update(2)"
+                                    />
+                                </td>
+                                <td class="formula-cell" id="r2-total">0.00</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="2"><strong>Итого</strong></td>
+                                <td class="formula-cell" id="total-m1">0.00</td>
+                                <td class="formula-cell" id="total-m2">0.00</td>
+                                <td class="formula-cell" id="total-m3">0.00</td>
+                                <td class="formula-cell" id="total-m4">0.00</td>
+                                <td class="formula-cell" id="total-m5">0.00</td>
+                                <td class="formula-cell" id="total-m6">0.00</td>
+                                <td class="formula-cell" id="total-m7">0.00</td>
+                                <td class="formula-cell" id="total-m8">0.00</td>
+                                <td class="formula-cell" id="total-m9">0.00</td>
+                                <td class="formula-cell" id="total-m10">
+                                    0.00
+                                </td>
+                                <td class="formula-cell" id="total-m11">
+                                    0.00
+                                </td>
+                                <td class="formula-cell" id="total-m12">
+                                    0.00
+                                </td>
+                                <td class="formula-cell" id="grand-total">
+                                    0.00
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        const SHEET_KEY = 'pu_income_dop';
-        let currentBranch = 'almaty';
-        let saveTimeout;
+        <script>
+            const SHEET_KEY = "pu_income_dop";
+            let currentBranch = "nao";
+            let saveTimeout;
 
-        function update(r) {
-            let sum = 0;
-            for (let m = 1; m <= 12; m++) {
-                sum += parseFloat(document.getElementById(`r${r}-m${m}`).value) || 0;
-            }
-            document.getElementById(`r${r}-total`).textContent = sum.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            updateTotals();
-            scheduleAutoSave();
-        }
-
-        function updateTotals() {
-            let mt = [0,0,0,0,0,0,0,0,0,0,0,0], gt = 0;
-            for (let r = 1; r <= 2; r++) {
+            function update(r) {
+                let sum = 0;
                 for (let m = 1; m <= 12; m++) {
-                    const v = parseFloat(document.getElementById(`r${r}-m${m}`).value) || 0;
-                    mt[m-1] += v;
-                    gt += v;
+                    sum +=
+                        parseFloat(
+                            document.getElementById(`r${r}-m${m}`).value,
+                        ) || 0;
                 }
+                document.getElementById(`r${r}-total`).textContent =
+                    sum.toLocaleString("ru-RU", { minimumFractionDigits: 2 });
+                updateTotals();
+                scheduleAutoSave();
             }
-            for (let m = 1; m <= 12; m++) {
-                document.getElementById(`total-m${m}`).textContent = mt[m-1].toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            }
-            document.getElementById('grand-total').textContent = gt.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-        }
 
-        function scheduleAutoSave() {
-            document.getElementById('saveStatus').textContent = 'Сохраняю...';
-            document.getElementById('saveStatus').style.background = '#fff3cd';
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(saveData, 1000);
-        }
-
-        function saveData() {
-            // Не сохранять в режиме консолидации
-            if (currentBranch === 'consolidated') return;
-            
-            const data = { rows: {} };
-            for (let r = 1; r <= 2; r++) {
-                data.rows[r] = {};
-                for (let m = 1; m <= 12; m++) data.rows[r][`m${m}`] = document.getElementById(`r${r}-m${m}`).value;
-            }
-            localStorage.setItem(`${SHEET_KEY}_${currentBranch}`, JSON.stringify(data));
-            document.getElementById('saveStatus').textContent = 'Сохранено';
-            document.getElementById('saveStatus').style.background = '#d4edda';
-        }
-
-        function loadData() {
-            const saved = localStorage.getItem(`${SHEET_KEY}_${currentBranch}`);
-            for (let r = 1; r <= 2; r++) {
-                for (let m = 1; m <= 12; m++) {
-                    document.getElementById(`r${r}-m${m}`).value = '';
-                    document.getElementById(`r${r}-m${m}`).disabled = false;
-                }
-            }
-            if (saved) {
-                const data = JSON.parse(saved);
+            function updateTotals() {
+                let mt = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    gt = 0;
                 for (let r = 1; r <= 2; r++) {
-                    if (data.rows && data.rows[r]) {
-                        for (let m = 1; m <= 12; m++) document.getElementById(`r${r}-m${m}`).value = data.rows[r][`m${m}`] || '';
+                    for (let m = 1; m <= 12; m++) {
+                        const v =
+                            parseFloat(
+                                document.getElementById(`r${r}-m${m}`).value,
+                            ) || 0;
+                        mt[m - 1] += v;
+                        gt += v;
                     }
                 }
+                for (let m = 1; m <= 12; m++) {
+                    document.getElementById(`total-m${m}`).textContent = mt[
+                        m - 1
+                    ].toLocaleString("ru-RU", { minimumFractionDigits: 2 });
+                }
+                document.getElementById("grand-total").textContent =
+                    gt.toLocaleString("ru-RU", { minimumFractionDigits: 2 });
             }
-            updateTotals();
-        }
 
-        function switchBranch(newBranch) {
-            if (currentBranch !== 'consolidated' && currentBranch !== newBranch) {
-                saveData();
+            function scheduleAutoSave() {
+                document.getElementById("saveStatus").textContent =
+                    "Сохраняю...";
+                document.getElementById("saveStatus").style.background =
+                    "#fff3cd";
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(saveData, 1000);
             }
-            currentBranch = newBranch;
-            document.querySelectorAll('.branch-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            if (currentBranch === 'consolidated') {
-                loadConsolidatedData();
-            } else {
-                document.querySelectorAll('input').forEach(input => {
-                    input.disabled = false;
-                });
-                loadData();
-            }
-        }
 
-        function loadConsolidatedData() {
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const allData = {};
+            function saveData() {
+                // Не сохранять в режиме консолидации
+                if (currentBranch === "consolidated") return;
 
-            // Сохраняем данные для детализации
-            window.branchDetailsData = {};
-            
-            for (let r = 1; r <= 2; r++) {
-                allData[r] = {};
-                for (let m = 1; m <= 12; m++) allData[r][`m${m}`] = 0;
+                const data = { rows: {} };
+                for (let r = 1; r <= 2; r++) {
+                    data.rows[r] = {};
+                    for (let m = 1; m <= 12; m++)
+                        data.rows[r][`m${m}`] = document.getElementById(
+                            `r${r}-m${m}`,
+                        ).value;
+                }
+                localStorage.setItem(
+                    `${SHEET_KEY}_${currentBranch}`,
+                    JSON.stringify(data),
+                );
+                document.getElementById("saveStatus").textContent = "Сохранено";
+                document.getElementById("saveStatus").style.background =
+                    "#d4edda";
             }
-            
-            branches.forEach(b => {
-                const key = `${SHEET_KEY}_${b}`;
-                const saved = localStorage.getItem(key);
+
+            function loadData() {
+                const saved = localStorage.getItem(
+                    `${SHEET_KEY}_${currentBranch}`,
+                );
+                for (let r = 1; r <= 2; r++) {
+                    for (let m = 1; m <= 12; m++) {
+                        document.getElementById(`r${r}-m${m}`).value = "";
+                        document.getElementById(`r${r}-m${m}`).disabled = false;
+                    }
+                }
                 if (saved) {
-                    try {
-                        const data = JSON.parse(saved);
-                        if (data.rows) {
-                            for (let r = 1; r <= 2; r++) {
-                                if (data.rows[r]) {
-                                    for (let m = 1; m <= 12; m++) {
-                                        allData[r][`m${m}`] += parseFloat(data.rows[r][`m${m}`]) || 0;
+                    const data = JSON.parse(saved);
+                    for (let r = 1; r <= 2; r++) {
+                        if (data.rows && data.rows[r]) {
+                            for (let m = 1; m <= 12; m++)
+                                document.getElementById(`r${r}-m${m}`).value =
+                                    data.rows[r][`m${m}`] || "";
+                        }
+                    }
+                }
+                updateTotals();
+            }
+
+            function switchBranch(newBranch) {
+                if (
+                    currentBranch !== "consolidated" &&
+                    currentBranch !== newBranch
+                ) {
+                    saveData();
+                }
+                currentBranch = newBranch;
+                document
+                    .querySelectorAll(".branch-btn")
+                    .forEach((btn) => btn.classList.remove("active"));
+                event.target.classList.add("active");
+                if (currentBranch === "consolidated") {
+                    loadConsolidatedData();
+                } else {
+                    document.querySelectorAll("input").forEach((input) => {
+                        input.disabled = false;
+                    });
+                    loadData();
+                }
+            }
+
+            function loadConsolidatedData() {
+                const branches = ["almaty", "uralsk", "astana", "nao"];
+                const allData = {};
+
+                // Сохраняем данные для детализации
+                window.branchDetailsData = {};
+
+                for (let r = 1; r <= 2; r++) {
+                    allData[r] = {};
+                    for (let m = 1; m <= 12; m++) allData[r][`m${m}`] = 0;
+                }
+
+                branches.forEach((b) => {
+                    const key = `${SHEET_KEY}_${b}`;
+                    const saved = localStorage.getItem(key);
+                    if (saved) {
+                        try {
+                            const data = JSON.parse(saved);
+                            if (data.rows) {
+                                for (let r = 1; r <= 2; r++) {
+                                    if (data.rows[r]) {
+                                        for (let m = 1; m <= 12; m++) {
+                                            allData[r][`m${m}`] +=
+                                                parseFloat(
+                                                    data.rows[r][`m${m}`],
+                                                ) || 0;
+                                        }
                                     }
                                 }
                             }
-                        }
-                    } catch (e) {}
+                        } catch (e) {}
+                    }
+                });
+
+                for (let r = 1; r <= 2; r++) {
+                    for (let m = 1; m <= 12; m++) {
+                        document.getElementById(`r${r}-m${m}`).value =
+                            allData[r][`m${m}`];
+                        document.getElementById(`r${r}-m${m}`).disabled = true;
+                    }
                 }
-            });
-            
-            for (let r = 1; r <= 2; r++) {
-                for (let m = 1; m <= 12; m++) {
-                    document.getElementById(`r${r}-m${m}`).value = allData[r][`m${m}`];
-                    document.getElementById(`r${r}-m${m}`).disabled = true;
-                }
+                updateTotals();
             }
-            updateTotals();
-        }
 
-        window.addEventListener('load', loadData);
-    </script>
-    <script>
-        // НЕ инициализируем редактируемые таблицы - структура уже готова
-            console.log(' Таблица готова к работе');
-        });
-        function addDetailToggles() {
-            // Удаляем существующие детальные строки и иконки
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
-            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
-            
-            const dataRows = document.querySelectorAll('tbody tr');
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const branchNames = {
-                'almaty': 'Алматы',
-                'uralsk': 'Уральск',
-                'astana': 'Астана',
-                'nao': 'НАО'
-            };
-            
-            let processedCount = 0;
-            
-            dataRows.forEach((row, index) => {
-                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
-                const firstInput = row.querySelector('input[data-cell]');
-                
-                const isTotalRow = row.classList.contains('total-row') || 
-                                   row.textContent.includes('Итого') ||
-                                   row.textContent.includes('ИТОГО');
-                
-                if (labelCell && firstInput && !isTotalRow) {
-                    const rowNum = firstInput.dataset.row || index;
-                    
-                    labelCell.classList.add('expandable');
-                    const toggle = document.createElement('span');
-                    toggle.className = 'toggle-detail';
-                    toggle.textContent = '▶';
-                    toggle.dataset.row = rowNum;
-                    
-                    labelCell.insertBefore(toggle, labelCell.firstChild);
-                    
-                    const detailRow = document.createElement('tr');
-                    detailRow.className = 'detail-row';
-                    detailRow.dataset.row = rowNum;
-                    
-                    const emptyCell = document.createElement('td');
-                    emptyCell.style.background = '#f8f9fa';
-                    detailRow.appendChild(emptyCell);
-                    
-                    const branchListCell = document.createElement('td');
-                    branchListCell.className = 'detail-cell';
-                    branchListCell.style.verticalAlign = 'top';
-                    
-                    let branchList = '<div style="padding: 5px 0;">';
-                    branches.forEach(b => {
-                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
-                    });
-                    branchList += '</div>';
-                    branchListCell.innerHTML = branchList;
-                    detailRow.appendChild(branchListCell);
-                    
-                    const inputs = row.querySelectorAll('input[data-cell]');
-                    inputs.forEach(input => {
-                        const yearCell = document.createElement('td');
-                        yearCell.className = 'detail-cell';
-                        yearCell.style.verticalAlign = 'top';
-                        yearCell.style.textAlign = 'right';
-                        
-                        let yearData = '<div style="padding: 5px 0;">';
+            window.addEventListener("load", loadData);
+        </script>
+        <script>
+            // НЕ инициализируем редактируемые таблицы - структура уже готова
+                console.log(' Таблица готова к работе');
+            });
+            function addDetailToggles() {
+                // Удаляем существующие детальные строки и иконки
+                document.querySelectorAll('.detail-row').forEach(row => row.remove());
+                document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+                document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+
+                const dataRows = document.querySelectorAll('tbody tr');
+                const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+                const branchNames = {
+                    'almaty': 'Алматы',
+                    'uralsk': 'Уральск',
+                    'astana': 'Астана',
+                    'nao': 'НАО «РФМШ»'
+                };
+
+                let processedCount = 0;
+
+                dataRows.forEach((row, index) => {
+                    const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
+                    const firstInput = row.querySelector('input[data-cell]');
+
+                    const isTotalRow = row.classList.contains('total-row') ||
+                                       row.textContent.includes('Итого') ||
+                                       row.textContent.includes('ИТОГО');
+
+                    if (labelCell && firstInput && !isTotalRow) {
+                        const rowNum = firstInput.dataset.row || index;
+
+                        labelCell.classList.add('expandable');
+                        const toggle = document.createElement('span');
+                        toggle.className = 'toggle-detail';
+                        toggle.textContent = '▶';
+                        toggle.dataset.row = rowNum;
+
+                        labelCell.insertBefore(toggle, labelCell.firstChild);
+
+                        const detailRow = document.createElement('tr');
+                        detailRow.className = 'detail-row';
+                        detailRow.dataset.row = rowNum;
+
+                        const emptyCell = document.createElement('td');
+                        emptyCell.style.background = '#f8f9fa';
+                        detailRow.appendChild(emptyCell);
+
+                        const branchListCell = document.createElement('td');
+                        branchListCell.className = 'detail-cell';
+                        branchListCell.style.verticalAlign = 'top';
+
+                        let branchList = '<div style="padding: 5px 0;">';
                         branches.forEach(b => {
-                            const cellId = input.dataset.cell;
-                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
-                                ? parseFloat(window.branchDetailsData[b][cellId]) 
-                                : 0;
-                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                            branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
                         });
-                        yearData += '</div>';
-                        yearCell.innerHTML = yearData;
-                        detailRow.appendChild(yearCell);
-                    });
-                    
-                    row.parentNode.insertBefore(detailRow, row.nextSibling);
-                    
-                    labelCell.addEventListener('click', function(e) {
-                        const toggle = this.querySelector('.toggle-detail');
-                        const detailRow = this.parentElement.nextElementSibling;
-                        
-                        if (detailRow && detailRow.classList.contains('detail-row')) {
-                            detailRow.classList.toggle('show');
-                            toggle.classList.toggle('expanded');
-                        }
-                    });
-                    
-                    processedCount++;
-                }
-            });
-            
-            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
-        }
+                        branchList += '</div>';
+                        branchListCell.innerHTML = branchList;
+                        detailRow.appendChild(branchListCell);
 
-        function removeDetailToggles() {
-            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.expandable').forEach(cell => {
-                cell.classList.remove('expandable');
-            });
-        }
+                        const inputs = row.querySelectorAll('input[data-cell]');
+                        inputs.forEach(input => {
+                            const yearCell = document.createElement('td');
+                            yearCell.className = 'detail-cell';
+                            yearCell.style.verticalAlign = 'top';
+                            yearCell.style.textAlign = 'right';
 
-    </script>
-    <script src="shared-nav.js"></script>
-</body>
+                            let yearData = '<div style="padding: 5px 0;">';
+                            branches.forEach(b => {
+                                const cellId = input.dataset.cell;
+                                const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId]
+                                    ? parseFloat(window.branchDetailsData[b][cellId])
+                                    : 0;
+                                yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                            });
+                            yearData += '</div>';
+                            yearCell.innerHTML = yearData;
+                            detailRow.appendChild(yearCell);
+                        });
+
+                        row.parentNode.insertBefore(detailRow, row.nextSibling);
+
+                        labelCell.addEventListener('click', function(e) {
+                            const toggle = this.querySelector('.toggle-detail');
+                            const detailRow = this.parentElement.nextElementSibling;
+
+                            if (detailRow && detailRow.classList.contains('detail-row')) {
+                                detailRow.classList.toggle('show');
+                                toggle.classList.toggle('expanded');
+                            }
+                        });
+
+                        processedCount++;
+                    }
+                });
+
+                console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+            }
+
+            function removeDetailToggles() {
+                document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+                document.querySelectorAll('.detail-row').forEach(row => row.remove());
+                document.querySelectorAll('.expandable').forEach(cell => {
+                    cell.classList.remove('expandable');
+                });
+            }
+        </script>
+        <script src="shared-nav.js"></script>
+    </body>
 </html>
-
-

@@ -1,0 +1,1038 @@
+﻿<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="shared.css" />
+        <title>Свод доходной части — НАО «РФМШ» 2026</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+        <style>
+            .section-block {
+                margin-bottom: 32px;
+            }
+            .section-block h3 {
+                margin: 0 0 10px;
+                font-size: 14px;
+                line-height: 1.4;
+            }
+            .badge {
+                display: inline-block;
+                padding: 2px 10px;
+                border-radius: 6px;
+                color: #fff;
+                font-size: 11px;
+                font-weight: 600;
+                vertical-align: middle;
+                margin-left: 6px;
+            }
+            .badge-rb {
+                background: linear-gradient(135deg, #6366f1, #4f46e5);
+            }
+            .badge-pu {
+                background: linear-gradient(135deg, #10b981, #059669);
+            }
+            .badge-all {
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 11px;
+            }
+            th,
+            td {
+                border: 1px solid #cbd5e1;
+                padding: 4px 5px;
+                text-align: right;
+            }
+            th {
+                background: #f1f5f9;
+                text-align: center;
+                font-size: 10px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            td:first-child {
+                text-align: center;
+                width: 36px;
+            }
+            .c-name {
+                text-align: left !important;
+                min-width: 220px;
+            }
+            .c-cls {
+                text-align: center !important;
+                width: 90px;
+                font-size: 10px;
+            }
+
+            .sub-row td {
+                background: #fef9ee;
+                font-weight: 600;
+            }
+            .grand-row td {
+                background: #fef3cd;
+                font-weight: 700;
+            }
+            .pct-row td {
+                background: #fff7ed;
+                font-style: italic;
+            }
+
+            input[type="number"] {
+                width: 100%;
+                min-width: 72px;
+                border: none;
+                background: transparent;
+                text-align: right;
+                font-size: 11px;
+                padding: 1px 0;
+                -moz-appearance: textfield;
+                appearance: textfield;
+            }
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+            }
+            input:focus {
+                background: #eff6ff;
+                outline: 1px solid #93c5fd;
+                border-radius: 2px;
+            }
+
+            .f {
+                font-variant-numeric: tabular-nums;
+                color: #1e40af;
+            }
+
+            .summary-cards {
+                display: flex;
+                gap: 14px;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+            }
+            .summary-card {
+                flex: 1;
+                min-width: 200px;
+                padding: 14px 18px;
+                border-radius: 12px;
+                color: #fff;
+            }
+            .summary-card .label {
+                font-size: 11px;
+                opacity: 0.85;
+                margin-bottom: 3px;
+            }
+            .summary-card .value {
+                font-size: 20px;
+                font-weight: 700;
+                font-variant-numeric: tabular-nums;
+            }
+            .card-rb {
+                background: linear-gradient(135deg, #6366f1, #4f46e5);
+            }
+            .card-pu {
+                background: linear-gradient(135deg, #10b981, #059669);
+            }
+            .card-total {
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+            }
+
+            .footnote {
+                font-size: 11px;
+                color: #64748b;
+                font-style: italic;
+                margin-top: 16px;
+                line-height: 1.5;
+            }
+
+            #consolidation table th {
+                background: #1e293b;
+                color: #fff;
+            }
+            #consolidation .sub-row td {
+                background: #e0e7ff;
+            }
+            #consolidation .grand-row td {
+                background: #fef3cd;
+            }
+
+            @media print {
+                .controls,
+                .back-link,
+                .summary-cards {
+                    display: none !important;
+                }
+                @page {
+                    size: landscape;
+                    margin: 8mm;
+                }
+            }
+        </style>
+    </head>
+    <body class="page-rb">
+        <div class="container" style="max-width: 1600px">
+            <div class="header">
+                <h1>Свод доходной части НАО «РФМШ» на 2026 год</h1>
+                <p>
+                    По прогнозным данным — Республиканский бюджет + Платные
+                    услуги
+                </p>
+            </div>
+            <div class="controls">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                    <button onclick="exportXlsx()">📥 Excel</button>
+                    <button onclick="SharedExport.exportToPDF()">📄 PDF</button>
+                    <button onclick="window.print()">🖨️ Печать</button>
+                </div>
+                <div class="save-status" id="saveStatus">Сохранено</div>
+            </div>
+            <div class="content">
+                <a href="index.html" class="back-link">← Вернуться к списку</a>
+
+                <div class="summary-cards">
+                    <div class="summary-card card-rb">
+                        <div class="label">Доходы РБ (итого год)</div>
+                        <div class="value" id="cardRB">0</div>
+                    </div>
+                    <div class="summary-card card-pu">
+                        <div class="label">Доходы ПУ (итого год)</div>
+                        <div class="value" id="cardPU">0</div>
+                    </div>
+                    <div class="summary-card card-total">
+                        <div class="label">ВСЕГО РБ + ПУ</div>
+                        <div class="value" id="cardTotal">0</div>
+                    </div>
+                </div>
+
+                <div id="sectionsContainer"></div>
+
+                <div class="section-block" id="consolidation">
+                    <h3>
+                        4. Общая консолидация бюджета
+                        <span class="badge badge-all">РБ + ПУ</span>
+                        <button
+                            onclick="exportConsXlsx()"
+                            style="
+                                padding: 3px 10px;
+                                border-radius: 5px;
+                                border: 1px solid #cbd5e1;
+                                background: #fff;
+                                cursor: pointer;
+                                font-size: 12px;
+                                vertical-align: middle;
+                                margin-left: 8px;
+                            "
+                            title="Скачать консолидацию"
+                        >
+                            📥 Excel
+                        </button>
+                    </h3>
+                    <div style="overflow-x: auto">
+                        <table id="tblCons"></table>
+                    </div>
+                </div>
+
+                <p class="footnote">
+                    * Рентабельность 8% предусмотрена к доходной части за счет
+                    реализации образовательных услуг на возмездной основе (в
+                    случае льготных скидок и отчисляющихся учащихся при наличии
+                    задолженности)
+                </p>
+            </div>
+        </div>
+
+        <script>
+            const MONTHS = [
+                "Январь",
+                "Февраль",
+                "Март",
+                "Апрель",
+                "Май",
+                "Июнь",
+                "Июль",
+                "Август",
+                "Сентябрь",
+                "Октябрь",
+                "Ноябрь",
+                "Декабрь",
+            ];
+            const KEY = "income_svod";
+            let saveTimer;
+            const computed = {};
+
+            /* ── Section & row definitions ── */
+            const SECTIONS = [
+                {
+                    title: "1. Доходная часть НАО «РФМШ» за счет средств республиканского бюджета — государственный образовательный грант на 2026 год",
+                    monthsLabel:
+                        "План поступлений по месяцам на 2026 год согласно бюджетной заявке МП РК (в тенге)",
+                    badge: "РБ",
+                    badgeCls: "badge-rb",
+                    monthLabels: [
+                        "Январь",
+                        "Февраль",
+                        "Март",
+                        "Апрель",
+                        "Май<br>1,3",
+                        "Июнь<br>1,4",
+                        "Июль<br>0,7",
+                        "Август<br>0,6",
+                        "Сентябрь",
+                        "Октябрь",
+                        "Ноябрь",
+                        "Декабрь",
+                    ],
+                    rows: [
+                        {
+                            t: "d",
+                            id: "s1r1",
+                            n: "1",
+                            name: "Филиал НАО «РФМШ» в г Алматы",
+                            cls: "с 7 по 11 кл",
+                            cont: 1186,
+                        },
+                        {
+                            t: "s",
+                            id: "s1sa",
+                            text: "Итого филиал Алматы",
+                            sum: ["s1r1"],
+                        },
+                        {
+                            t: "d",
+                            id: "s1r2",
+                            n: "1",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 7 по 11 кл",
+                            cont: 400,
+                        },
+                        {
+                            t: "s",
+                            id: "s1sn",
+                            text: "Итого филиал Астана",
+                            sum: ["s1r2"],
+                        },
+                        {
+                            t: "g",
+                            id: "s1t",
+                            text: "ВСЕГО",
+                            sum: ["s1r1", "s1r2"],
+                        },
+                    ],
+                },
+                {
+                    title: "2. Доходная часть НАО «РФМШ» за счет средств республиканского бюджета — государственный образовательный грант (ДОТАЦИЯ) на 2026 год",
+                    monthsLabel:
+                        "План поступлений по месяцам на 2026 год согласно договору с АО «Финансовый центр» (в тенге)",
+                    badge: "РБ",
+                    badgeCls: "badge-rb",
+                    monthLabels: null,
+                    rows: [
+                        {
+                            t: "d",
+                            id: "s2r1",
+                            n: "1",
+                            name: "Филиал НАО «РФМШ» в г Алматы",
+                            cls: "с 5 по 9 кл",
+                            cont: 146,
+                        },
+                        {
+                            t: "d",
+                            id: "s2r2",
+                            n: "2",
+                            name: "Филиал НАО «РФМШ» в г Алматы",
+                            cls: "с 10 по 11 кл",
+                            cont: 31,
+                        },
+                        {
+                            t: "s",
+                            id: "s2sa",
+                            text: "Итого филиал Алматы",
+                            sum: ["s2r1", "s2r2"],
+                        },
+                        {
+                            t: "d",
+                            id: "s2r3",
+                            n: "1",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 1 по 2 кл",
+                            cont: 281,
+                        },
+                        {
+                            t: "d",
+                            id: "s2r4",
+                            n: "2",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 3 по 4 кл",
+                            cont: 257,
+                        },
+                        {
+                            t: "d",
+                            id: "s2r5",
+                            n: "3",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 5 по 9 кл",
+                            cont: 568,
+                        },
+                        {
+                            t: "d",
+                            id: "s2r6",
+                            n: "4",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 10 по 11 кл",
+                            cont: 111,
+                        },
+                        {
+                            t: "d",
+                            id: "s2r7",
+                            n: "5",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 10 по 11 кл АР",
+                            cont: 12,
+                        },
+                        {
+                            t: "s",
+                            id: "s2sn",
+                            text: "Итого филиал Астана",
+                            sum: ["s2r3", "s2r4", "s2r5", "s2r6", "s2r7"],
+                        },
+                        {
+                            t: "d",
+                            id: "s2r8",
+                            n: "1",
+                            name: "Филиал НАО «РФМШ» в г Уральск",
+                            cls: "с 1 по 4 кл",
+                            cont: 248,
+                        },
+                        {
+                            t: "d",
+                            id: "s2r9",
+                            n: "2",
+                            name: "Филиал НАО «РФМШ» в г Уральск",
+                            cls: "с 5 по 6 кл",
+                            cont: 32,
+                        },
+                        {
+                            t: "s",
+                            id: "s2su1",
+                            text: "Итого",
+                            sum: ["s2r8", "s2r9"],
+                        },
+                        {
+                            t: "d",
+                            id: "s2r10",
+                            n: "1",
+                            name: "Филиал НАО «РФМШ» в г Уральск",
+                            cls: "с 1 по 4 кл",
+                            cont: 78,
+                        },
+                        {
+                            t: "d",
+                            id: "s2r11",
+                            n: "2",
+                            name: "Филиал НАО «РФМШ» в г Уральск",
+                            cls: "с 5 по 6 кл",
+                            cont: 46,
+                        },
+                        {
+                            t: "s",
+                            id: "s2su2",
+                            text: "Итого дополнительно с 01.09.2026",
+                            sum: ["s2r10", "s2r11"],
+                        },
+                        {
+                            t: "s",
+                            id: "s2su",
+                            text: "Итого филиал Уральск",
+                            sum: ["s2r8", "s2r9", "s2r10", "s2r11"],
+                        },
+                        {
+                            t: "g",
+                            id: "s2t",
+                            text: "ВСЕГО",
+                            sum: [
+                                "s2r1",
+                                "s2r2",
+                                "s2r3",
+                                "s2r4",
+                                "s2r5",
+                                "s2r6",
+                                "s2r7",
+                                "s2r8",
+                                "s2r9",
+                                "s2r10",
+                                "s2r11",
+                            ],
+                        },
+                    ],
+                },
+                {
+                    title: "3. Доходная часть НАО «РФМШ» за счет реализации образовательных услуг на возмездной основе на 2026 год",
+                    monthsLabel:
+                        "План поступлений по месяцам на 2026 год согласно договорам с законными представителями (в тенге)",
+                    badge: "ПУ",
+                    badgeCls: "badge-pu",
+                    monthLabels: null,
+                    rows: [
+                        {
+                            t: "d",
+                            id: "s3r1",
+                            n: "1",
+                            name: "Филиал НАО «РФМШ» в г Алматы",
+                            cls: "с 7 по 11 кл",
+                            cont: 158,
+                        },
+                        {
+                            t: "d",
+                            id: "s3r2",
+                            n: "2",
+                            name: "Филиал НАО «РФМШ» в г Алматы Жанаозен обучение",
+                            cls: "с 5 по 11 кл",
+                            cont: 15,
+                        },
+                        {
+                            t: "d",
+                            id: "s3r3",
+                            n: "3",
+                            name: "Филиал НАО «РФМШ» в г Алматы Жанаозен проживание",
+                            cls: "с 5 по 11 кл",
+                            cont: 15,
+                        },
+                        {
+                            t: "d",
+                            id: "s3r4",
+                            n: "4",
+                            name: "Филиал НАО «РФМШ» в г Алматы Жанаозен питание",
+                            cls: "с 5 по 11 кл",
+                            cont: 8,
+                        },
+                        {
+                            t: "d",
+                            id: "s3r5",
+                            n: "5",
+                            name: "Филиал НАО «РФМШ» в г Алматы",
+                            cls: "с 10 по 11 кл АР",
+                            cont: 0,
+                        },
+                        {
+                            t: "s",
+                            id: "s3sa",
+                            text: "Итого",
+                            sum: ["s3r1", "s3r2", "s3r3", "s3r4", "s3r5"],
+                        },
+                        {
+                            t: "d",
+                            id: "s3r6",
+                            n: "1",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 1 по 2 кл",
+                            cont: 281,
+                        },
+                        {
+                            t: "d",
+                            id: "s3r7",
+                            n: "2",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 3 по 4 кл",
+                            cont: 257,
+                        },
+                        {
+                            t: "d",
+                            id: "s3r8",
+                            n: "3",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 5 по 7 кл",
+                            cont: 390,
+                        },
+                        {
+                            t: "d",
+                            id: "s3r9",
+                            n: "4",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 8 по 11 кл",
+                            cont: 284,
+                        },
+                        {
+                            t: "d",
+                            id: "s3r10",
+                            n: "5",
+                            name: "Филиал НАО «РФМШ» в г Астана",
+                            cls: "с 8 по 11 кл АР",
+                            cont: 12,
+                        },
+                        {
+                            t: "s",
+                            id: "s3sn",
+                            text: "Итого филиал Астана",
+                            sum: ["s3r6", "s3r7", "s3r8", "s3r9", "s3r10"],
+                        },
+                        {
+                            t: "d",
+                            id: "s3r11",
+                            n: "1",
+                            name: "Филиал НАО «РФМШ» в г Уральск",
+                            cls: "с 1 по 4 кл",
+                            cont: 248,
+                        },
+                        {
+                            t: "d",
+                            id: "s3r12",
+                            n: "2",
+                            name: "Филиал НАО «РФМШ» в г Уральск",
+                            cls: "с 5 по 6 кл",
+                            cont: 32,
+                        },
+                        {
+                            t: "s",
+                            id: "s3su1",
+                            text: "Итого",
+                            sum: ["s3r11", "s3r12"],
+                        },
+                        {
+                            t: "d",
+                            id: "s3r13",
+                            n: "1",
+                            name: "Филиал НАО «РФМШ» в г Уральск",
+                            cls: "с 1 по 4 кл",
+                            cont: 78,
+                        },
+                        {
+                            t: "d",
+                            id: "s3r14",
+                            n: "2",
+                            name: "Филиал НАО «РФМШ» в г Уральск",
+                            cls: "с 5 по 6 кл",
+                            cont: 46,
+                        },
+                        {
+                            t: "s",
+                            id: "s3su2",
+                            text: "Итого дополнительно с 01.09.2026",
+                            sum: ["s3r13", "s3r14"],
+                        },
+                        {
+                            t: "s",
+                            id: "s3su",
+                            text: "Итого филиал Уральск",
+                            sum: ["s3r11", "s3r12", "s3r13", "s3r14"],
+                        },
+                        {
+                            t: "g",
+                            id: "s3t",
+                            text: "ВСЕГО",
+                            sum: [
+                                "s3r1",
+                                "s3r2",
+                                "s3r3",
+                                "s3r4",
+                                "s3r5",
+                                "s3r6",
+                                "s3r7",
+                                "s3r8",
+                                "s3r9",
+                                "s3r10",
+                                "s3r11",
+                                "s3r12",
+                                "s3r13",
+                                "s3r14",
+                            ],
+                        },
+                        {
+                            t: "p",
+                            id: "s3rent",
+                            text: "Рентабельность 8%",
+                            src: "s3t",
+                            rate: 0.08,
+                            noCont: true,
+                        },
+                        {
+                            t: "g",
+                            id: "s3tr",
+                            text: "ВСЕГО с учетом скидки и рентабельности",
+                            sum: ["s3t", "s3rent"],
+                            noCont: true,
+                        },
+                    ],
+                },
+            ];
+
+            const DATA_IDS = SECTIONS.flatMap((s) =>
+                s.rows.filter((r) => r.t === "d").map((r) => r.id),
+            );
+
+            /* ── Helpers ── */
+            const el = (id) => document.getElementById(id);
+            const pf = (id) => {
+                const e = el(id);
+                return e ? parseFloat(e.value) || 0 : 0;
+            };
+            function fmt(n) {
+                return n.toLocaleString("ru-RU", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
+            }
+            function fmtI(n) {
+                return Math.round(n).toLocaleString("ru-RU");
+            }
+
+            /* ── Build section table ── */
+            function buildSection(sec, idx) {
+                const ml = sec.monthLabels || MONTHS;
+                let h = '<div class="section-block">';
+                h +=
+                    "<h3>" +
+                    sec.title +
+                    ' <span class="badge ' +
+                    sec.badgeCls +
+                    '">' +
+                    sec.badge +
+                    "</span> ";
+                h +=
+                    '<button onclick="exportSectionXlsx(' +
+                    idx +
+                    ')" style="padding:3px 10px;border-radius:5px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:12px;vertical-align:middle;margin-left:8px" title="Скачать раздел">📥 Excel</button>';
+                h += "</h3>";
+                h +=
+                    '<div style="overflow-x:auto"><table id="tbl-sec' +
+                    idx +
+                    '">';
+                h += "<thead><tr>";
+                h += '<th rowspan="2" style="width:36px">№ п/п</th>';
+                h +=
+                    '<th rowspan="2" style="min-width:220px;text-align:left">Наименование филиалов НАО «РФМШ»</th>';
+                h += '<th rowspan="2" style="width:90px">Классы</th>';
+                h +=
+                    '<th rowspan="2" style="width:75px">Контингент<br>учащихся</th>';
+                h += '<th colspan="12">' + sec.monthsLabel + "</th>";
+                h += '<th colspan="2">Стоимость на одного<br>в тенге</th>';
+                h += "</tr><tr>";
+                ml.forEach((m) => (h += "<th>" + m + "</th>"));
+                h += "<th>в месяц</th><th>в год</th>";
+                h += "</tr></thead><tbody>";
+
+                sec.rows.forEach((row) => {
+                    if (row.t === "d") {
+                        h += "<tr>";
+                        h += "<td>" + row.n + "</td>";
+                        h += '<td class="c-name">' + row.name + "</td>";
+                        h += '<td class="c-cls">' + row.cls + "</td>";
+                        h +=
+                            '<td><input type="number" id="' +
+                            row.id +
+                            '-cont" value="' +
+                            (row.cont || 0) +
+                            '"></td>';
+                        for (let m = 1; m <= 12; m++)
+                            h +=
+                                '<td><input type="number" id="' +
+                                row.id +
+                                "-m" +
+                                m +
+                                '" value="0" step="any"></td>';
+                        h +=
+                            '<td><input type="number" id="' +
+                            row.id +
+                            '-pm" value="0" step="any"></td>';
+                        h +=
+                            '<td><input type="number" id="' +
+                            row.id +
+                            '-py" value="0" step="any"></td>';
+                        h += "</tr>";
+                    } else {
+                        const cls =
+                            row.t === "g"
+                                ? "grand-row"
+                                : row.t === "p"
+                                  ? "pct-row"
+                                  : "sub-row";
+                        h += '<tr class="' + cls + '">';
+                        h += "<td></td>";
+                        h +=
+                            '<td class="c-name"><strong>' +
+                            row.text +
+                            "</strong></td>";
+                        h += "<td></td>";
+                        h +=
+                            '<td class="f" id="' +
+                            row.id +
+                            '-cont-d">' +
+                            (row.noCont ? "" : "") +
+                            "</td>";
+                        for (let m = 1; m <= 12; m++)
+                            h +=
+                                '<td class="f" id="' +
+                                row.id +
+                                "-m" +
+                                m +
+                                '-d"></td>';
+                        h += "<td></td><td></td>";
+                        h += "</tr>";
+                    }
+                });
+
+                h += "</tbody></table></div></div>";
+                return h;
+            }
+
+            /* ── Build consolidation table ── */
+            function buildConsolidation() {
+                let h = "<thead><tr>";
+                h += '<th style="width:36px">№</th>';
+                h +=
+                    '<th style="min-width:280px;text-align:left">Источник доходов</th>';
+                MONTHS.forEach((m) => (h += "<th>" + m + "</th>"));
+                h += "<th>Итого за год</th>";
+                h += "</tr></thead><tbody>";
+
+                const rows = [
+                    {
+                        id: "c1",
+                        n: "1",
+                        text: "Государственный образовательный грант",
+                    },
+                    {
+                        id: "c2",
+                        n: "2",
+                        text: "Государственный образовательный грант (ДОТАЦИЯ)",
+                    },
+                    { id: "cRB", n: "", text: "Итого РБ", cls: "sub-row" },
+                    {
+                        id: "c3",
+                        n: "3",
+                        text: "Реализация образовательных услуг (ПУ)",
+                    },
+                    {
+                        id: "cAll",
+                        n: "",
+                        text: "ИТОГО РБ + ПУ",
+                        cls: "grand-row",
+                    },
+                ];
+
+                rows.forEach((r) => {
+                    const cls = r.cls ? ' class="' + r.cls + '"' : "";
+                    h += "<tr" + cls + ' id="cons-' + r.id + '">';
+                    h += "<td>" + r.n + "</td>";
+                    h +=
+                        '<td class="c-name"><strong>' +
+                        r.text +
+                        "</strong></td>";
+                    for (let m = 1; m <= 12; m++)
+                        h +=
+                            '<td class="f" id="cons-' +
+                            r.id +
+                            "-m" +
+                            m +
+                            '"></td>';
+                    h += '<td class="f" id="cons-' + r.id + '-year"></td>';
+                    h += "</tr>";
+                });
+
+                h += "</tbody>";
+                return h;
+            }
+
+            /* ── Calculation ── */
+            function calc() {
+                SECTIONS.forEach((sec) => {
+                    sec.rows.forEach((row) => {
+                        if (row.t === "d") {
+                            computed[row.id] = {
+                                cont: pf(row.id + "-cont"),
+                                m: Array.from({ length: 12 }, (_, i) =>
+                                    pf(row.id + "-m" + (i + 1)),
+                                ),
+                            };
+                        } else if (
+                            (row.t === "s" || row.t === "g") &&
+                            row.sum
+                        ) {
+                            const v = { cont: 0, m: new Array(12).fill(0) };
+                            row.sum.forEach((sid) => {
+                                const s = computed[sid];
+                                if (!s) return;
+                                v.cont += s.cont;
+                                for (let i = 0; i < 12; i++) v.m[i] += s.m[i];
+                            });
+                            computed[row.id] = v;
+                            if (!row.noCont) {
+                                const e = el(row.id + "-cont-d");
+                                if (e) e.textContent = fmtI(v.cont);
+                            }
+                            for (let i = 0; i < 12; i++) {
+                                const e = el(row.id + "-m" + (i + 1) + "-d");
+                                if (e) e.textContent = fmt(v.m[i]);
+                            }
+                        } else if (row.t === "p") {
+                            const s = computed[row.src];
+                            const v = {
+                                cont: 0,
+                                m: s
+                                    ? s.m.map((x) => x * row.rate)
+                                    : new Array(12).fill(0),
+                            };
+                            computed[row.id] = v;
+                            for (let i = 0; i < 12; i++) {
+                                const e = el(row.id + "-m" + (i + 1) + "-d");
+                                if (e) e.textContent = fmt(v.m[i]);
+                            }
+                        }
+                    });
+                });
+
+                /* Consolidation */
+                const consRows = [
+                    { id: "c1", src: "s1t" },
+                    { id: "c2", src: "s2t" },
+                    { id: "cRB", sum: ["c1", "c2"] },
+                    { id: "c3", src: "s3tr" },
+                    { id: "cAll", sum: ["cRB", "c3"] },
+                ];
+                const cc = {};
+                consRows.forEach((cr) => {
+                    let m;
+                    if (cr.src) {
+                        m = computed[cr.src]
+                            ? [...computed[cr.src].m]
+                            : new Array(12).fill(0);
+                    } else {
+                        m = new Array(12).fill(0);
+                        cr.sum.forEach((sid) => {
+                            const s = cc[sid];
+                            if (s) for (let i = 0; i < 12; i++) m[i] += s[i];
+                        });
+                    }
+                    cc[cr.id] = m;
+                    const yr = m.reduce((a, b) => a + b, 0);
+                    for (let i = 0; i < 12; i++) {
+                        const e = el("cons-" + cr.id + "-m" + (i + 1));
+                        if (e) e.textContent = fmt(m[i]);
+                    }
+                    const ye = el("cons-" + cr.id + "-year");
+                    if (ye) ye.textContent = fmt(yr);
+                });
+
+                /* Cards */
+                const rbYear = (cc.cRB || []).reduce((a, b) => a + b, 0);
+                const puYear = (cc.c3 || []).reduce((a, b) => a + b, 0);
+                el("cardRB").textContent = fmt(rbYear);
+                el("cardPU").textContent = fmt(puYear);
+                el("cardTotal").textContent = fmt(rbYear + puYear);
+
+                schedSave();
+            }
+
+            /* ── Save / Load ── */
+            function schedSave() {
+                el("saveStatus").textContent = "Изменено...";
+                el("saveStatus").style.background = "#fff3cd";
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(save, 1500);
+            }
+
+            function save() {
+                const data = {};
+                DATA_IDS.forEach((id) => {
+                    const row = { cont: el(id + "-cont").value };
+                    for (let m = 1; m <= 12; m++)
+                        row["m" + m] = el(id + "-m" + m).value;
+                    row.pm = el(id + "-pm").value;
+                    row.py = el(id + "-py").value;
+                    data[id] = row;
+                });
+                localStorage.setItem(KEY, JSON.stringify(data));
+                el("saveStatus").textContent = "Сохранено";
+                el("saveStatus").style.background = "#d4edda";
+            }
+
+            function load() {
+                const raw = localStorage.getItem(KEY);
+                if (!raw) return;
+                try {
+                    const data = JSON.parse(raw);
+                    DATA_IDS.forEach((id) => {
+                        if (!data[id]) return;
+                        const d = data[id];
+                        if (d.cont !== undefined)
+                            el(id + "-cont").value = d.cont;
+                        for (let m = 1; m <= 12; m++)
+                            if (d["m" + m] !== undefined)
+                                el(id + "-m" + m).value = d["m" + m];
+                        if (d.pm !== undefined) el(id + "-pm").value = d.pm;
+                        if (d.py !== undefined) el(id + "-py").value = d.py;
+                    });
+                } catch (e) {}
+            }
+
+            /* ── Export section ── */
+            function exportSectionXlsx(idx) {
+                var tbl = el("tbl-sec" + idx);
+                if (!tbl) return;
+                var names = ["РБ_Грант", "РБ_Дотация", "ПУ_Услуги"];
+                var sheetNames = ["РБ Грант", "РБ Дотация", "ПУ Услуги"];
+                SharedExport.exportTableToExcel({
+                    table: tbl,
+                    title: SECTIONS[idx].title,
+                    fileName: "Доходы_" + names[idx] + "_РФМШ_2026.xlsx",
+                    sheetName: sheetNames[idx],
+                    colWidths: [4, 36, 14, 10, ...Array(14).fill(14)],
+                });
+            }
+            function exportConsXlsx() {
+                var tbl = el("tblCons");
+                if (!tbl) return;
+                SharedExport.exportTableToExcel({
+                    table: tbl,
+                    title: "Общая консолидация бюджета (РБ + ПУ)",
+                    fileName: "Консолидация_доходов_РФМШ_2026.xlsx",
+                    sheetName: "Консолидация",
+                    colWidths: [4, 40, ...Array(13).fill(15)],
+                });
+            }
+
+            /* ── Export all ── */
+            function exportXlsx() {
+                const wb = XLSX.utils.book_new();
+                SECTIONS.forEach((sec, i) => {
+                    const tbl = el("tbl-sec" + i);
+                    const ws = XLSX.utils.table_to_sheet(tbl, { raw: false });
+                    ws["!cols"] = [
+                        { wch: 4 },
+                        { wch: 36 },
+                        { wch: 14 },
+                        { wch: 10 },
+                        ...Array(14).fill({ wch: 14 }),
+                    ];
+                    const names = ["РБ Грант", "РБ Дотация", "ПУ Услуги"];
+                    XLSX.utils.book_append_sheet(wb, ws, names[i]);
+                });
+                const ct = el("tblCons");
+                const cws = XLSX.utils.table_to_sheet(ct, { raw: false });
+                cws["!cols"] = [
+                    { wch: 4 },
+                    { wch: 40 },
+                    ...Array(13).fill({ wch: 15 }),
+                ];
+                XLSX.utils.book_append_sheet(wb, cws, "Консолидация");
+                XLSX.writeFile(wb, "Свод_доходов_РФМШ_2026.xlsx");
+            }
+
+            /* ── Init ── */
+            let allHtml = "";
+            SECTIONS.forEach((sec, i) => (allHtml += buildSection(sec, i)));
+            document.getElementById("sectionsContainer").innerHTML = allHtml;
+            document.getElementById("tblCons").innerHTML = buildConsolidation();
+
+            document.addEventListener("input", (e) => {
+                if (e.target.matches('input[type="number"]')) calc();
+            });
+
+            load();
+            calc();
+        </script>
+        <script src="shared-nav.js"></script>
+    </body>
+</html>

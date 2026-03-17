@@ -1,0 +1,1086 @@
+﻿<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="shared.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+        <title>Свод ФОТ — НАО «РФМШ»</title>
+        <style>
+            .summary-cards {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 14px;
+                margin-bottom: 20px;
+            }
+            .summary-card {
+                background: #fff;
+                border-radius: 10px;
+                padding: 16px 18px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+                border-left: 4px solid #6366f1;
+            }
+            .summary-card.rb {
+                border-left-color: #3b82f6;
+            }
+            .summary-card.pu {
+                border-left-color: #10b981;
+            }
+            .summary-card.tot {
+                border-left-color: #f59e0b;
+            }
+            .summary-card .sc-label {
+                font-size: 12px;
+                color: #64748b;
+                font-weight: 500;
+            }
+            .summary-card .sc-value {
+                font-size: 20px;
+                font-weight: 700;
+                color: #1e293b;
+                margin-top: 4px;
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 13px;
+            }
+            table th,
+            table td {
+                border: 1px solid #cbd5e1;
+                padding: 5px 6px;
+                text-align: right;
+            }
+            table th {
+                background: #f1f5f9;
+                text-align: center;
+                font-size: 12px;
+            }
+            td:nth-child(1) {
+                text-align: center;
+                width: 36px;
+            }
+            td:nth-child(2) {
+                text-align: left;
+                min-width: 200px;
+            }
+
+            .section-hdr td {
+                background: #f8f9fb;
+                text-align: left !important;
+                font-weight: 600;
+                padding: 10px 8px !important;
+            }
+            .col-hdr td {
+                background: #eef2f7;
+                text-align: center !important;
+                font-weight: 600;
+                font-size: 11px;
+            }
+
+            .sub-row td {
+                background: #fef9ee;
+                font-weight: 600;
+            }
+            .grand-row td {
+                background: #fef3cd;
+                font-weight: 700;
+            }
+            .mega-row td {
+                background: #ffe0b2;
+                font-weight: 700;
+                font-size: 14px;
+            }
+
+            input[type="number"] {
+                width: 100%;
+                border: none;
+                background: transparent;
+                text-align: right;
+                font-size: 13px;
+                padding: 2px 0;
+                -moz-appearance: textfield;
+                appearance: textfield;
+            }
+            input[type="number"]::-webkit-outer-spin-button,
+            input[type="number"]::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+            }
+            input[type="number"]:focus {
+                background: #eff6ff;
+                outline: 1px solid #93c5fd;
+                border-radius: 2px;
+            }
+
+            .formula-cell {
+                color: #1e40af;
+                font-weight: 600;
+            }
+
+            @media print {
+                .controls,
+                .back-link {
+                    display: none !important;
+                }
+                input[type="number"] {
+                    border: none !important;
+                    background: none !important;
+                }
+            }
+        </style>
+    </head>
+    <body class="page-pu">
+        <div class="container" style="max-width: 1400px">
+            <div class="header">
+                <h1>Свод фонда оплаты труда</h1>
+                <p>НАО «РФМШ» на 2026 год</p>
+            </div>
+            <div class="controls">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                    <button onclick="exportToExcel()">📥 Excel</button>
+                    <button onclick="exportToPDF()">📄 PDF</button>
+                    <button onclick="window.print()">🖨️ Печать</button>
+                </div>
+                <div class="save-status" id="saveStatus">Сохранено</div>
+            </div>
+            <div class="content">
+                <a href="index.html" class="back-link">← Вернуться к списку</a>
+
+                <div class="summary-cards">
+                    <div class="summary-card rb">
+                        <div class="sc-label">Итого РБ (ФОТ)</div>
+                        <div class="sc-value" id="cardRB">0 ₸</div>
+                    </div>
+                    <div class="summary-card pu">
+                        <div class="sc-label">Итого по ПУ (ФОТ)</div>
+                        <div class="sc-value" id="cardPU">0 ₸</div>
+                    </div>
+                    <div class="summary-card tot">
+                        <div class="sc-label">ВСЕГО ФОТ</div>
+                        <div class="sc-value" id="cardTotal">0 ₸</div>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto">
+                    <table id="fotTable">
+                        <tbody>
+                            <!-- ═══ SECTION 1: РБ ═══ -->
+                            <tr class="section-hdr">
+                                <td colspan="11">
+                                    <strong
+                                        >1. Свод тарификационной ведомости и
+                                        штатного расписания за счёт средств
+                                        республиканского бюджета</strong
+                                    >
+                                </td>
+                                <td style="text-align: center">
+                                    <button
+                                        onclick="exportSection('rb')"
+                                        style="
+                                            padding: 2px 8px;
+                                            border-radius: 5px;
+                                            border: 1px solid #cbd5e1;
+                                            background: #fff;
+                                            cursor: pointer;
+                                            font-size: 13px;
+                                        "
+                                        title="Скачать раздел"
+                                    >
+                                        📥
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="col-hdr">
+                                <td>№</td>
+                                <td>Наименование</td>
+                                <td>Факт. числ.</td>
+                                <td>Кол-во часов</td>
+                                <td>Зарплата в мес.</td>
+                                <td>Годовой ФЗП</td>
+                                <td>Компенсац. выплаты</td>
+                                <td>ОПВР</td>
+                                <td>Соц. налог</td>
+                                <td>Соц. отчисл.</td>
+                                <td>Обяз. мед. страх.</td>
+                                <td>Годовой ФОТ</td>
+                            </tr>
+                            <tr data-row="r1">
+                                <td>1</td>
+                                <td style="text-align: left">
+                                    Штатное расписание Алматы
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r2">
+                                <td>2</td>
+                                <td style="text-align: left">
+                                    Штатное расписание Астаны
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r3">
+                                <td>3</td>
+                                <td style="text-align: left">
+                                    Тарификация Алматы
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r4">
+                                <td>4</td>
+                                <td style="text-align: left">
+                                    Тарификация Астаны
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr class="sub-row" id="sumRB">
+                                <td></td>
+                                <td><strong>Итого РБ</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+
+                            <!-- ═══ SECTION 2: ПУ основной ═══ -->
+                            <tr class="section-hdr">
+                                <td colspan="11">
+                                    <strong
+                                        >2. Свод тарификационной ведомости и
+                                        штатного расписания за счёт реализации
+                                        образовательных услуг на возмездной
+                                        основе</strong
+                                    >
+                                </td>
+                                <td style="text-align: center">
+                                    <button
+                                        onclick="exportSection('pu')"
+                                        style="
+                                            padding: 2px 8px;
+                                            border-radius: 5px;
+                                            border: 1px solid #cbd5e1;
+                                            background: #fff;
+                                            cursor: pointer;
+                                            font-size: 13px;
+                                        "
+                                        title="Скачать раздел"
+                                    >
+                                        📥
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="col-hdr">
+                                <td>№</td>
+                                <td>Наименование</td>
+                                <td>Факт. числ.</td>
+                                <td>Кол-во часов</td>
+                                <td>Зарплата в мес.</td>
+                                <td>Годовой ФЗП</td>
+                                <td>Компенсац. выплаты</td>
+                                <td>ОПВР</td>
+                                <td>Соц. налог</td>
+                                <td>Соц. отчисл.</td>
+                                <td>Обяз. мед. страх.</td>
+                                <td>Годовой ФОТ</td>
+                            </tr>
+                            <tr data-row="r5">
+                                <td>1</td>
+                                <td style="text-align: left">
+                                    Штатное расписание Правление
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r6">
+                                <td>2</td>
+                                <td style="text-align: left">
+                                    Штатное расписание Алматы
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r7">
+                                <td>3</td>
+                                <td style="text-align: left">
+                                    Штатное расписание Астаны
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r8">
+                                <td>4</td>
+                                <td style="text-align: left">
+                                    Штатное расписание Уральска
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r9">
+                                <td>5</td>
+                                <td style="text-align: left">
+                                    Тарификация Алматы
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r10">
+                                <td>6</td>
+                                <td style="text-align: left">
+                                    Тарификация Астаны
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r11">
+                                <td>7</td>
+                                <td style="text-align: left">
+                                    Тарификация Уральска
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr class="sub-row" id="sumPU1">
+                                <td></td>
+                                <td><strong>Итого ПУ</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr class="grand-row" id="sumFOT1">
+                                <td></td>
+                                <td><strong>ИТОГО ФОТ</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+
+                            <!-- ═══ Иностранные специалисты ═══ -->
+                            <tr data-row="r12">
+                                <td>1</td>
+                                <td style="text-align: left">
+                                    Иностранные специалисты филиалов НАО «РФМШ»
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr class="sub-row" id="sumForeign">
+                                <td></td>
+                                <td>
+                                    <strong
+                                        >Итого иностранные специалисты</strong
+                                    >
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+
+                            <!-- ═══ Дополнительные выплаты ═══ -->
+                            <tr data-row="r13">
+                                <td>2</td>
+                                <td style="text-align: left">
+                                    Дополнительные денежные выплаты НАО «РФМШ»
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r14">
+                                <td>3</td>
+                                <td style="text-align: left">
+                                    Дополнительные денежные выплаты для АУП
+                                    филиала Алматы
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r15">
+                                <td>4</td>
+                                <td style="text-align: left">
+                                    Дополнительные денежные выплаты для АУП
+                                    филиала Астаны
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r16">
+                                <td>5</td>
+                                <td style="text-align: left">
+                                    Дополнительные денежные выплаты для АУП
+                                    филиала Уральск
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr class="sub-row" id="sumDop">
+                                <td></td>
+                                <td>
+                                    <strong
+                                        >Итого дополнительные выплаты</strong
+                                    >
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+
+                            <!-- ═══ Возмещение аренды ═══ -->
+                            <tr data-row="r17">
+                                <td>6</td>
+                                <td style="text-align: left">
+                                    Возмещение за аренду жилого помещения
+                                    работникам филиала Алматы
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r18">
+                                <td>7</td>
+                                <td style="text-align: left">
+                                    Возмещение за аренду жилого помещения
+                                    работникам филиала Астаны
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr data-row="r19">
+                                <td>8</td>
+                                <td style="text-align: left">
+                                    Возмещение за аренду жилого помещения
+                                    работникам филиала Уральск
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr class="sub-row" id="sumRent">
+                                <td></td>
+                                <td>
+                                    <strong
+                                        >Итого возмещение за аренду жилого
+                                        помещения работникам</strong
+                                    >
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+
+                            <!-- ═══ Итоги ═══ -->
+                            <tr class="sub-row" id="sumPU2">
+                                <td></td>
+                                <td><strong>Итого ПУ</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr class="grand-row" id="sumPUall">
+                                <td></td>
+                                <td><strong>ИТОГО по ПУ</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                            <tr class="mega-row" id="sumGrand">
+                                <td colspan="2"><strong>ВСЕГО ФОТ</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="formula-cell"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const KEY = "fot_consolidation";
+            const COLS = ["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9"]; // 9 editable columns
+            const DATA_ROWS = 19; // r1..r19
+            let timeout;
+
+            /* ── Build inputs into empty <td> cells ── */
+            (function init() {
+                document.querySelectorAll("tr[data-row]").forEach((tr) => {
+                    const rid = tr.dataset.row;
+                    const tds = tr.querySelectorAll("td");
+                    // tds[0]=№, tds[1]=name, tds[2..10]=inputs, tds[11]=formula
+                    for (let c = 0; c < 9; c++) {
+                        const td = tds[c + 2];
+                        const inp = document.createElement("input");
+                        inp.type = "number";
+                        inp.id = rid + "-" + COLS[c];
+                        inp.value = "0";
+                        inp.step = "any";
+                        inp.addEventListener("input", calc);
+                        td.appendChild(inp);
+                    }
+                });
+                load();
+            })();
+
+            /* ── Summation helpers ── */
+            function rowVals(rid) {
+                const v = [];
+                for (let c = 0; c < 9; c++) {
+                    v.push(
+                        parseFloat(
+                            document.getElementById(rid + "-" + COLS[c]).value,
+                        ) || 0,
+                    );
+                }
+                return v;
+            }
+
+            function sumRows(rids) {
+                const s = new Array(9).fill(0);
+                rids.forEach((rid) => {
+                    const v = rowVals(rid);
+                    v.forEach((val, i) => {
+                        s[i] += val;
+                    });
+                });
+                return s;
+            }
+
+            function fotFromVals(v) {
+                // Годовой ФОТ = ФЗП(c4) + Компенс(c5) + ОПВР(c6) + Соцналог(c7) + Соцотч(c8) + Медстрах(c9)
+                // indices:       3         4              5           6              7             8
+                return v[3] + v[4] + v[5] + v[6] + v[7] + v[8];
+            }
+
+            function fmt(n) {
+                return n.toLocaleString("ru-RU", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
+            }
+            function fmtCard(n) {
+                return (
+                    n.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                    }) + " ₸"
+                );
+            }
+
+            function writeSumRow(id, vals) {
+                const tr = document.getElementById(id);
+                if (!tr) return;
+                const tds = tr.querySelectorAll("td");
+                const offset = id === "sumGrand" ? 1 : 2; // sumGrand has colspan=2 in first td
+                for (let c = 0; c < 9; c++) {
+                    tds[offset + c].textContent = fmt(vals[c]);
+                }
+                tds[offset + 9].textContent = fmt(fotFromVals(vals));
+            }
+
+            /* ── Main calculation ── */
+            function calc() {
+                // Row-level FOT formula
+                for (let i = 1; i <= DATA_ROWS; i++) {
+                    const rid = "r" + i;
+                    const v = rowVals(rid);
+                    const fot = fotFromVals(v);
+                    const tr = document.querySelector(
+                        'tr[data-row="' + rid + '"]',
+                    );
+                    const lastTd = tr.querySelector(".formula-cell");
+                    lastTd.textContent = fmt(fot);
+                }
+
+                // Section sums
+                const rbRows = ["r1", "r2", "r3", "r4"];
+                const pu1Rows = ["r5", "r6", "r7", "r8", "r9", "r10", "r11"];
+                const forRows = ["r12"];
+                const dopRows = ["r13", "r14", "r15", "r16"];
+                const rentRows = ["r17", "r18", "r19"];
+
+                const sRB = sumRows(rbRows);
+                const sPU1 = sumRows(pu1Rows);
+                const sFOT1 = sRB.map((v, i) => v + sPU1[i]);
+
+                const sFor = sumRows(forRows);
+                const sDop = sumRows(dopRows);
+                const sRent = sumRows(rentRows);
+                const sPU2 = sFor.map((v, i) => v + sDop[i] + sRent[i]);
+                const sPUall = sPU1.map((v, i) => v + sPU2[i]);
+                const sGrand = sRB.map((v, i) => v + sPUall[i]);
+
+                writeSumRow("sumRB", sRB);
+                writeSumRow("sumPU1", sPU1);
+                writeSumRow("sumFOT1", sFOT1);
+                writeSumRow("sumForeign", sFor);
+                writeSumRow("sumDop", sDop);
+                writeSumRow("sumRent", sRent);
+                writeSumRow("sumPU2", sPU2);
+                writeSumRow("sumPUall", sPUall);
+                writeSumRow("sumGrand", sGrand);
+
+                // Summary cards
+                document.getElementById("cardRB").textContent = fmtCard(
+                    fotFromVals(sRB),
+                );
+                document.getElementById("cardPU").textContent = fmtCard(
+                    fotFromVals(sPUall),
+                );
+                document.getElementById("cardTotal").textContent = fmtCard(
+                    fotFromVals(sGrand),
+                );
+
+                schedSave();
+            }
+
+            /* ── Save / Load ── */
+            function schedSave() {
+                document.getElementById("saveStatus").textContent =
+                    "Изменено...";
+                document.getElementById("saveStatus").style.background =
+                    "#fff3cd";
+                clearTimeout(timeout);
+                timeout = setTimeout(save, 1000);
+            }
+
+            function save() {
+                const data = {};
+                for (let i = 1; i <= DATA_ROWS; i++) {
+                    const rid = "r" + i;
+                    const row = {};
+                    COLS.forEach((c) => {
+                        row[c] = document.getElementById(rid + "-" + c).value;
+                    });
+                    data[rid] = row;
+                }
+                localStorage.setItem(KEY, JSON.stringify(data));
+                document.getElementById("saveStatus").textContent = "Сохранено";
+                document.getElementById("saveStatus").style.background =
+                    "#d4edda";
+            }
+
+            function load() {
+                const raw = localStorage.getItem(KEY);
+                if (raw) {
+                    try {
+                        const data = JSON.parse(raw);
+                        for (let i = 1; i <= DATA_ROWS; i++) {
+                            const rid = "r" + i;
+                            if (data[rid]) {
+                                COLS.forEach((c) => {
+                                    const el = document.getElementById(
+                                        rid + "-" + c,
+                                    );
+                                    if (el && data[rid][c] !== undefined)
+                                        el.value = data[rid][c];
+                                });
+                            }
+                        }
+                    } catch (e) {}
+                }
+                calc();
+            }
+
+            /* ── Export section to Excel ── */
+            function exportSection(section) {
+                const HDR = [
+                    "№",
+                    "Наименование",
+                    "Факт. числ.",
+                    "Кол-во часов",
+                    "Зарплата в мес.",
+                    "Годовой ФЗП",
+                    "Компенсац. выплаты",
+                    "ОПВР",
+                    "Соц. налог",
+                    "Соц. отчисл.",
+                    "Обяз. мед. страх.",
+                    "Годовой ФОТ",
+                ];
+                const sections = {
+                    rb: {
+                        rows: ["r1", "r2", "r3", "r4"],
+                        sumId: "sumRB",
+                        title: "Свод ФОТ за счёт средств РБ",
+                        file: "ФОТ_РБ",
+                    },
+                    pu: {
+                        rows: ["r5", "r6", "r7", "r8", "r9", "r10", "r11"],
+                        sumId: "sumPU1",
+                        title: "Свод ФОТ за счёт реализации образовательных услуг",
+                        file: "ФОТ_ПУ",
+                    },
+                };
+                const sec = sections[section];
+                if (!sec) return;
+                const data = [];
+                data.push([sec.title + " — НАО «РФМШ» на 2026 год"]);
+                data.push([]);
+                data.push(HDR);
+                sec.rows.forEach((rid) => {
+                    const tr = document.querySelector(
+                        'tr[data-row="' + rid + '"]',
+                    );
+                    const tds = tr.querySelectorAll("td");
+                    const row = [];
+                    tds.forEach((td, i) => {
+                        const inp = td.querySelector("input");
+                        if (inp) {
+                            row.push(parseFloat(inp.value) || 0);
+                        } else {
+                            const txt = td.textContent.trim();
+                            const num = parseFloat(
+                                txt.replace(/\s/g, "").replace(",", "."),
+                            );
+                            row.push(isNaN(num) || i < 2 ? txt : num);
+                        }
+                    });
+                    data.push(row);
+                });
+                // subtotal
+                const sumTr = document.getElementById(sec.sumId);
+                if (sumTr) {
+                    const row = [];
+                    sumTr.querySelectorAll("td").forEach((td, i) => {
+                        const txt = td.textContent.trim();
+                        const num = parseFloat(
+                            txt.replace(/\s/g, "").replace(",", "."),
+                        );
+                        row.push(isNaN(num) || i < 2 ? txt : num);
+                    });
+                    data.push(row);
+                }
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                ws["!cols"] = [
+                    { wch: 5 },
+                    { wch: 45 },
+                    { wch: 12 },
+                    { wch: 12 },
+                    { wch: 16 },
+                    { wch: 16 },
+                    { wch: 16 },
+                    { wch: 14 },
+                    { wch: 14 },
+                    { wch: 14 },
+                    { wch: 16 },
+                    { wch: 16 },
+                ];
+                XLSX.utils.book_append_sheet(
+                    wb,
+                    ws,
+                    sec.title.substring(0, 31),
+                );
+                XLSX.writeFile(wb, sec.file + "_РФМШ_2026.xlsx");
+            }
+
+            /* ── Export to Excel ── */
+            function exportToExcel() {
+                const wb = XLSX.utils.book_new();
+                const rows = [];
+
+                // Title
+                rows.push(["Свод фонда оплаты труда НАО «РФМШ» на 2026 год"]);
+                rows.push([]);
+
+                const HDR = [
+                    "№",
+                    "Наименование",
+                    "Факт. числ.",
+                    "Кол-во часов",
+                    "Зарплата в мес.",
+                    "Годовой ФЗП",
+                    "Компенсац. выплаты",
+                    "ОПВР",
+                    "Соц. налог",
+                    "Соц. отчисл.",
+                    "Обяз. мед. страх.",
+                    "Годовой ФОТ",
+                ];
+
+                const table = document.getElementById("fotTable");
+                const trs = table.querySelectorAll("tbody tr");
+
+                trs.forEach((tr) => {
+                    if (tr.classList.contains("section-hdr")) {
+                        rows.push([]);
+                        rows.push([tr.textContent.trim()]);
+                        rows.push(HDR);
+                        return;
+                    }
+                    if (tr.classList.contains("col-hdr")) return;
+
+                    const tds = tr.querySelectorAll("td");
+                    const rowData = [];
+                    tds.forEach((td, i) => {
+                        const inp = td.querySelector("input");
+                        if (inp) {
+                            const v = parseFloat(inp.value) || 0;
+                            rowData.push(v);
+                        } else {
+                            const txt = td.textContent.trim();
+                            const num = parseFloat(
+                                txt.replace(/\s/g, "").replace(",", "."),
+                            );
+                            rowData.push(isNaN(num) || i < 2 ? txt : num);
+                        }
+                    });
+                    rows.push(rowData);
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+
+                // Column widths
+                ws["!cols"] = [
+                    { wch: 5 },
+                    { wch: 45 },
+                    { wch: 12 },
+                    { wch: 12 },
+                    { wch: 16 },
+                    { wch: 16 },
+                    { wch: 16 },
+                    { wch: 14 },
+                    { wch: 14 },
+                    { wch: 14 },
+                    { wch: 16 },
+                    { wch: 16 },
+                ];
+
+                XLSX.utils.book_append_sheet(wb, ws, "Свод ФОТ");
+                XLSX.writeFile(wb, "Свод_ФОТ_РФМШ_2026.xlsx");
+            }
+
+            /* ── Export to PDF (via print) ── */
+            function exportToPDF() {
+                const style = document.createElement("style");
+                style.id = "pdf-print-style";
+                style.textContent = `
+                @media print {
+                    @page { size: landscape; margin: 10mm; }
+                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .summary-cards { display: none !important; }
+                }
+            `;
+                document.head.appendChild(style);
+                window.print();
+                setTimeout(() => style.remove(), 1000);
+            }
+        </script>
+        <script src="shared-nav.js"></script>
+    </body>
+</html>

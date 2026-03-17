@@ -1,584 +1,840 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="shared.css">
-    <title>Калькуляция 2026</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="editable-table.js"></script>
-</head>
-<body class="page-rb">
-    <div class="header">
-        <h1>📊 Калькуляция затрат на 2026 год</h1>
-        <p style="color: #7f8c8d; margin-top: 5px;">Подробная калькуляция на одного ученика — республиканский бюджет — лист 5 из 6</p>
-        
-        <div class="branch-selector">
-            <button class="branch-btn active" data-branch="almaty">Алматы</button>
-            <button class="branch-btn" data-branch="astana">Астана</button>
-            <button class="branch-btn" data-branch="uralsk">Уральск</button>
-            <button class="branch-btn" data-branch="nao">НАО</button>
-            <button class="branch-btn" data-branch="consolidated" style="border-color: #8e44ad; color: #8e44ad;">
-                📈 Консолидация
-            </button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="shared.css" />
+        <title>Калькуляция 2026</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+        <script src="editable-table.js"></script>
+    </head>
+    <body class="page-rb">
+        <div class="header">
+            <h1>📊 Калькуляция затрат на 2026 год</h1>
+            <p style="color: #7f8c8d; margin-top: 5px">
+                Подробная калькуляция на одного ученика — республиканский бюджет
+                — лист 5 из 6
+            </p>
+
+            <div class="branch-selector">
+                <button class="branch-btn active" data-branch="nao">
+                    НАО «РФМШ»
+                </button>
+                <button class="branch-btn" data-branch="almaty">Алматы</button>
+                <button class="branch-btn" data-branch="astana">Астана</button>
+                <button class="branch-btn" data-branch="uralsk">Уральск</button>
+                <button
+                    class="branch-btn"
+                    data-branch="consolidated"
+                    style="border-color: #8e44ad; color: #8e44ad"
+                >
+                    📈 Консолидация
+                </button>
+            </div>
         </div>
-    </div>
 
-    <div class="info-bar">
-        <div>
-            <span style="font-weight: bold;">Филиал:</span>
-            <span id="currentBranch">Алматы</span>
+        <div class="info-bar">
+            <div>
+                <span style="font-weight: bold">Филиал:</span>
+                <span id="currentBranch">НАО «РФМШ»</span>
+            </div>
+            <div>
+                <span style="font-weight: bold">Контингент:</span>
+                <span>1186 учащихся</span>
+            </div>
+            <div>
+                <span style="font-weight: bold">Последнее изменение:</span>
+                <span id="lastUpdate">-</span>
+            </div>
+            <div class="auto-save-status saved" id="saveStatus">
+                ✓ Сохранено
+            </div>
         </div>
-        <div>
-            <span style="font-weight: bold;">Контингент:</span>
-            <span>1186 учащихся</span>
-        </div>
-        <div>
-            <span style="font-weight: bold;">Последнее изменение:</span>
-            <span id="lastUpdate">-</span>
-        </div>
-        <div class="auto-save-status saved" id="saveStatus">
-            ✓ Сохранено
-        </div>
-    </div>
 
-    <div class="table-container">
-        <table id="mainTable">
-            <tbody>
-                <tr>
-                    <td colspan="5" class="title-cell">
-Калькуляция затрат на государственные образовательные услуги<br>филиала НАО "Республиканская физико-математическая школа" на 2026 год на одного ученика
-                    </td>
-                </tr>
+        <div class="table-container">
+            <table id="mainTable">
+                <tbody>
+                    <tr>
+                        <td colspan="6" class="title-cell">
+                            Калькуляция затрат на государственные
+                            образовательные услуги<br />филиала НАО «РФМШ» на
+                            2026 год на одного ученика
+                        </td>
+                    </tr>
 
-                <tr>
-                    <th style="width: 60px;">№</th>
-                    <th>Наименование расходов</th>
-                    <th style="width: 18%;">Всего на 2026 г. (тенге)</th>
-                    <th style="width: 18%;">На одного в год (тенге)</th>
-                    <th style="width: 18%;">На одного в месяц (тенге)</th>
-                </tr>
+                    <tr>
+                        <th style="width: 40px">№</th>
+                        <th>Наименование расходов</th>
+                        <th style="width: 70px">Специфика</th>
+                        <th style="width: 16%">Всего на 2026 г. (тенге)</th>
+                        <th style="width: 16%">На одного в год (тенге)</th>
+                        <th style="width: 16%">На одного в месяц (тенге)</th>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">1</td>
-                    <td class="label-cell">Оплата труда</td>
-                    <td class="editable"><input type="number" data-cell="C5" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D5">0.00</td>
-                    <td class="formula-cell" id="E5">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">1</td>
+                        <td class="label-cell">Оплата труда</td>
+                        <td class="label-cell" style="text-align: center">
+                            111
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C5"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D5">0.00</td>
+                        <td class="formula-cell" id="E5">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">2</td>
-                    <td class="label-cell">Компенсационные выплаты</td>
-                    <td class="editable"><input type="number" data-cell="C6" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D6">0.00</td>
-                    <td class="formula-cell" id="E6">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">2</td>
+                        <td class="label-cell">Компенсационные выплаты</td>
+                        <td class="label-cell" style="text-align: center">
+                            113
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C6"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D6">0.00</td>
+                        <td class="formula-cell" id="E6">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">3</td>
-                    <td class="label-cell">Социальный налог</td>
-                    <td class="editable"><input type="number" data-cell="C7" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D7">0.00</td>
-                    <td class="formula-cell" id="E7">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">3</td>
+                        <td class="label-cell">
+                            Обязательные пенсионные взносы работодателей
+                        </td>
+                        <td class="label-cell" style="text-align: center">
+                            116
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C7"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D7">0.00</td>
+                        <td class="formula-cell" id="E7">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">4</td>
-                    <td class="label-cell">Социальные отчисления</td>
-                    <td class="editable"><input type="number" data-cell="C8" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D8">0.00</td>
-                    <td class="formula-cell" id="E8">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">4</td>
+                        <td class="label-cell">Социальный налог</td>
+                        <td class="label-cell" style="text-align: center">
+                            121
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C8"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D8">0.00</td>
+                        <td class="formula-cell" id="E8">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">5</td>
-                    <td class="label-cell">Обязательное медицинское страхование</td>
-                    <td class="editable"><input type="number" data-cell="C9" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D9">0.00</td>
-                    <td class="formula-cell" id="E9">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">5</td>
+                        <td class="label-cell">
+                            Социальные отчисления в Государственный фонд
+                            социального страхования
+                        </td>
+                        <td class="label-cell" style="text-align: center">
+                            122
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C9"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D9">0.00</td>
+                        <td class="formula-cell" id="E9">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">6</td>
-                    <td class="label-cell">Обязательные пенсионные взносы 5%</td>
-                    <td class="editable"><input type="number" data-cell="C10" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D10">0.00</td>
-                    <td class="formula-cell" id="E10">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">6</td>
+                        <td class="label-cell">
+                            Отчисления на обязательное социальное медицинское
+                            страхование
+                        </td>
+                        <td class="label-cell" style="text-align: center">
+                            124
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C10"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D10">0.00</td>
+                        <td class="formula-cell" id="E10">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">7</td>
-                    <td class="label-cell">Приобретение продуктов питания (питьевой воды)</td>
-                    <td class="editable"><input type="number" data-cell="C11" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D11">0.00</td>
-                    <td class="formula-cell" id="E11">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">7</td>
+                        <td class="label-cell">
+                            Приобретение продуктов питания
+                        </td>
+                        <td class="label-cell" style="text-align: center">
+                            141
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C11"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D11">0.00</td>
+                        <td class="formula-cell" id="E11">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">8</td>
-                    <td class="label-cell">Приобретение горюче-смазочных материалов</td>
-                    <td class="editable"><input type="number" data-cell="C12" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D12">0.00</td>
-                    <td class="formula-cell" id="E12">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">8</td>
+                        <td class="label-cell">
+                            Приобретение лекарственных средств и прочих изделий
+                            медицинского назначения
+                        </td>
+                        <td class="label-cell" style="text-align: center">
+                            142
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C12"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D12">0.00</td>
+                        <td class="formula-cell" id="E12">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">9</td>
-                    <td class="label-cell">Приобретение медикаментов и прочих средств медицинского назначения</td>
-                    <td class="editable"><input type="number" data-cell="C13" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D13">0.00</td>
-                    <td class="formula-cell" id="E13">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">9</td>
+                        <td class="label-cell">
+                            Приобретение топлива, горюче-смазочных материалов
+                        </td>
+                        <td class="label-cell" style="text-align: center">
+                            144
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C13"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D13">0.00</td>
+                        <td class="formula-cell" id="E13">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">10</td>
-                    <td class="label-cell">Приобретение прочих запасов</td>
-                    <td class="editable"><input type="number" data-cell="C14" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D14">0.00</td>
-                    <td class="formula-cell" id="E14">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">10</td>
+                        <td class="label-cell">Приобретение прочих запасов</td>
+                        <td class="label-cell" style="text-align: center">
+                            149
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C14"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D14">0.00</td>
+                        <td class="formula-cell" id="E14">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">11</td>
-                    <td class="label-cell">Коммунальные услуги</td>
-                    <td class="editable"><input type="number" data-cell="C15" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D15">0.00</td>
-                    <td class="formula-cell" id="E15">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">11</td>
+                        <td class="label-cell">Оплата коммунальных услуг</td>
+                        <td class="label-cell" style="text-align: center">
+                            151
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C15"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D15">0.00</td>
+                        <td class="formula-cell" id="E15">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">12</td>
-                    <td class="label-cell">Услуги связи и интернет</td>
-                    <td class="editable"><input type="number" data-cell="C16" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D16">0.00</td>
-                    <td class="formula-cell" id="E16">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">12</td>
+                        <td class="label-cell">Оплата услуги связи</td>
+                        <td class="label-cell" style="text-align: center">
+                            152
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C16"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D16">0.00</td>
+                        <td class="formula-cell" id="E16">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">13</td>
-                    <td class="label-cell">Прочие услуги и работы</td>
-                    <td class="editable"><input type="number" data-cell="C17" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D17">0.00</td>
-                    <td class="formula-cell" id="E17">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">13</td>
+                        <td class="label-cell">Оплата прочих услуг и работ</td>
+                        <td class="label-cell" style="text-align: center">
+                            159
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C17"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D17">0.00</td>
+                        <td class="formula-cell" id="E17">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">14</td>
-                    <td class="label-cell">Командировки и служебные разъезды</td>
-                    <td class="editable"><input type="number" data-cell="C18" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D18">0.00</td>
-                    <td class="formula-cell" id="E18">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">14</td>
+                        <td class="label-cell">
+                            Командировки и служебные разъезды внутри страны
+                        </td>
+                        <td class="label-cell" style="text-align: center">
+                            161
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C18"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D18">0.00</td>
+                        <td class="formula-cell" id="E18">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">15</td>
-                    <td class="label-cell">Организация горячим питанием</td>
-                    <td class="editable"><input type="number" data-cell="C19" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D19">0.00</td>
-                    <td class="formula-cell" id="E19">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">15</td>
+                        <td class="label-cell">
+                            Затраты Фонда всеобщего обязательного среднего
+                            образования
+                        </td>
+                        <td class="label-cell" style="text-align: center">
+                            163
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C19"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D19">0.00</td>
+                        <td class="formula-cell" id="E19">0.00</td>
+                    </tr>
 
-                <tr>
-                    <td class="label-cell">16</td>
-                    <td class="label-cell">Прочие текущие затраты</td>
-                    <td class="editable"><input type="number" data-cell="C20" step="0.01" value="0"></td>
-                    <td class="formula-cell" id="D20">0.00</td>
-                    <td class="formula-cell" id="E20">0.00</td>
-                </tr>
+                    <tr>
+                        <td class="label-cell">16</td>
+                        <td class="label-cell">Прочие текущие затраты</td>
+                        <td class="label-cell" style="text-align: center">
+                            169
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="C20"
+                                step="0.01"
+                                value="0"
+                            />
+                        </td>
+                        <td class="formula-cell" id="D20">0.00</td>
+                        <td class="formula-cell" id="E20">0.00</td>
+                    </tr>
 
-                <tr class="total-row">
-                    <td colspan="2" class="label-cell">Итого</td>
-                    <td class="formula-cell" id="totalC">0.00</td>
-                    <td class="formula-cell" id="totalD">0.00</td>
-                    <td class="formula-cell" id="totalE">0.00</td>
-                </tr>
-            </tbody>
-        </table>
+                    <tr class="total-row">
+                        <td colspan="3" class="label-cell">Итого</td>
+                        <td class="formula-cell" id="totalC">0.00</td>
+                        <td class="formula-cell" id="totalD">0.00</td>
+                        <td class="formula-cell" id="totalE">0.00</td>
+                    </tr>
+                </tbody>
+            </table>
 
-        <div class="highlight-box">
-            <h3>📊 Стоимость обучения одного ученика</h3>
-            <div class="cost-summary">
-                <div class="cost-item">
-                    <div class="label">Годовая стоимость</div>
-                    <div class="value" id="costPerYear">0 ₸</div>
-                </div>
-                <div class="cost-item">
-                    <div class="label">Месячная стоимость</div>
-                    <div class="value" id="costPerMonth">0 ₸</div>
-                </div>
-                <div class="cost-item">
-                    <div class="label">Общий бюджет (1186 учащихся)</div>
-                    <div class="value" id="totalBudget">0 ₸</div>
+            <div class="highlight-box">
+                <h3>📊 Стоимость обучения одного ученика</h3>
+                <div class="cost-summary">
+                    <div class="cost-item">
+                        <div class="label">Годовая стоимость</div>
+                        <div class="value" id="costPerYear">0 ₸</div>
+                    </div>
+                    <div class="cost-item">
+                        <div class="label">Месячная стоимость</div>
+                        <div class="value" id="costPerMonth">0 ₸</div>
+                    </div>
+                    <div class="cost-item">
+                        <div class="label">Общий бюджет (1186 учащихся)</div>
+                        <div class="value" id="totalBudget">0 ₸</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="buttons">
-        <button class="btn btn-primary" onclick="saveData()">💾 Сохранить данные</button>
-        <button class="btn btn-success" onclick="exportToExcel()">📊 Экспорт в Excel</button>
-        <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Назад к списку</button>
-    </div>
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="saveData()">
+                💾 Сохранить данные
+            </button>
+            <button class="btn btn-success" onclick="exportToExcel()">
+                � Excel
+            </button>
+            <button
+                class="btn btn-success"
+                onclick="SharedExport.exportToPDF()"
+                style="background: #6366f1"
+            >
+                📄 PDF
+            </button>
+            <button
+                class="btn btn-success"
+                onclick="window.print()"
+                style="background: #64748b"
+            >
+                🖨️ Печать
+            </button>
+            <button
+                class="btn btn-secondary"
+                onclick="window.location.href = 'index.html'"
+            >
+                ← Назад к списку
+            </button>
+        </div>
 
-    <script>
-        const STUDENTS = 1186;
-        const MONTHS = 12;
+        <script>
+            const STUDENTS = 1186;
+            const MONTHS = 12;
 
-        let currentBranch = 'almaty'; // Текущий филиал
-        
-        let tableData = {
-            branch: 'almaty',
-            sheet: 'rb_kalkulyacia',
-            lastModified: new Date().toISOString(),
-            cells: {}
-        };
+            let currentBranch = "nao"; // Текущий филиал
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-            setupEventListeners();
-            calculateTotals();
-            
-            // НЕ инициализируем редактируемые таблицы - структура уже готова
-            console.log(' Таблица готова к работе');
-        });
-
-        function setupEventListeners() {
-            document.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', function() {
-                    this.parentElement.classList.add('changed');
-                    calculateTotals();
-                    autoSave();
-                });
-            });
-
-            document.querySelectorAll('.branch-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    switchBranch(this.dataset.branch);
-                });
-            });
-        }
-
-        function getValue(cell) {
-            const input = document.querySelector(`input[data-cell="${cell}"]`);
-            return parseFloat(input?.value || 0) || 0;
-        }
-
-        function updateCell(id, value) {
-            const cell = document.getElementById(id);
-            if (cell) {
-                cell.textContent = value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            }
-        }
-
-        function calculateTotals() {
-            let totalYear = 0;
-            let totalPerStudent = 0;
-            let totalPerMonth = 0;
-
-            // Расчеты по всем строкам (C5-C20)
-            for (let row = 5; row <= 20; row++) {
-                const valueC = getValue(`C${row}`);
-                const valueD = valueC / STUDENTS;
-                const valueE = valueD / MONTHS;
-
-                totalYear += valueC;
-                totalPerStudent += valueD;
-                totalPerMonth += valueE;
-
-                updateCell(`D${row}`, valueD);
-                updateCell(`E${row}`, valueE);
-            }
-
-            // ...
-            updateCell('totalC', totalYear);
-            updateCell('totalD', totalPerStudent);
-            updateCell('totalE', totalPerMonth);
-
-            // ...
-            document.getElementById('costPerYear').textContent = totalPerStudent.toLocaleString('ru-RU', {minimumFractionDigits: 0, maximumFractionDigits: 0}) + ' ₸';
-            document.getElementById('costPerMonth').textContent = totalPerMonth.toLocaleString('ru-RU', {minimumFractionDigits: 0, maximumFractionDigits: 0}) + ' ₸';
-            document.getElementById('totalBudget').textContent = totalYear.toLocaleString('ru-RU', {minimumFractionDigits: 0, maximumFractionDigits: 0}) + ' ₸';
-        }
-
-        let saveTimeout;
-        function autoSave() {
-            clearTimeout(saveTimeout);
-            
-            const status = document.getElementById('saveStatus');
-            status.className = 'auto-save-status';
-            status.style.background = '#fff3cd';
-            status.style.color = '#856404';
-            status.textContent = '⏳ Сохранение...';
-
-            saveTimeout = setTimeout(() => {
-                saveData();
-                status.className = 'auto-save-status saved';
-                status.textContent = '✓ Сохранено';
-            }, 1000);
-        }
-
-        function saveData() {
-            // ...
-            if (currentBranch === 'consolidated') return;
-            
-            document.querySelectorAll('input').forEach(input => {
-                if (input.dataset.cell) {
-                    tableData.cells[input.dataset.cell] = input.value;
-                    input.parentElement.classList.remove('changed');
-                }
-            });
-
-            tableData.lastModified = new Date().toISOString();
-            
-            const storageKey = `${tableData.sheet}_${tableData.branch}`;
-            localStorage.setItem(storageKey, JSON.stringify(tableData));
-            
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ru-RU');
-        }
-
-        function loadData() {
-            const storageKey = `${tableData.sheet}_${tableData.branch}`;
-            const saved = localStorage.getItem(storageKey);
-            
-            // ...
-            document.querySelectorAll('input').forEach(input => {
-                input.value = '0';
-            });
-            
-            if (saved) {
-                const data = JSON.parse(saved);
-                tableData = data;
-                
-                Object.keys(data.cells).forEach(cell => {
-                    const input = document.querySelector(`input[data-cell="${cell}"]`);
-                    if (input) {
-                        input.value = data.cells[cell];
-                    }
-                });
-                
-                document.getElementById('lastUpdate').textContent = new Date(data.lastModified).toLocaleString('ru-RU');
-            } else {
-                document.getElementById('нет данных').textContent = 'нет данных';
-            }
-            
-            calculateTotals();
-        }
-
-        function switchBranch(branch) {
-            // ...
-            if (currentBranch !== 'consolidated') {
-                saveData();
-            }
-            tableData.branch = branch;
-            // Удаляем детали при переключении с консолидации
-            if (currentBranch === 'consolidated' && branch !== 'consolidated') {
-                removeDetailToggles();
-            }
-            
-            currentBranch = branch;
-            
-            document.querySelectorAll('.branch-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.branch === branch) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            const branchNames = {
-                'almaty': 'Алматы',
-                'uralsk': 'Уральск',
-                'astana': 'Астана',
-                'nao': 'НАО',
-                'consolidated': 'Консолидированный'
+            let tableData = {
+                branch: "almaty",
+                sheet: "rb_kalkulyacia",
+                lastModified: new Date().toISOString(),
+                cells: {},
             };
-            
-            document.getElementById('currentBranch').textContent = branchNames[branch];
-            
-            if (branch === 'consolidated') {
-                document.querySelectorAll('input').forEach(input => {
-                    input.disabled = true;
-                });
-                loadConsolidatedData();
-            } else {
-                document.querySelectorAll('input').forEach(input => {
-                    input.disabled = false;
-                });
+
+            document.addEventListener("DOMContentLoaded", function () {
                 loadData();
+                setupEventListeners();
+                calculateTotals();
+
+                // НЕ инициализируем редактируемые таблицы - структура уже готова
+                console.log(" Таблица готова к работе");
+            });
+
+            function setupEventListeners() {
+                document.querySelectorAll("input").forEach((input) => {
+                    input.addEventListener("input", function () {
+                        this.parentElement.classList.add("changed");
+                        calculateTotals();
+                        autoSave();
+                    });
+                });
+
+                document.querySelectorAll(".branch-btn").forEach((btn) => {
+                    btn.addEventListener("click", function () {
+                        document
+                            .querySelectorAll(".branch-btn")
+                            .forEach((b) => b.classList.remove("active"));
+                        this.classList.add("active");
+                        switchBranch(this.dataset.branch);
+                    });
+                });
             }
-        }
 
-        function loadConsolidatedData() {
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const allData = {};
+            function getValue(cell) {
+                const input = document.querySelector(
+                    `input[data-cell="${cell}"]`,
+                );
+                return parseFloat(input?.value || 0) || 0;
+            }
 
-            // Сохраняем данные для детализации
-            window.branchDetailsData = {};
-            
-            branches.forEach(b => {
-                const key = `rb_kalkulyacia_${b}`;
-                const saved = localStorage.getItem(key);
-                if (saved) {
-                    allData[b] = JSON.parse(saved).cells || {};
+            function updateCell(id, value) {
+                const cell = document.getElementById(id);
+                if (cell) {
+                    cell.textContent = value.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
                 }
-            });
-            
-            document.querySelectorAll('input').forEach(input => {
-                const cellId = input.dataset.cell;
-                let sum = 0;
-                branches.forEach(b => {
-                    if (allData[b]?.[cellId]) {
-                        sum += parseFloat(allData[b][cellId]) || 0;
-                    }
-                });
-                input.value = sum.toFixed(2);
-            });
-            
-            calculateTotals();
-            document.getElementById('Консолидировано из 3 филиалов').textContent = 'Консолидировано из 3 филиалов';
-        }
+            }
 
-        function exportToExcel() {
-            const data = [];
-            const table = document.querySelector('table');
-            const rows = table.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const rowData = [];
-                row.querySelectorAll('th, td').forEach(cell => {
-                    const input = cell.querySelector('input');
-                    if (input) {
-                        rowData.push(input.value || '');
-                    } else {
-                        rowData.push(cell.textContent.trim());
+            function calculateTotals() {
+                let totalYear = 0;
+                let totalPerStudent = 0;
+                let totalPerMonth = 0;
+
+                // Расчеты по всем строкам (C5-C20)
+                for (let row = 5; row <= 20; row++) {
+                    const valueC = getValue(`C${row}`);
+                    const valueD = valueC / STUDENTS;
+                    const valueE = valueD / MONTHS;
+
+                    totalYear += valueC;
+                    totalPerStudent += valueD;
+                    totalPerMonth += valueE;
+
+                    updateCell(`D${row}`, valueD);
+                    updateCell(`E${row}`, valueE);
+                }
+
+                // ...
+                updateCell("totalC", totalYear);
+                updateCell("totalD", totalPerStudent);
+                updateCell("totalE", totalPerMonth);
+
+                // ...
+                document.getElementById("costPerYear").textContent =
+                    totalPerStudent.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                    }) + " ₸";
+                document.getElementById("costPerMonth").textContent =
+                    totalPerMonth.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                    }) + " ₸";
+                document.getElementById("totalBudget").textContent =
+                    totalYear.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                    }) + " ₸";
+            }
+
+            let saveTimeout;
+            function autoSave() {
+                clearTimeout(saveTimeout);
+
+                const status = document.getElementById("saveStatus");
+                status.className = "auto-save-status";
+                status.style.background = "#fff3cd";
+                status.style.color = "#856404";
+                status.textContent = "⏳ Сохранение...";
+
+                saveTimeout = setTimeout(() => {
+                    saveData();
+                    status.className = "auto-save-status saved";
+                    status.textContent = "✓ Сохранено";
+                }, 1000);
+            }
+
+            function saveData() {
+                // ...
+                if (currentBranch === "consolidated") return;
+
+                document.querySelectorAll("input").forEach((input) => {
+                    if (input.dataset.cell) {
+                        tableData.cells[input.dataset.cell] = input.value;
+                        input.parentElement.classList.remove("changed");
                     }
                 });
-                data.push(rowData);
-            });
-            
-            const csvContent = data.map(row => row.join('\t')).join('\n');
-            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            const branchNames = {'almaty': 'Алматы', 'uralsk': 'Уральск', 'astana': 'Астана', 'nao': 'НАО', 'consolidated': 'Консолидированный'};
-            const filename = `Калькуляция_2026_${branchNames[currentBranch]}_${new Date().toISOString().slice(0,10)}.csv`;
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-        function addDetailToggles() {
-            // Удаляем существующие детальные строки и иконки
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
-            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
-            
-            const dataRows = document.querySelectorAll('tbody tr');
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const branchNames = {
-                'almaty': 'Алматы',
-                'uralsk': 'Уральск',
-                'astana': 'Астана',
-                'nao': 'НАО'
-            };
-            
-            let processedCount = 0;
-            
-            dataRows.forEach((row, index) => {
-                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
-                const firstInput = row.querySelector('input[data-cell]');
-                
-                const isTotalRow = row.classList.contains('total-row') || 
-                                   row.textContent.includes('Итого') ||
-                                   row.textContent.includes('ИТОГО');
-                
-                if (labelCell && firstInput && !isTotalRow) {
-                    const rowNum = firstInput.dataset.row || index;
-                    
-                    labelCell.classList.add('expandable');
-                    const toggle = document.createElement('span');
-                    toggle.className = 'toggle-detail';
-                    toggle.textContent = '▶';
-                    toggle.dataset.row = rowNum;
-                    
-                    labelCell.insertBefore(toggle, labelCell.firstChild);
-                    
-                    const detailRow = document.createElement('tr');
-                    detailRow.className = 'detail-row';
-                    detailRow.dataset.row = rowNum;
-                    
-                    const emptyCell = document.createElement('td');
-                    emptyCell.style.background = '#f8f9fa';
-                    detailRow.appendChild(emptyCell);
-                    
-                    const branchListCell = document.createElement('td');
-                    branchListCell.className = 'detail-cell';
-                    branchListCell.style.verticalAlign = 'top';
-                    
-                    let branchList = '<div style="padding: 5px 0;">';
-                    branches.forEach(b => {
-                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
-                    });
-                    branchList += '</div>';
-                    branchListCell.innerHTML = branchList;
-                    detailRow.appendChild(branchListCell);
-                    
-                    const inputs = row.querySelectorAll('input[data-cell]');
-                    inputs.forEach(input => {
-                        const yearCell = document.createElement('td');
-                        yearCell.className = 'detail-cell';
-                        yearCell.style.verticalAlign = 'top';
-                        yearCell.style.textAlign = 'right';
-                        
-                        let yearData = '<div style="padding: 5px 0;">';
-                        branches.forEach(b => {
-                            const cellId = input.dataset.cell;
-                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
-                                ? parseFloat(window.branchDetailsData[b][cellId]) 
-                                : 0;
-                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
-                        });
-                        yearData += '</div>';
-                        yearCell.innerHTML = yearData;
-                        detailRow.appendChild(yearCell);
-                    });
-                    
-                    row.parentNode.insertBefore(detailRow, row.nextSibling);
-                    
-                    labelCell.addEventListener('click', function(e) {
-                        const toggle = this.querySelector('.toggle-detail');
-                        const detailRow = this.parentElement.nextElementSibling;
-                        
-                        if (detailRow && detailRow.classList.contains('detail-row')) {
-                            detailRow.classList.toggle('show');
-                            toggle.classList.toggle('expanded');
+
+                tableData.lastModified = new Date().toISOString();
+
+                const storageKey = `${tableData.sheet}_${tableData.branch}`;
+                localStorage.setItem(storageKey, JSON.stringify(tableData));
+
+                document.getElementById("lastUpdate").textContent =
+                    new Date().toLocaleString("ru-RU");
+            }
+
+            function loadData() {
+                const storageKey = `${tableData.sheet}_${tableData.branch}`;
+                const saved = localStorage.getItem(storageKey);
+
+                // ...
+                document.querySelectorAll("input").forEach((input) => {
+                    input.value = "0";
+                });
+
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    tableData = data;
+
+                    Object.keys(data.cells).forEach((cell) => {
+                        const input = document.querySelector(
+                            `input[data-cell="${cell}"]`,
+                        );
+                        if (input) {
+                            input.value = data.cells[cell];
                         }
                     });
-                    
-                    processedCount++;
+
+                    document.getElementById("lastUpdate").textContent =
+                        new Date(data.lastModified).toLocaleString("ru-RU");
+                } else {
+                    document.getElementById("нет данных").textContent =
+                        "нет данных";
                 }
-            });
-            
-            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
-        }
 
-        function removeDetailToggles() {
-            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.expandable').forEach(cell => {
-                cell.classList.remove('expandable');
-            });
-        }
+                calculateTotals();
+            }
 
-    </script>
-    <script src="shared-nav.js"></script>
-</body>
+            function switchBranch(branch) {
+                // ...
+                if (currentBranch !== "consolidated") {
+                    saveData();
+                }
+                tableData.branch = branch;
+                // Удаляем детали при переключении с консолидации
+                if (
+                    currentBranch === "consolidated" &&
+                    branch !== "consolidated"
+                ) {
+                    removeDetailToggles();
+                }
+
+                currentBranch = branch;
+
+                document.querySelectorAll(".branch-btn").forEach((btn) => {
+                    btn.classList.remove("active");
+                    if (btn.dataset.branch === branch) {
+                        btn.classList.add("active");
+                    }
+                });
+
+                const branchNames = {
+                    almaty: "Алматы",
+                    uralsk: "Уральск",
+                    astana: "Астана",
+                    nao: "НАО «РФМШ»",
+                    consolidated: "Консолидированный",
+                };
+
+                document.getElementById("currentBranch").textContent =
+                    branchNames[branch];
+
+                if (branch === "consolidated") {
+                    document.querySelectorAll("input").forEach((input) => {
+                        input.disabled = true;
+                    });
+                    loadConsolidatedData();
+                } else {
+                    document.querySelectorAll("input").forEach((input) => {
+                        input.disabled = false;
+                    });
+                    loadData();
+                }
+            }
+
+            function loadConsolidatedData() {
+                const branches = ["almaty", "uralsk", "astana", "nao"];
+                const allData = {};
+
+                // Сохраняем данные для детализации
+                window.branchDetailsData = {};
+
+                branches.forEach((b) => {
+                    const key = `rb_kalkulyacia_${b}`;
+                    const saved = localStorage.getItem(key);
+                    if (saved) {
+                        allData[b] = JSON.parse(saved).cells || {};
+                    }
+                });
+
+                document.querySelectorAll("input").forEach((input) => {
+                    const cellId = input.dataset.cell;
+                    let sum = 0;
+                    branches.forEach((b) => {
+                        if (allData[b]?.[cellId]) {
+                            sum += parseFloat(allData[b][cellId]) || 0;
+                        }
+                    });
+                    input.value = sum.toFixed(2);
+                });
+
+                calculateTotals();
+                document.getElementById(
+                    "Консолидировано из 3 филиалов",
+                ).textContent = "Консолидировано из 3 филиалов";
+            }
+
+            function exportToExcel() {
+                const branchNames = {
+                    almaty: "Алматы",
+                    uralsk: "Уральск",
+                    astana: "Астана",
+                    nao: "НАО «РФМШ»",
+                    consolidated: "Консолидированный",
+                };
+                const brName = branchNames[currentBranch] || "";
+                SharedExport.exportTableToExcel({
+                    title: "Калькуляция 2026 — " + brName,
+                    fileName:
+                        "Калькуляция_2026_" +
+                        brName +
+                        "_" +
+                        new Date().toISOString().slice(0, 10) +
+                        ".xlsx",
+                    sheetName: "Калькуляция",
+                });
+            }
+            function addDetailToggles() {
+                // Удаляем существующие детальные строки и иконки
+                document
+                    .querySelectorAll(".detail-row")
+                    .forEach((row) => row.remove());
+                document
+                    .querySelectorAll(".toggle-detail")
+                    .forEach((toggle) => toggle.remove());
+                document
+                    .querySelectorAll(".expandable")
+                    .forEach((cell) => cell.classList.remove("expandable"));
+
+                const dataRows = document.querySelectorAll("tbody tr");
+                const branches = ["almaty", "uralsk", "astana", "nao"];
+                const branchNames = {
+                    almaty: "Алматы",
+                    uralsk: "Уральск",
+                    astana: "Астана",
+                    nao: "НАО «РФМШ»",
+                };
+
+                let processedCount = 0;
+
+                dataRows.forEach((row, index) => {
+                    const labelCell =
+                        row.querySelector("td.label-cell:nth-child(2)") ||
+                        row.querySelector("td:nth-child(2)");
+                    const firstInput = row.querySelector("input[data-cell]");
+
+                    const isTotalRow =
+                        row.classList.contains("total-row") ||
+                        row.textContent.includes("Итого") ||
+                        row.textContent.includes("ИТОГО");
+
+                    if (labelCell && firstInput && !isTotalRow) {
+                        const rowNum = firstInput.dataset.row || index;
+
+                        labelCell.classList.add("expandable");
+                        const toggle = document.createElement("span");
+                        toggle.className = "toggle-detail";
+                        toggle.textContent = "▶";
+                        toggle.dataset.row = rowNum;
+
+                        labelCell.insertBefore(toggle, labelCell.firstChild);
+
+                        const detailRow = document.createElement("tr");
+                        detailRow.className = "detail-row";
+                        detailRow.dataset.row = rowNum;
+
+                        const emptyCell = document.createElement("td");
+                        emptyCell.style.background = "#f8f9fa";
+                        detailRow.appendChild(emptyCell);
+
+                        const branchListCell = document.createElement("td");
+                        branchListCell.className = "detail-cell";
+                        branchListCell.style.verticalAlign = "top";
+
+                        let branchList = '<div style="padding: 5px 0;">';
+                        branches.forEach((b) => {
+                            branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+                        });
+                        branchList += "</div>";
+                        branchListCell.innerHTML = branchList;
+                        detailRow.appendChild(branchListCell);
+
+                        const inputs = row.querySelectorAll("input[data-cell]");
+                        inputs.forEach((input) => {
+                            const yearCell = document.createElement("td");
+                            yearCell.className = "detail-cell";
+                            yearCell.style.verticalAlign = "top";
+                            yearCell.style.textAlign = "right";
+
+                            let yearData = '<div style="padding: 5px 0;">';
+                            branches.forEach((b) => {
+                                const cellId = input.dataset.cell;
+                                const value =
+                                    window.branchDetailsData &&
+                                    window.branchDetailsData[b] &&
+                                    window.branchDetailsData[b][cellId]
+                                        ? parseFloat(
+                                              window.branchDetailsData[b][
+                                                  cellId
+                                              ],
+                                          )
+                                        : 0;
+                                yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>`;
+                            });
+                            yearData += "</div>";
+                            yearCell.innerHTML = yearData;
+                            detailRow.appendChild(yearCell);
+                        });
+
+                        row.parentNode.insertBefore(detailRow, row.nextSibling);
+
+                        labelCell.addEventListener("click", function (e) {
+                            const toggle = this.querySelector(".toggle-detail");
+                            const detailRow =
+                                this.parentElement.nextElementSibling;
+
+                            if (
+                                detailRow &&
+                                detailRow.classList.contains("detail-row")
+                            ) {
+                                detailRow.classList.toggle("show");
+                                toggle.classList.toggle("expanded");
+                            }
+                        });
+
+                        processedCount++;
+                    }
+                });
+
+                console.log(
+                    `✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`,
+                );
+            }
+
+            function removeDetailToggles() {
+                document
+                    .querySelectorAll(".toggle-detail")
+                    .forEach((el) => el.remove());
+                document
+                    .querySelectorAll(".detail-row")
+                    .forEach((row) => row.remove());
+                document.querySelectorAll(".expandable").forEach((cell) => {
+                    cell.classList.remove("expandable");
+                });
+            }
+        </script>
+        <script src="shared-nav.js"></script>
+    </body>
 </html>
-
-

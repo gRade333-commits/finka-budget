@@ -1,496 +1,715 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="shared.css">
-    <title>Доходная часть РБ 2026</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="editable-table.js"></script>
-</head>
-<body class="page-rb">
-    <div class="header">
-        <h1>📊 Доходная часть РБ 2026</h1>
-        <p style="color: #7f8c8d; margin-top: 5px;">Консолидированный бюджет • Лист 2 из 6</p>
-        
-        <div class="branch-selector">
-            <button class="branch-btn active" data-branch="almaty">Алматы</button>
-            <button class="branch-btn" data-branch="astana">Астана</button>
-            <button class="branch-btn" data-branch="uralsk">Уральск</button>
-            <button class="branch-btn" data-branch="nao">НАО</button>
-            <button class="branch-btn" data-branch="consolidated" style="border-color: #8e44ad; color: #8e44ad;">
-                📈 Консолидация
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="shared.css" />
+        <title>Доходная часть РБ 2026</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+        <script src="editable-table.js"></script>
+    </head>
+    <body class="page-rb">
+        <div class="header">
+            <h1>📊 Доходная часть РБ 2026</h1>
+            <p style="color: #7f8c8d; margin-top: 5px">
+                Консолидированный бюджет • Лист 2 из 6
+            </p>
+
+            <div class="branch-selector">
+                <button class="branch-btn active" data-branch="nao">
+                    НАО «РФМШ»
+                </button>
+                <button class="branch-btn" data-branch="almaty">Алматы</button>
+                <button class="branch-btn" data-branch="astana">Астана</button>
+                <button class="branch-btn" data-branch="uralsk">Уральск</button>
+                <button
+                    class="branch-btn"
+                    data-branch="consolidated"
+                    style="border-color: #8e44ad; color: #8e44ad"
+                >
+                    📈 Консолидация
+                </button>
+            </div>
+        </div>
+
+        <div class="info-bar">
+            <div>
+                <span style="font-weight: bold">Филиал:</span>
+                <span id="currentBranch">НАО «РФМШ»</span>
+            </div>
+            <div>
+                <span style="font-weight: bold">Контингент:</span>
+                <span>1186 человек</span>
+            </div>
+            <div>
+                <span style="font-weight: bold">Последнее обновление:</span>
+                <span id="lastUpdate">-</span>
+            </div>
+            <div class="auto-save-status saved" id="saveStatus">
+                ✓ Сохранено
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <tbody>
+                    <tr>
+                        <td colspan="19" class="title-cell">
+                            План поступлений доходной части бюджета НАО «РФМШ»
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            colspan="19"
+                            class="title-cell"
+                            style="
+                                background: #d6eaf8;
+                                text-align: left;
+                                padding-left: 20px;
+                            "
+                        >
+                            1. Доходная часть бюджета НАО «РФМШ» с учетом вклада
+                            по государственному заданию
+                        </td>
+                    </tr>
+
+                    <!-- Заголовки -->
+                    <tr>
+                        <th rowspan="2">№ п/п</th>
+                        <th rowspan="2">Наименование филиала НАО «РФМШ»</th>
+                        <th rowspan="2">Адресат</th>
+                        <th rowspan="2">Плановый<br />контингент</th>
+                        <th colspan="12" class="month-header">
+                            Сумма поступлений по месяцам на 2026 год бюджетных
+                            тыс
+                        </th>
+                        <th colspan="2">Платежки по месяцу<br />и годам</th>
+                        <th rowspan="2">
+                            Общая сумма поступлений<br />на весь ГЗ на 2026
+                            год<br />(бюджетных тыс)
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="month-header">Январь</th>
+                        <th class="month-header">Февраль</th>
+                        <th class="month-header">Март</th>
+                        <th class="month-header">Апрель</th>
+                        <th class="month-header">Май<br />1,3</th>
+                        <th class="month-header">Июнь<br />1,4</th>
+                        <th class="month-header">Июль<br />0,7</th>
+                        <th class="month-header">Август<br />0,6</th>
+                        <th class="month-header">Сентябрь</th>
+                        <th class="month-header">Октябрь</th>
+                        <th class="month-header">Ноябрь</th>
+                        <th class="month-header">Декабрь</th>
+                        <th class="month-header">в месяц</th>
+                        <th class="month-header">в год</th>
+                    </tr>
+
+                    <!-- Данные филиала -->
+                    <tr>
+                        <td class="label-cell">1</td>
+                        <td class="label-cell" id="branchName">
+                            Филиал НАО «РФМШ» г г Алматы
+                        </td>
+                        <td class="label-cell">с 7 по 11 кл</td>
+                        <td class="editable">
+                            <input type="number" data-cell="E7" value="1186" />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="F7"
+                                data-month="jan"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="G7"
+                                data-month="feb"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="H7"
+                                data-month="mar"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="I7"
+                                data-month="apr"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="J7"
+                                data-month="may"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="K7"
+                                data-month="jun"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="L7"
+                                data-month="jul"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="M7"
+                                data-month="aug"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="N7"
+                                data-month="sep"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="O7"
+                                data-month="oct"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="P7"
+                                data-month="nov"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input
+                                type="number"
+                                data-cell="Q7"
+                                data-month="dec"
+                                value="0"
+                            />
+                        </td>
+                        <td class="editable">
+                            <input type="number" data-cell="R7" value="0" />
+                        </td>
+                        <td class="editable">
+                            <input type="number" data-cell="S7" value="0" />
+                        </td>
+                        <td class="formula-cell" id="totalYear">0.00</td>
+                    </tr>
+
+                    <!-- Итого -->
+                    <tr class="total-row">
+                        <td colspan="3" class="label-cell">Итого</td>
+                        <td class="formula-cell" id="totalContingent">0</td>
+                        <td class="formula-cell" id="totalJan">0.00</td>
+                        <td class="formula-cell" id="totalFeb">0.00</td>
+                        <td class="formula-cell" id="totalMar">0.00</td>
+                        <td class="formula-cell" id="totalApr">0.00</td>
+                        <td class="formula-cell" id="totalMay">0.00</td>
+                        <td class="formula-cell" id="totalJun">0.00</td>
+                        <td class="formula-cell" id="totalJul">0.00</td>
+                        <td class="formula-cell" id="totalAug">0.00</td>
+                        <td class="formula-cell" id="totalSep">0.00</td>
+                        <td class="formula-cell" id="totalOct">0.00</td>
+                        <td class="formula-cell" id="totalNov">0.00</td>
+                        <td class="formula-cell" id="totalDec">0.00</td>
+                        <td class="formula-cell" id="totalPerMonth">0.00</td>
+                        <td class="formula-cell" id="totalPerYear">0.00</td>
+                        <td class="formula-cell" id="grandTotal">0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="saveData()">
+                💾 Сохранить данные
+            </button>
+            <button class="btn btn-success" onclick="exportToExcel()">
+                📥 Excel
+            </button>
+            <button
+                class="btn btn-success"
+                onclick="SharedExport.exportToPDF()"
+                style="background: #6366f1"
+            >
+                📄 PDF
+            </button>
+            <button
+                class="btn btn-success"
+                onclick="window.print()"
+                style="background: #64748b"
+            >
+                🖨️ Печать
+            </button>
+            <button
+                class="btn btn-secondary"
+                onclick="window.location.href = 'index.html'"
+            >
+                ← Назад в Главное
             </button>
         </div>
-    </div>
 
-    <div class="info-bar">
-        <div>
-            <span style="font-weight: bold;">Филиал:</span>
-            <span id="currentBranch">Алматы</span>
-        </div>
-        <div>
-            <span style="font-weight: bold;">Контингент:</span>
-            <span>1186 человек</span>
-        </div>
-        <div>
-            <span style="font-weight: bold;">Последнее обновление:</span>
-            <span id="lastUpdate">-</span>
-        </div>
-        <div class="auto-save-status saved" id="saveStatus">
-            ✓ Сохранено
-        </div>
-    </div>
+        <script>
+            let currentBranch = "nao";
 
-    <div class="table-container">
-        <table>
-            <tbody>
-                <tr>
-                    <td colspan="19" class="title-cell">
-                        План поступлений доходной части бюджета НАО "КБТУ"
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="19" class="title-cell" style="background: #d6eaf8; text-align: left; padding-left: 20px;">
-                        1. Доходная часть бюджета НАО "КБТУ" с учетом вклада по государственному заданию
-                    </td>
-                </tr>
-                
-                <!-- Заголовки -->
-                <tr>
-                    <th rowspan="2">№ п/п</th>
-                    <th rowspan="2">Наименование филиала НАО "КБТУ"</th>
-                    <th rowspan="2">Адресат</th>
-                    <th rowspan="2">Плановый<br>контингент</th>
-                    <th colspan="12" class="month-header">Сумма поступлений по месяцам на 2026 год бюджетных тыс</th>
-                    <th colspan="2">Платежки по месяцу<br>и годам</th>
-                    <th rowspan="2">Общая сумма поступлений<br>на весь ГЗ на 2026 год<br>(бюджетных тыс)</th>
-                </tr>
-                <tr>
-                    <th class="month-header">Январь</th>
-                    <th class="month-header">Февраль</th>
-                    <th class="month-header">Март</th>
-                    <th class="month-header">Апрель</th>
-                    <th class="month-header">Май<br>1,3</th>
-                    <th class="month-header">Июнь<br>1,4</th>
-                    <th class="month-header">Июль<br>0,7</th>
-                    <th class="month-header">Август<br>0,6</th>
-                    <th class="month-header">Сентябрь</th>
-                    <th class="month-header">Октябрь</th>
-                    <th class="month-header">Ноябрь</th>
-                    <th class="month-header">Декабрь</th>
-                    <th class="month-header">в месяц</th>
-                    <th class="month-header">в год</th>
-                </tr>
+            let tableData = {
+                branch: "almaty",
+                sheet: "rb_income",
+                lastModified: new Date().toISOString(),
+                cells: {},
+            };
 
-                <!-- Данные филиала -->
-                <tr>
-                    <td class="label-cell">1</td>
-                    <td class="label-cell" id="branchName">Филиал НАО "КБТУ" г г Алматы</td>
-                    <td class="label-cell">с 7 по 11 кл</td>
-                    <td class="editable"><input type="number" data-cell="E7" value="1186"></td>
-                    <td class="editable"><input type="number" data-cell="F7" data-month="jan" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="G7" data-month="feb" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="H7" data-month="mar" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="I7" data-month="apr" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="J7" data-month="may" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="K7" data-month="jun" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="L7" data-month="jul" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="M7" data-month="aug" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="N7" data-month="sep" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="O7" data-month="oct" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="P7" data-month="nov" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="Q7" data-month="dec" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="R7" value="0"></td>
-                    <td class="editable"><input type="number" data-cell="S7" value="0"></td>
-                    <td class="formula-cell" id="totalYear">0.00</td>
-                </tr>
+            document.addEventListener("DOMContentLoaded", function () {
+                loadData();
+                setupEventListeners();
+                calculateTotals();
 
-                <!-- Итого -->
-                <tr class="total-row">
-                    <td colspan="3" class="label-cell">Итого</td>
-                    <td class="formula-cell" id="totalContingent">0</td>
-                    <td class="formula-cell" id="totalJan">0.00</td>
-                    <td class="formula-cell" id="totalFeb">0.00</td>
-                    <td class="formula-cell" id="totalMar">0.00</td>
-                    <td class="formula-cell" id="totalApr">0.00</td>
-                    <td class="formula-cell" id="totalMay">0.00</td>
-                    <td class="formula-cell" id="totalJun">0.00</td>
-                    <td class="formula-cell" id="totalJul">0.00</td>
-                    <td class="formula-cell" id="totalAug">0.00</td>
-                    <td class="formula-cell" id="totalSep">0.00</td>
-                    <td class="formula-cell" id="totalOct">0.00</td>
-                    <td class="formula-cell" id="totalNov">0.00</td>
-                    <td class="formula-cell" id="totalDec">0.00</td>
-                    <td class="formula-cell" id="totalPerMonth">0.00</td>
-                    <td class="formula-cell" id="totalPerYear">0.00</td>
-                    <td class="formula-cell" id="grandTotal">0.00</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+                // НЕ инициализируем редактируемые таблицы для этой страницы
+                // Таблица уже имеет правильную структуру с input полями
+                console.log("✅ Таблица rb-income готова к работе");
+            });
 
-    <div class="buttons">
-        <button class="btn btn-primary" onclick="saveData()">💾 Сохранить данные</button>
-        <button class="btn btn-success" onclick="exportToExcel()">📥 Скачать в Excel</button>
-        <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Назад в Главное</button>
-    </div>
-
-    <script>
-        let currentBranch = 'almaty';
-        
-        let tableData = {
-            branch: 'almaty',
-            sheet: 'rb_income',
-            lastModified: new Date().toISOString(),
-            cells: {}
-        };
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-            setupEventListeners();
-            calculateTotals();
-            
-            // НЕ инициализируем редактируемые таблицы для этой страницы
-            // Таблица уже имеет правильную структуру с input полями
-            console.log('✅ Таблица rb-income готова к работе');
-        });
-
-        function setupEventListeners() {
-            document.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', function() {
-                    this.parentElement.classList.add('changed');
-                    calculateTotals();
-                    autoSave();
+            function setupEventListeners() {
+                document.querySelectorAll("input").forEach((input) => {
+                    input.addEventListener("input", function () {
+                        this.parentElement.classList.add("changed");
+                        calculateTotals();
+                        autoSave();
+                    });
                 });
-            });
 
-            document.querySelectorAll('.branch-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    switchBranch(this.dataset.branch);
+                document.querySelectorAll(".branch-btn").forEach((btn) => {
+                    btn.addEventListener("click", function () {
+                        document
+                            .querySelectorAll(".branch-btn")
+                            .forEach((b) => b.classList.remove("active"));
+                        this.classList.add("active");
+                        switchBranch(this.dataset.branch);
+                    });
                 });
-            });
-        }
+            }
 
-        function getValue(cell) {
-            const input = document.querySelector(`input[data-cell="${cell}"]`);
-            return parseFloat(input?.value || 0) || 0;
-        }
+            function getValue(cell) {
+                const input = document.querySelector(
+                    `input[data-cell="${cell}"]`,
+                );
+                return parseFloat(input?.value || 0) || 0;
+            }
 
-        function calculateTotals() {
-            const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-            const monthCells = ['F7', 'G7', 'H7', 'I7', 'J7', 'K7', 'L7', 'M7', 'N7', 'O7', 'P7', 'Q7'];
-            const totalIds = ['totalJan', 'totalFeb', 'totalMar', 'totalApr', 'totalMay', 'totalJun', 
-                            'totalJul', 'totalAug', 'totalSep', 'totalOct', 'totalNov', 'totalDec'];
-            
-            let yearTotal = 0;
-            
-            monthCells.forEach((cell, index) => {
-                const value = getValue(cell);
-                document.getElementById(totalIds[index]).textContent = value.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-                yearTotal += value;
-            });
+            function calculateTotals() {
+                const months = [
+                    "jan",
+                    "feb",
+                    "mar",
+                    "apr",
+                    "may",
+                    "jun",
+                    "jul",
+                    "aug",
+                    "sep",
+                    "oct",
+                    "nov",
+                    "dec",
+                ];
+                const monthCells = [
+                    "F7",
+                    "G7",
+                    "H7",
+                    "I7",
+                    "J7",
+                    "K7",
+                    "L7",
+                    "M7",
+                    "N7",
+                    "O7",
+                    "P7",
+                    "Q7",
+                ];
+                const totalIds = [
+                    "totalJan",
+                    "totalFeb",
+                    "totalMar",
+                    "totalApr",
+                    "totalMay",
+                    "totalJun",
+                    "totalJul",
+                    "totalAug",
+                    "totalSep",
+                    "totalOct",
+                    "totalNov",
+                    "totalDec",
+                ];
 
-            document.getElementById('totalContingent').textContent = getValue('E7');
+                let yearTotal = 0;
 
-            const perMonth = getValue('R7');
-            const perYear = getValue('S7');
-            document.getElementById('totalPerMonth').textContent = perMonth.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('totalPerYear').textContent = perYear.toLocaleString('ru-RU', {minimumFractionDigits: 2});
+                monthCells.forEach((cell, index) => {
+                    const value = getValue(cell);
+                    document.getElementById(totalIds[index]).textContent =
+                        value.toLocaleString("ru-RU", {
+                            minimumFractionDigits: 2,
+                        });
+                    yearTotal += value;
+                });
 
-            document.getElementById('totalYear').textContent = yearTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-            document.getElementById('grandTotal').textContent = yearTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2});
-        }
+                document.getElementById("totalContingent").textContent =
+                    getValue("E7");
 
-        let saveTimeout;
-        function autoSave() {
-            clearTimeout(saveTimeout);
-            
-            const status = document.getElementById('saveStatus');
-            status.className = 'auto-save-status';
-            status.style.background = '#fff3cd';
-            status.style.color = '#856404';
-            status.textContent = '⏳ Сохранение...';
+                const perMonth = getValue("R7");
+                const perYear = getValue("S7");
+                document.getElementById("totalPerMonth").textContent =
+                    perMonth.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                    });
+                document.getElementById("totalPerYear").textContent =
+                    perYear.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                    });
 
-            saveTimeout = setTimeout(() => {
-                saveData();
-                status.className = 'auto-save-status saved';
-                status.textContent = '✓ Сохранено';
-            }, 1000);
-        }
+                document.getElementById("totalYear").textContent =
+                    yearTotal.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                    });
+                document.getElementById("grandTotal").textContent =
+                    yearTotal.toLocaleString("ru-RU", {
+                        minimumFractionDigits: 2,
+                    });
+            }
 
-        function saveData() {
-            if (currentBranch === 'consolidated') return;
-            
-            document.querySelectorAll('input').forEach(input => {
-                tableData.cells[input.dataset.cell] = input.value;
-                input.parentElement.classList.remove('changed');
-            });
+            let saveTimeout;
+            function autoSave() {
+                clearTimeout(saveTimeout);
 
-            tableData.lastModified = new Date().toISOString();
-            
-            const storageKey = `${tableData.sheet}_${tableData.branch}`;
-            localStorage.setItem(storageKey, JSON.stringify(tableData));
-            
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ru-RU');
-        }
+                const status = document.getElementById("saveStatus");
+                status.className = "auto-save-status";
+                status.style.background = "#fff3cd";
+                status.style.color = "#856404";
+                status.textContent = "⏳ Сохранение...";
 
-        function loadData() {
-            const storageKey = `${tableData.sheet}_${tableData.branch}`;
-            const saved = localStorage.getItem(storageKey);
-            
-            document.querySelectorAll('input').forEach(input => {
-                if (input.dataset.cell === 'E7') {
-                    input.value = '1186';
-                } else {
-                    input.value = '0';
-                }
-            });
-            
-            if (saved) {
-                const data = JSON.parse(saved);
-                tableData = data;
-                
-                Object.keys(data.cells).forEach(cell => {
-                    const input = document.querySelector(`input[data-cell="${cell}"]`);
-                    if (input) {
-                        input.value = data.cells[cell];
+                saveTimeout = setTimeout(() => {
+                    saveData();
+                    status.className = "auto-save-status saved";
+                    status.textContent = "✓ Сохранено";
+                }, 1000);
+            }
+
+            function saveData() {
+                if (currentBranch === "consolidated") return;
+
+                document.querySelectorAll("input").forEach((input) => {
+                    tableData.cells[input.dataset.cell] = input.value;
+                    input.parentElement.classList.remove("changed");
+                });
+
+                tableData.lastModified = new Date().toISOString();
+
+                const storageKey = `${tableData.sheet}_${tableData.branch}`;
+                localStorage.setItem(storageKey, JSON.stringify(tableData));
+
+                document.getElementById("lastUpdate").textContent =
+                    new Date().toLocaleString("ru-RU");
+            }
+
+            function loadData() {
+                const storageKey = `${tableData.sheet}_${tableData.branch}`;
+                const saved = localStorage.getItem(storageKey);
+
+                document.querySelectorAll("input").forEach((input) => {
+                    if (input.dataset.cell === "E7") {
+                        input.value = "1186";
+                    } else {
+                        input.value = "0";
                     }
                 });
-                
-                document.getElementById('lastUpdate').textContent = new Date(data.lastModified).toLocaleString('ru-RU');
-            } else {
-                document.getElementById('lastUpdate').textContent = 'Нет данных';
-            }
-            
-            calculateTotals();
-        }
 
-        function switchBranch(branch) {
-            if (currentBranch !== 'consolidated') {
-                saveData();
-            }
-            // Удаляем детали при переключении с консолидации
-            if (currentBranch === 'consolidated' && branch !== 'consolidated') {
-                removeDetailToggles();
-            }
-            
-            currentBranch = branch;
-            tableData.branch = branch;
-            
-            document.querySelectorAll('.branch-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.branch === branch) {
-                    btn.classList.add('active');
-                }
-            });
-
-            const branchNames = {
-                'almaty': 'Филиал НАО "КБТУ" г г Алматы',
-                'uralsk': 'Филиал НАО "КБТУ" г г Уральск',
-                'astana': 'Филиал НАО "КБТУ" г г Астана',
-                'nao': 'Филиал НАО "КБТУ" НАО',
-                'consolidated': 'Консолидированный бюджет по всем филиалам'
-            };
-            
-            const shortNames = {
-                'almaty': 'Алматы',
-                'uralsk': 'Уральск',
-                'astana': 'Астана',
-                'nao': 'НАО',
-                'consolidated': 'Консолидированная'
-            };
-            
-            document.getElementById('currentBranch').textContent = shortNames[branch];
-            document.getElementById('branchName').textContent = branchNames[branch];
-            
-            if (branch === 'consolidated') {
-                document.querySelectorAll('input').forEach(input => {
-                    input.disabled = true;
-                });
-                loadConsolidatedData();
-            } else {
-                document.querySelectorAll('input').forEach(input => {
-                    input.disabled = false;
-                });
-                loadData();
-            }
-        }
-
-        function loadConsolidatedData() {
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const allData = {};
-
-            // Сохраняем данные для детализации
-            window.branchDetailsData = {};
-            
-            branches.forEach(b => {
-                const key = `rb_income_${b}`;
-                const saved = localStorage.getItem(key);
                 if (saved) {
                     const data = JSON.parse(saved);
-                    allData[b] = data.cells;
-                window.branchDetailsData[b] = data.cells || {};
-                }
-            });
-            
-            document.querySelectorAll('input').forEach(input => {
-                const cellId = input.dataset.cell;
-                let sum = 0;
-                
-                branches.forEach(b => {
-                    if (allData[b] && allData[b][cellId]) {
-                        sum += parseFloat(allData[b][cellId]) || 0;
-                    }
-                });
-                
-                input.value = sum;
-            });
-            
-            calculateTotals();
-            document.getElementById('lastUpdate').textContent = 'Консолидация из 3 филиалов';
-        }
+                    tableData = data;
 
-        function exportToExcel() {
-            const data = [];
-            const table = document.querySelector('table');
-            const rows = table.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const rowData = [];
-                row.querySelectorAll('th, td').forEach(cell => {
-                    const input = cell.querySelector('input');
-                    if (input) {
-                        rowData.push(input.value || '');
-                    } else {
-                        rowData.push(cell.textContent.trim());
-                    }
-                });
-                data.push(rowData);
-            });
-            
-            const csvContent = data.map(row => row.join('\t')).join('\n');
-            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            const branchNames = {'almaty': 'Алматы', 'uralsk': 'Уральск', 'astana': 'Астана', 'nao': 'НАО', 'consolidated': 'Консолидированная'};
-            const filename = `Доходная_часть_РБ_${branchNames[currentBranch]}_${new Date().toISOString().slice(0,10)}.csv`;
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-        function addDetailToggles() {
-            // Удаляем существующие детальные строки и иконки
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
-            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
-            
-            const dataRows = document.querySelectorAll('tbody tr');
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const branchNames = {
-                'almaty': 'Алматы',
-                'uralsk': 'Уральск',
-                'astana': 'Астана',
-                'nao': 'НАО'
-            };
-            
-            let processedCount = 0;
-            
-            dataRows.forEach((row, index) => {
-                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
-                const firstInput = row.querySelector('input[data-cell]');
-                
-                const isTotalRow = row.classList.contains('total-row') || 
-                                   row.textContent.includes('Итого') ||
-                                   row.textContent.includes('ИТОГО');
-                
-                if (labelCell && firstInput && !isTotalRow) {
-                    const rowNum = firstInput.dataset.row || index;
-                    
-                    labelCell.classList.add('expandable');
-                    const toggle = document.createElement('span');
-                    toggle.className = 'toggle-detail';
-                    toggle.textContent = '▶';
-                    toggle.dataset.row = rowNum;
-                    
-                    labelCell.insertBefore(toggle, labelCell.firstChild);
-                    
-                    const detailRow = document.createElement('tr');
-                    detailRow.className = 'detail-row';
-                    detailRow.dataset.row = rowNum;
-                    
-                    const emptyCell = document.createElement('td');
-                    emptyCell.style.background = '#f8f9fa';
-                    detailRow.appendChild(emptyCell);
-                    
-                    const branchListCell = document.createElement('td');
-                    branchListCell.className = 'detail-cell';
-                    branchListCell.style.verticalAlign = 'top';
-                    
-                    let branchList = '<div style="padding: 5px 0;">';
-                    branches.forEach(b => {
-                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
-                    });
-                    branchList += '</div>';
-                    branchListCell.innerHTML = branchList;
-                    detailRow.appendChild(branchListCell);
-                    
-                    const inputs = row.querySelectorAll('input[data-cell]');
-                    inputs.forEach(input => {
-                        const yearCell = document.createElement('td');
-                        yearCell.className = 'detail-cell';
-                        yearCell.style.verticalAlign = 'top';
-                        yearCell.style.textAlign = 'right';
-                        
-                        let yearData = '<div style="padding: 5px 0;">';
-                        branches.forEach(b => {
-                            const cellId = input.dataset.cell;
-                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
-                                ? parseFloat(window.branchDetailsData[b][cellId]) 
-                                : 0;
-                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
-                        });
-                        yearData += '</div>';
-                        yearCell.innerHTML = yearData;
-                        detailRow.appendChild(yearCell);
-                    });
-                    
-                    row.parentNode.insertBefore(detailRow, row.nextSibling);
-                    
-                    labelCell.addEventListener('click', function(e) {
-                        const toggle = this.querySelector('.toggle-detail');
-                        const detailRow = this.parentElement.nextElementSibling;
-                        
-                        if (detailRow && detailRow.classList.contains('detail-row')) {
-                            detailRow.classList.toggle('show');
-                            toggle.classList.toggle('expanded');
+                    Object.keys(data.cells).forEach((cell) => {
+                        const input = document.querySelector(
+                            `input[data-cell="${cell}"]`,
+                        );
+                        if (input) {
+                            input.value = data.cells[cell];
                         }
                     });
-                    
-                    processedCount++;
+
+                    document.getElementById("lastUpdate").textContent =
+                        new Date(data.lastModified).toLocaleString("ru-RU");
+                } else {
+                    document.getElementById("lastUpdate").textContent =
+                        "Нет данных";
                 }
-            });
-            
-            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
-        }
 
-        function removeDetailToggles() {
-            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.expandable').forEach(cell => {
-                cell.classList.remove('expandable');
-            });
-        }
+                calculateTotals();
+            }
 
-    </script>
-    <script src="shared-nav.js"></script>
-</body>
+            function switchBranch(branch) {
+                if (currentBranch !== "consolidated") {
+                    saveData();
+                }
+                // Удаляем детали при переключении с консолидации
+                if (
+                    currentBranch === "consolidated" &&
+                    branch !== "consolidated"
+                ) {
+                    removeDetailToggles();
+                }
+
+                currentBranch = branch;
+                tableData.branch = branch;
+
+                document.querySelectorAll(".branch-btn").forEach((btn) => {
+                    btn.classList.remove("active");
+                    if (btn.dataset.branch === branch) {
+                        btn.classList.add("active");
+                    }
+                });
+
+                const branchNames = {
+                    almaty: "Филиал НАО «РФМШ» г г Алматы",
+                    uralsk: "Филиал НАО «РФМШ» г г Уральск",
+                    astana: "Филиал НАО «РФМШ» г г Астана",
+                    nao: "Филиал НАО «РФМШ»",
+                    consolidated: "Консолидированный бюджет по всем филиалам",
+                };
+
+                const shortNames = {
+                    almaty: "Алматы",
+                    uralsk: "Уральск",
+                    astana: "Астана",
+                    nao: "НАО «РФМШ»",
+                    consolidated: "Консолидированная",
+                };
+
+                document.getElementById("currentBranch").textContent =
+                    shortNames[branch];
+                document.getElementById("branchName").textContent =
+                    branchNames[branch];
+
+                if (branch === "consolidated") {
+                    document.querySelectorAll("input").forEach((input) => {
+                        input.disabled = true;
+                    });
+                    loadConsolidatedData();
+                } else {
+                    document.querySelectorAll("input").forEach((input) => {
+                        input.disabled = false;
+                    });
+                    loadData();
+                }
+            }
+
+            function loadConsolidatedData() {
+                const branches = ["almaty", "uralsk", "astana", "nao"];
+                const allData = {};
+
+                // Сохраняем данные для детализации
+                window.branchDetailsData = {};
+
+                branches.forEach((b) => {
+                    const key = `rb_income_${b}`;
+                    const saved = localStorage.getItem(key);
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        allData[b] = data.cells;
+                        window.branchDetailsData[b] = data.cells || {};
+                    }
+                });
+
+                document.querySelectorAll("input").forEach((input) => {
+                    const cellId = input.dataset.cell;
+                    let sum = 0;
+
+                    branches.forEach((b) => {
+                        if (allData[b] && allData[b][cellId]) {
+                            sum += parseFloat(allData[b][cellId]) || 0;
+                        }
+                    });
+
+                    input.value = sum;
+                });
+
+                calculateTotals();
+                document.getElementById("lastUpdate").textContent =
+                    "Консолидация из 3 филиалов";
+            }
+
+            function exportToExcel() {
+                const branchNames = {
+                    almaty: "Алматы",
+                    uralsk: "Уральск",
+                    astana: "Астана",
+                    nao: "НАО «РФМШ»",
+                    consolidated: "Консолидированная",
+                };
+                const brName = branchNames[currentBranch] || "";
+                SharedExport.exportTableToExcel({
+                    title: "Доходная часть РБ — " + brName,
+                    fileName:
+                        "Доходная_часть_РБ_" +
+                        brName +
+                        "_" +
+                        new Date().toISOString().slice(0, 10) +
+                        ".xlsx",
+                    sheetName: "Доходы РБ",
+                });
+            }
+            function addDetailToggles() {
+                // Удаляем существующие детальные строки и иконки
+                document
+                    .querySelectorAll(".detail-row")
+                    .forEach((row) => row.remove());
+                document
+                    .querySelectorAll(".toggle-detail")
+                    .forEach((toggle) => toggle.remove());
+                document
+                    .querySelectorAll(".expandable")
+                    .forEach((cell) => cell.classList.remove("expandable"));
+
+                const dataRows = document.querySelectorAll("tbody tr");
+                const branches = ["almaty", "uralsk", "astana", "nao"];
+                const branchNames = {
+                    almaty: "Алматы",
+                    uralsk: "Уральск",
+                    astana: "Астана",
+                    nao: "НАО «РФМШ»",
+                };
+
+                let processedCount = 0;
+
+                dataRows.forEach((row, index) => {
+                    const labelCell =
+                        row.querySelector("td.label-cell:nth-child(2)") ||
+                        row.querySelector("td:nth-child(2)");
+                    const firstInput = row.querySelector("input[data-cell]");
+
+                    const isTotalRow =
+                        row.classList.contains("total-row") ||
+                        row.textContent.includes("Итого") ||
+                        row.textContent.includes("ИТОГО");
+
+                    if (labelCell && firstInput && !isTotalRow) {
+                        const rowNum = firstInput.dataset.row || index;
+
+                        labelCell.classList.add("expandable");
+                        const toggle = document.createElement("span");
+                        toggle.className = "toggle-detail";
+                        toggle.textContent = "▶";
+                        toggle.dataset.row = rowNum;
+
+                        labelCell.insertBefore(toggle, labelCell.firstChild);
+
+                        const detailRow = document.createElement("tr");
+                        detailRow.className = "detail-row";
+                        detailRow.dataset.row = rowNum;
+
+                        const emptyCell = document.createElement("td");
+                        emptyCell.style.background = "#f8f9fa";
+                        detailRow.appendChild(emptyCell);
+
+                        const branchListCell = document.createElement("td");
+                        branchListCell.className = "detail-cell";
+                        branchListCell.style.verticalAlign = "top";
+
+                        let branchList = '<div style="padding: 5px 0;">';
+                        branches.forEach((b) => {
+                            branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
+                        });
+                        branchList += "</div>";
+                        branchListCell.innerHTML = branchList;
+                        detailRow.appendChild(branchListCell);
+
+                        const inputs = row.querySelectorAll("input[data-cell]");
+                        inputs.forEach((input) => {
+                            const yearCell = document.createElement("td");
+                            yearCell.className = "detail-cell";
+                            yearCell.style.verticalAlign = "top";
+                            yearCell.style.textAlign = "right";
+
+                            let yearData = '<div style="padding: 5px 0;">';
+                            branches.forEach((b) => {
+                                const cellId = input.dataset.cell;
+                                const value =
+                                    window.branchDetailsData &&
+                                    window.branchDetailsData[b] &&
+                                    window.branchDetailsData[b][cellId]
+                                        ? parseFloat(
+                                              window.branchDetailsData[b][
+                                                  cellId
+                                              ],
+                                          )
+                                        : 0;
+                                yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>`;
+                            });
+                            yearData += "</div>";
+                            yearCell.innerHTML = yearData;
+                            detailRow.appendChild(yearCell);
+                        });
+
+                        row.parentNode.insertBefore(detailRow, row.nextSibling);
+
+                        labelCell.addEventListener("click", function (e) {
+                            const toggle = this.querySelector(".toggle-detail");
+                            const detailRow =
+                                this.parentElement.nextElementSibling;
+
+                            if (
+                                detailRow &&
+                                detailRow.classList.contains("detail-row")
+                            ) {
+                                detailRow.classList.toggle("show");
+                                toggle.classList.toggle("expanded");
+                            }
+                        });
+
+                        processedCount++;
+                    }
+                });
+
+                console.log(
+                    `✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`,
+                );
+            }
+
+            function removeDetailToggles() {
+                document
+                    .querySelectorAll(".toggle-detail")
+                    .forEach((el) => el.remove());
+                document
+                    .querySelectorAll(".detail-row")
+                    .forEach((row) => row.remove());
+                document.querySelectorAll(".expandable").forEach((cell) => {
+                    cell.classList.remove("expandable");
+                });
+            }
+        </script>
+        <script src="shared-nav.js"></script>
+    </body>
 </html>
-

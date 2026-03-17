@@ -1,64 +1,207 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="shared.css">
-    <title>План командировок в пределах РК - Бюджет ПУ 2026</title>
-    <script src="editable-table.js"></script>
-</head>
-<body class="page-pu">
-    <div class="container">
-        <div class="header">
-            <h1>План командировок в пределах РК</h1>
-            <p>Бюджет командировочных расходов по территории - 2026</p>
-        </div>
-        <div class="controls">
-            <div class="branch-selector">
-                <button class="branch-btn active" onclick="switchBranch('almaty')">Алматы</button>
-                <button class="branch-btn" onclick="switchBranch('astana')">Астана</button>
-                <button class="branch-btn" onclick="switchBranch('uralsk')">Уральск</button>
-                <button class="branch-btn" onclick="switchBranch('nao')">НАО</button>
-                <button class="branch-btn" onclick="switchBranch('consolidated')">Консолидация</button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="shared.css" />
+        <title>План командировок в пределах РК - Бюджет ПУ 2026</title>
+        <script src="editable-table.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="shared-export.js"></script>
+    </head>
+    <body class="page-pu">
+        <div class="container">
+            <div class="header">
+                <h1>План командировок в пределах РК</h1>
+                <p>Бюджет командировочных расходов по территории - 2026</p>
             </div>
-            <button onclick="addTrip()" id="addBtn">+ Добавить командировку</button>
-            <div class="save-status" id="saveStatus">Сохранено</div>
-        </div>
-        <div class="content">
-            <a href="index.html" class="back-link">< Вернуться к списку</a>
-            <div class="info">
-                <strong>МРП на 2026 год: 3,692₸</strong> (используется для расчёта суточных)
+            <div class="controls">
+                <div class="branch-selector">
+                    <button
+                        class="branch-btn active"
+                        onclick="switchBranch('nao')"
+                    >
+                        НАО «РФМШ»
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('almaty')">
+                        Алматы
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('astana')">
+                        Астана
+                    </button>
+                    <button class="branch-btn" onclick="switchBranch('uralsk')">
+                        Уральск
+                    </button>
+                    <button
+                        class="branch-btn"
+                        onclick="switchBranch('consolidated')"
+                    >
+                        Консолидация
+                    </button>
+                </div>
+                <button onclick="addTrip()" id="addBtn">
+                    + Добавить командировку
+                </button>
+                <div
+                    style="
+                        display: flex;
+                        gap: 8px;
+                        flex-wrap: wrap;
+                        align-items: center;
+                    "
+                >
+                    <button
+                        onclick="
+                            SharedExport.exportTableToExcel({
+                                title: document.title,
+                            })
+                        "
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📥 Excel
+                    </button>
+                    <button
+                        onclick="SharedExport.exportToPDF()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📄 PDF
+                    </button>
+                    <button
+                        onclick="window.print()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        🖨️ Печать
+                    </button>
+                </div>
+                <div
+                    style="
+                        display: flex;
+                        gap: 8px;
+                        flex-wrap: wrap;
+                        align-items: center;
+                    "
+                >
+                    <button
+                        onclick="
+                            SharedExport.exportTableToExcel({
+                                title: document.title,
+                            })
+                        "
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📥 Excel
+                    </button>
+                    <button
+                        onclick="SharedExport.exportToPDF()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        📄 PDF
+                    </button>
+                    <button
+                        onclick="window.print()"
+                        style="
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            border: 1px solid #cbd5e1;
+                            background: #fff;
+                            cursor: pointer;
+                            font-size: 13px;
+                        "
+                    >
+                        🖨️ Печать
+                    </button>
+                </div>
+                <div class="save-status" id="saveStatus">Сохранено</div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:40px;">№</th>
-                        <th style="min-width:200px;">Цель поездки</th>
-                        <th style="width:150px;">Город</th>
-                        <th style="width:80px;">Человек</th>
-                        <th style="width:80px;">Дней</th>
-                        <th style="width:80px;">Мес.</th>
-                        <th style="width:100px;">Билеты (₸)</th>
-                        <th style="width:100px;">Прож. (₸)</th>
-                        <th style="width:100px;">Суточные (₸)</th>
-                        <th style="width:120px;">Итого (₸)</th>
-                        <th style="width:60px;"></th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+            <div class="content">
+                <a href="index.html" class="back-link">← Вернуться к списку</a>
+                <div class="info">
+                    <strong
+                        >МРП на <span class="dyn-year">2026</span> год:
+                        <span id="mrpDisplay">4 325</span>₸</strong
+                    >
+                    (используется для расчёта суточных)
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px">№</th>
+                            <th style="min-width: 200px">Цель поездки</th>
+                            <th style="width: 150px">Город</th>
+                            <th style="width: 80px">Человек</th>
+                            <th style="width: 80px">Дней</th>
+                            <th style="width: 80px">Мес.</th>
+                            <th style="width: 100px">Билеты (₸)</th>
+                            <th style="width: 100px">Прож. (₸)</th>
+                            <th style="width: 100px">Суточные (₸)</th>
+                            <th style="width: 120px">Итого (₸)</th>
+                            <th style="width: 60px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
         </div>
-    </div>
-    <script>
-        const KEY = 'pu_plan_rk';
-        const MRP = 3692;
-        let branch = 'almaty', timeout, counter = 0;
+        <script>
+            const KEY = "pu_plan_rk";
+            var MRP_BY_YEAR = {
+                2024: 3692,
+                2025: 3932,
+                2026: 4325,
+                2027: 4325,
+                2028: 4325,
+            };
+            var MRP =
+                MRP_BY_YEAR[
+                    parseInt(localStorage.getItem("budget_year")) ||
+                        new Date().getFullYear()
+                ] || 4325;
+            let branch = "nao",
+                timeout,
+                counter = 0;
 
-        function addTrip() {
-            counter++;
-            const tbody = document.getElementById('tableBody');
-            const row = tbody.insertRow();
-            row.innerHTML = `
+            function addTrip() {
+                counter++;
+                const tbody = document.getElementById("tableBody");
+                const row = tbody.insertRow();
+                row.innerHTML = `
                 <td>${counter}</td>
                 <td><input type="text" id="purpose-${counter}" placeholder="Стажировка по направлению" oninput="sched()"></td>
                 <td><input type="text" id="city-${counter}" placeholder="Астана" oninput="sched()"></td>
@@ -71,121 +214,147 @@
                 <td class="formula-cell" id="total-${counter}">0</td>
                 <td><button class="delete-btn" onclick="delRow(this)">?</button></td>
             `;
-        }
+            }
 
-        function delRow(btn) { btn.closest('tr').remove(); sched(); }
+            function delRow(btn) {
+                btn.closest("tr").remove();
+                sched();
+            }
 
-        function calc(id) {
-            const trips = parseFloat(document.getElementById(`trips-${id}`).value) || 0;
-            const days = parseFloat(document.getElementById(`days-${id}`).value) || 0;
-            const people = parseFloat(document.getElementById(`people-${id}`).value) || 0;
-            const ticket = parseFloat(document.getElementById(`ticket-${id}`).value) || 0;
-            const hotel = parseFloat(document.getElementById(`hotel-${id}`).value) || 0;
-            
-            const daily = MRP * trips * days * people;
-            const total = (ticket + hotel) * trips * people + daily;
-            
-            document.getElementById(`daily-${id}`).textContent = daily.toLocaleString('ru-RU', {minimumFractionDigits: 0});
-            document.getElementById(`total-${id}`).textContent = total.toLocaleString('ru-RU', {minimumFractionDigits: 0});
-            sched();
-        }
+            function calc(id) {
+                const trips =
+                    parseFloat(document.getElementById(`trips-${id}`).value) ||
+                    0;
+                const days =
+                    parseFloat(document.getElementById(`days-${id}`).value) ||
+                    0;
+                const people =
+                    parseFloat(document.getElementById(`people-${id}`).value) ||
+                    0;
+                const ticket =
+                    parseFloat(document.getElementById(`ticket-${id}`).value) ||
+                    0;
+                const hotel =
+                    parseFloat(document.getElementById(`hotel-${id}`).value) ||
+                    0;
 
-        function sched() {
-            document.getElementById('saveStatus').textContent = 'Сохраняю...';
-            clearTimeout(timeout);
-            timeout = setTimeout(save, 1000);
-        }
+                const daily = MRP * trips * days * people;
+                const total = (ticket + hotel) * trips * people + daily;
 
-        function save() {
-            // Не сохранять в режиме консолидации
-            if (branch === 'consolidated') return;
-            
-            const data = { trips: [] };
-            const tbody = document.getElementById('tableBody');
-            Array.from(tbody.querySelectorAll('tr')).forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs.length >= 7) {
-                    data.trips.push({
-                        purpose: inputs[0].value,
-                        city: inputs[1].value,
-                        trips: inputs[2].value,
-                        days: inputs[3].value,
-                        people: inputs[4].value,
-                        ticket: inputs[5].value,
-                        hotel: inputs[6].value
+                document.getElementById(`daily-${id}`).textContent =
+                    daily.toLocaleString("ru-RU", { minimumFractionDigits: 0 });
+                document.getElementById(`total-${id}`).textContent =
+                    total.toLocaleString("ru-RU", { minimumFractionDigits: 0 });
+                sched();
+            }
+
+            function sched() {
+                document.getElementById("saveStatus").textContent =
+                    "Сохраняю...";
+                clearTimeout(timeout);
+                timeout = setTimeout(save, 1000);
+            }
+
+            function save() {
+                // Не сохранять в режиме консолидации
+                if (branch === "consolidated") return;
+
+                const data = { trips: [] };
+                const tbody = document.getElementById("tableBody");
+                Array.from(tbody.querySelectorAll("tr")).forEach((row) => {
+                    const inputs = row.querySelectorAll("input");
+                    if (inputs.length >= 7) {
+                        data.trips.push({
+                            purpose: inputs[0].value,
+                            city: inputs[1].value,
+                            trips: inputs[2].value,
+                            days: inputs[3].value,
+                            people: inputs[4].value,
+                            ticket: inputs[5].value,
+                            hotel: inputs[6].value,
+                        });
+                    }
+                });
+                localStorage.setItem(`${KEY}_${branch}`, JSON.stringify(data));
+                document.getElementById("saveStatus").textContent = "Сохранено";
+                document.getElementById("saveStatus").style.background =
+                    "#d4edda";
+            }
+
+            function load() {
+                const saved = localStorage.getItem(`${KEY}_${branch}`);
+                document.getElementById("tableBody").innerHTML = "";
+                document.getElementById("addBtn").disabled = false;
+                counter = 0;
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    const trips = data.trips || [];
+                    trips.forEach((r) => {
+                        addTrip();
+                        document.getElementById(`purpose-${counter}`).value =
+                            r.purpose || "";
+                        document.getElementById(`city-${counter}`).value =
+                            r.city || "";
+                        document.getElementById(`trips-${counter}`).value =
+                            r.trips || 1;
+                        document.getElementById(`days-${counter}`).value =
+                            r.days || 3;
+                        document.getElementById(`people-${counter}`).value =
+                            r.people || 2;
+                        document.getElementById(`ticket-${counter}`).value =
+                            r.ticket || 0;
+                        document.getElementById(`hotel-${counter}`).value =
+                            r.hotel || 0;
+                        calc(counter);
                     });
                 }
-            });
-            localStorage.setItem(`${KEY}_${branch}`, JSON.stringify(data));
-            document.getElementById('saveStatus').textContent = 'Сохранено';
-            document.getElementById('saveStatus').style.background = '#d4edda';
-        }
-
-        function load() {
-            const saved = localStorage.getItem(`${KEY}_${branch}`);
-            document.getElementById('tableBody').innerHTML = '';
-            document.getElementById('addBtn').disabled = false;
-            counter = 0;
-            if (saved) {
-                const data = JSON.parse(saved);
-                const trips = data.trips || [];
-                trips.forEach(r => {
-                    addTrip();
-                    document.getElementById(`purpose-${counter}`).value = r.purpose || '';
-                    document.getElementById(`city-${counter}`).value = r.city || '';
-                    document.getElementById(`trips-${counter}`).value = r.trips || 1;
-                    document.getElementById(`days-${counter}`).value = r.days || 3;
-                    document.getElementById(`people-${counter}`).value = r.people || 2;
-                    document.getElementById(`ticket-${counter}`).value = r.ticket || 0;
-                    document.getElementById(`hotel-${counter}`).value = r.hotel || 0;
-                    calc(counter);
-                });
             }
-        }
 
-        function switchBranch(newBranch) { 
-            if (branch !== 'consolidated' && branch !== newBranch) {
-                save();
-            }
-            branch = newBranch;
-            document.querySelectorAll('.branch-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            if (branch === 'consolidated') {
-                document.querySelectorAll('input').forEach(input => {
-                    input.disabled = true;
-                });
-                loadConsolidatedData();
-            } else {
-                load();
-            }
-        }
-
-        function loadConsolidatedData() {
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const allTrips = [];
-            
-            branches.forEach(b => {
-                const key = `${KEY}_${b}`;
-                const saved = localStorage.getItem(key);
-                if (saved) {
-                    try {
-                        const data = JSON.parse(saved);
-                        if (data.trips) allTrips.push(...data.trips);
-                    } catch (e) {}
+            function switchBranch(newBranch) {
+                if (branch !== "consolidated" && branch !== newBranch) {
+                    save();
                 }
-            });
-            
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-            counter = 0;
-            
-            allTrips.forEach(r => {
-                counter++;
-                const row = tbody.insertRow();
-                row.innerHTML = `
+                branch = newBranch;
+                document
+                    .querySelectorAll(".branch-btn")
+                    .forEach((btn) => btn.classList.remove("active"));
+                event.target.classList.add("active");
+                if (branch === "consolidated") {
+                    document.querySelectorAll("input").forEach((input) => {
+                        input.disabled = true;
+                    });
+                    loadConsolidatedData();
+                } else {
+                    load();
+                }
+            }
+
+            function loadConsolidatedData() {
+                const branches = ["almaty", "uralsk", "astana", "nao"];
+                const allTrips = [];
+
+                branches.forEach((b) => {
+                    const key = `${KEY}_${b}`;
+                    const saved = localStorage.getItem(key);
+                    if (saved) {
+                        try {
+                            const data = JSON.parse(saved);
+                            if (data.trips) allTrips.push(...data.trips);
+                        } catch (e) {}
+                    }
+                });
+
+                const tbody = document.getElementById("tableBody");
+                tbody.innerHTML = "";
+                counter = 0;
+
+                allTrips.forEach((r) => {
+                    counter++;
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
                     <td>${counter}</td>
-                    <td><input type="text" id="purpose-${counter}" value="${r.purpose || ''}" disabled></td>
-                    <td><input type="text" id="city-${counter}" value="${r.city || ''}" disabled></td>
+                    <td><input type="text" id="purpose-${counter}" value="${r.purpose || ""}" disabled></td>
+                    <td><input type="text" id="city-${counter}" value="${r.city || ""}" disabled></td>
                     <td><input type="number" id="trips-${counter}" value="${r.trips || 1}" disabled></td>
                     <td><input type="number" id="days-${counter}" value="${r.days || 3}" disabled></td>
                     <td><input type="number" id="people-${counter}" value="${r.people || 2}" disabled></td>
@@ -195,123 +364,124 @@
                     <td class="formula-cell" id="total-${counter}">0</td>
                     <td></td>
                 `;
-                calc(counter);
+                    calc(counter);
+                });
+
+                document.getElementById("addBtn").disabled = true;
+            }
+            window.addEventListener("load", function () {
+                var disp = document.getElementById("mrpDisplay");
+                if (disp) disp.textContent = MRP.toLocaleString("ru-RU");
+                load();
             });
-            
-            document.getElementById('addBtn').disabled = true;
-        }
-        window.addEventListener('load', load);
-    </script>
-    <script>
-        // НЕ инициализируем редактируемые таблицы - структура уже готова
-            console.log(' Таблица готова к работе');
-        });
-        function addDetailToggles() {
-            // Удаляем существующие детальные строки и иконки
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
-            document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
-            
-            const dataRows = document.querySelectorAll('tbody tr');
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
-            const branchNames = {
-                'almaty': 'Алматы',
-                'uralsk': 'Уральск',
-                'astana': 'Астана',
-                'nao': 'НАО'
-            };
-            
-            let processedCount = 0;
-            
-            dataRows.forEach((row, index) => {
-                const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
-                const firstInput = row.querySelector('input[data-cell]');
-                
-                const isTotalRow = row.classList.contains('total-row') || 
-                                   row.textContent.includes('Итого') ||
-                                   row.textContent.includes('ИТОГО');
-                
-                if (labelCell && firstInput && !isTotalRow) {
-                    const rowNum = firstInput.dataset.row || index;
-                    
-                    labelCell.classList.add('expandable');
-                    const toggle = document.createElement('span');
-                    toggle.className = 'toggle-detail';
-                    toggle.textContent = '▶';
-                    toggle.dataset.row = rowNum;
-                    
-                    labelCell.insertBefore(toggle, labelCell.firstChild);
-                    
-                    const detailRow = document.createElement('tr');
-                    detailRow.className = 'detail-row';
-                    detailRow.dataset.row = rowNum;
-                    
-                    const emptyCell = document.createElement('td');
-                    emptyCell.style.background = '#f8f9fa';
-                    detailRow.appendChild(emptyCell);
-                    
-                    const branchListCell = document.createElement('td');
-                    branchListCell.className = 'detail-cell';
-                    branchListCell.style.verticalAlign = 'top';
-                    
-                    let branchList = '<div style="padding: 5px 0;">';
-                    branches.forEach(b => {
-                        branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
-                    });
-                    branchList += '</div>';
-                    branchListCell.innerHTML = branchList;
-                    detailRow.appendChild(branchListCell);
-                    
-                    const inputs = row.querySelectorAll('input[data-cell]');
-                    inputs.forEach(input => {
-                        const yearCell = document.createElement('td');
-                        yearCell.className = 'detail-cell';
-                        yearCell.style.verticalAlign = 'top';
-                        yearCell.style.textAlign = 'right';
-                        
-                        let yearData = '<div style="padding: 5px 0;">';
+        </script>
+        <script>
+            // НЕ инициализируем редактируемые таблицы - структура уже готова
+                console.log(' Таблица готова к работе');
+            });
+            function addDetailToggles() {
+                // Удаляем существующие детальные строки и иконки
+                document.querySelectorAll('.detail-row').forEach(row => row.remove());
+                document.querySelectorAll('.toggle-detail').forEach(toggle => toggle.remove());
+                document.querySelectorAll('.expandable').forEach(cell => cell.classList.remove('expandable'));
+
+                const dataRows = document.querySelectorAll('tbody tr');
+                const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+                const branchNames = {
+                    'almaty': 'Алматы',
+                    'uralsk': 'Уральск',
+                    'astana': 'Астана',
+                    'nao': 'НАО «РФМШ»'
+                };
+
+                let processedCount = 0;
+
+                dataRows.forEach((row, index) => {
+                    const labelCell = row.querySelector('td.label-cell:nth-child(2)') || row.querySelector('td:nth-child(2)');
+                    const firstInput = row.querySelector('input[data-cell]');
+
+                    const isTotalRow = row.classList.contains('total-row') ||
+                                       row.textContent.includes('Итого') ||
+                                       row.textContent.includes('ИТОГО');
+
+                    if (labelCell && firstInput && !isTotalRow) {
+                        const rowNum = firstInput.dataset.row || index;
+
+                        labelCell.classList.add('expandable');
+                        const toggle = document.createElement('span');
+                        toggle.className = 'toggle-detail';
+                        toggle.textContent = '▶';
+                        toggle.dataset.row = rowNum;
+
+                        labelCell.insertBefore(toggle, labelCell.firstChild);
+
+                        const detailRow = document.createElement('tr');
+                        detailRow.className = 'detail-row';
+                        detailRow.dataset.row = rowNum;
+
+                        const emptyCell = document.createElement('td');
+                        emptyCell.style.background = '#f8f9fa';
+                        detailRow.appendChild(emptyCell);
+
+                        const branchListCell = document.createElement('td');
+                        branchListCell.className = 'detail-cell';
+                        branchListCell.style.verticalAlign = 'top';
+
+                        let branchList = '<div style="padding: 5px 0;">';
                         branches.forEach(b => {
-                            const cellId = input.dataset.cell;
-                            const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId] 
-                                ? parseFloat(window.branchDetailsData[b][cellId]) 
-                                : 0;
-                            yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                            branchList += `<div style="margin: 5px 0; line-height: 22px;"><strong style="color: #3498db;">${branchNames[b]}:</strong></div>`;
                         });
-                        yearData += '</div>';
-                        yearCell.innerHTML = yearData;
-                        detailRow.appendChild(yearCell);
-                    });
-                    
-                    row.parentNode.insertBefore(detailRow, row.nextSibling);
-                    
-                    labelCell.addEventListener('click', function(e) {
-                        const toggle = this.querySelector('.toggle-detail');
-                        const detailRow = this.parentElement.nextElementSibling;
-                        
-                        if (detailRow && detailRow.classList.contains('detail-row')) {
-                            detailRow.classList.toggle('show');
-                            toggle.classList.toggle('expanded');
-                        }
-                    });
-                    
-                    processedCount++;
-                }
-            });
-            
-            console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
-        }
+                        branchList += '</div>';
+                        branchListCell.innerHTML = branchList;
+                        detailRow.appendChild(branchListCell);
 
-        function removeDetailToggles() {
-            document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
-            document.querySelectorAll('.detail-row').forEach(row => row.remove());
-            document.querySelectorAll('.expandable').forEach(cell => {
-                cell.classList.remove('expandable');
-            });
-        }
+                        const inputs = row.querySelectorAll('input[data-cell]');
+                        inputs.forEach(input => {
+                            const yearCell = document.createElement('td');
+                            yearCell.className = 'detail-cell';
+                            yearCell.style.verticalAlign = 'top';
+                            yearCell.style.textAlign = 'right';
 
-    </script>
-    <script src="shared-nav.js"></script>
-</body>
+                            let yearData = '<div style="padding: 5px 0;">';
+                            branches.forEach(b => {
+                                const cellId = input.dataset.cell;
+                                const value = window.branchDetailsData && window.branchDetailsData[b] && window.branchDetailsData[b][cellId]
+                                    ? parseFloat(window.branchDetailsData[b][cellId])
+                                    : 0;
+                                yearData += `<div style="margin: 5px 0; line-height: 22px; color: #555;">${value.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                            });
+                            yearData += '</div>';
+                            yearCell.innerHTML = yearData;
+                            detailRow.appendChild(yearCell);
+                        });
+
+                        row.parentNode.insertBefore(detailRow, row.nextSibling);
+
+                        labelCell.addEventListener('click', function(e) {
+                            const toggle = this.querySelector('.toggle-detail');
+                            const detailRow = this.parentElement.nextElementSibling;
+
+                            if (detailRow && detailRow.classList.contains('detail-row')) {
+                                detailRow.classList.toggle('show');
+                                toggle.classList.toggle('expanded');
+                            }
+                        });
+
+                        processedCount++;
+                    }
+                });
+
+                console.log(`✅ Добавлено ${processedCount} раскрывающихся блоков с детализацией`);
+            }
+
+            function removeDetailToggles() {
+                document.querySelectorAll('.toggle-detail').forEach(el => el.remove());
+                document.querySelectorAll('.detail-row').forEach(row => row.remove());
+                document.querySelectorAll('.expandable').forEach(cell => {
+                    cell.classList.remove('expandable');
+                });
+            }
+        </script>
+        <script src="shared-nav.js"></script>
+    </body>
 </html>
-
-
