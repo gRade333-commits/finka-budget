@@ -1,12 +1,193 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="shared.css">
     <title>Проверка импортированных данных</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {text-align: center; color: #2c3e50; margin-bottom: 10px;}
+        .subtitle {text-align: center; color: #7f8c8d; margin-bottom: 40px;}
+        .btn {
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            margin: 10px;
+        }
+        .btn:hover {background: #764ba2;}
+        .log {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .log-entry {padding: 5px 0; border-bottom: 1px solid #e9ecef;}
+        .log-success {color: #28a745;}
+        .log-error {color: #dc3545;}
+        .log-info {color: #17a2b8;}
+        .log-warning {color: #ffc107;}
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+    
+        /* Mobile adaptation - Tablets */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mobile adaptation - Medium screens */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header, .container {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+
+            h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            h2 {
+                font-size: 16px;
+            }
+
+            .subtitle {
+                font-size: 12px;
+            }
+
+            .branch-selector, .btn-group, .controls {
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .btn, button, .branch-btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-bar, .status-bar {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+            
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            .section-footer {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            input, select, textarea {
+                padding: 6px;
+                font-size: 12px;
+            }
+        }
+
+        /* Mobile adaptation - Small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header, .container {
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            h2 {
+                font-size: 14px;
+            }
+
+            .subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+
+            .branch-selector, .btn-group, .controls {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn, button, .branch-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info-bar, .status-bar {
+                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px 2px;
+            }
+
+            .section-footer {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            input, select, textarea {
+                font-size: 11px;
+                padding: 5px;
+            }
+        }
+    </style>
 </head>
-<body class="page-util">
+<body>
     <div class="container">
         <a href="index.html" class="back-link">← Вернуться на главную</a>
         
@@ -37,7 +218,7 @@
             document.getElementById('log').innerHTML = '';
             addLog('🚀 Начало проверки данных...', 'info');
 
-            const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+            const branches = ['almaty', 'uralsk', 'astana'];
             const rbTables = ['rb_svod', 'rb_svodnaya', 'rb_income', 'rb_fzp', 'rb_kalkulyacia', 'rb_plan_komandir'];
             const puTables = ['pu_svod_2026', 'pu_ss_dotacia', 'pu_income_pu', 'pu_income_dt', 'pu_income_dop', 
                              'pu_fot_almaty', 'pu_grafik_almaty', 'pu_kalkulyacia_almaty', 'pu_plan_rk', 
@@ -172,6 +353,5 @@
             }
         }
     </script>
-    <script src="shared-nav.js"></script>
 </body>
 </html>

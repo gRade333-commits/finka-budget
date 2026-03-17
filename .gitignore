@@ -39,6 +39,3 @@ desktop.ini
 
 # PowerShell скрипты для разработки (опционально, можно закоммитить)
 # *.ps1
-
-.vercel
-.env*.local

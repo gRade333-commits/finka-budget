@@ -1,12 +1,180 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="shared.css">
     <title>Заполнение rb-svodnaya данными</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2ecc71;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #27ae60;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #d4edda;
+            border-radius: 5px;
+            display: none;
+        }
+    
+        /* Mobile adaptation - Tablets */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mobile adaptation - Medium screens */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header, .container {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+
+            h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            h2 {
+                font-size: 16px;
+            }
+
+            .subtitle {
+                font-size: 12px;
+            }
+
+            .branch-selector, .btn-group, .controls {
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .btn, button, .branch-btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-bar, .status-bar {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+            
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            .section-footer {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            input, select, textarea {
+                padding: 6px;
+                font-size: 12px;
+            }
+        }
+
+        /* Mobile adaptation - Small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header, .container {
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            h2 {
+                font-size: 14px;
+            }
+
+            .subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+
+            .branch-selector, .btn-group, .controls {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn, button, .branch-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info-bar, .status-bar {
+                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px 2px;
+            }
+
+            .section-footer {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            input, select, textarea {
+                font-size: 11px;
+                padding: 5px;
+            }
+        }
+    </style>
 </head>
-<body class="page-util">
+<body>
     <div class="container">
         <h1>🎲 Заполнение rb-svodnaya данными</h1>
         
@@ -32,7 +200,7 @@
                 const response = await fetch('svodnaya_sections_full.json');
                 const jsonData = await response.json();
 
-                const branches = ['almaty', 'uralsk', 'astana', 'nao'];
+                const branches = ['almaty', 'uralsk', 'astana'];
                 
                 branches.forEach(branch => {
                     const data = {};
@@ -56,8 +224,7 @@
                                     const branchMultiplier = {
                                         'almaty': 1.0,
                                         'uralsk': 0.7,
-                                        'astana': 0.5,
-                                        'nao': 0.4
+                                        'astana': 0.5
                                     };
                                     data[cellId] = Math.floor(baseValue * branchMultiplier[branch]);
                                 }
@@ -85,6 +252,5 @@
             }
         }
     </script>
-    <script src="shared-nav.js"></script>
 </body>
 </html>
