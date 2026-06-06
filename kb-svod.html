@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Консолидированный бюджет — НАО РФМШ</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg:       #f0f2f7;
+            --surface:  #ffffff;
+            --border:   #e4e8f0;
+            --text-1:   #0f172a;
+            --text-2:   #475569;
+            --text-3:   #94a3b8;
+            --accent:   #3b5bdb;
+            --accent-s: #e8edff;
+            --green:    #0d9488;
+            --green-s:  #ccfbf1;
+            --header-from: #0f172a;
+            --header-to:   #1e3a5f;
+            --radius:   12px;
+            --shadow-sm: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+            --shadow:    0 4px 16px rgba(15,23,42,.08), 0 1px 4px rgba(15,23,42,.05);
+            --transition: 180ms cubic-bezier(.4,0,.2,1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-1);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─── TOP NAV STUB ──────────────────────────── */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15,23,42,.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,.07);
+            height: 52px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 20px;
+        }
+        .top-nav .brand {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: .03em;
+            white-space: nowrap;
+        }
+        .top-nav .back-link {
+            font-size: 12px;
+            color: rgba(255,255,255,.5);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color var(--transition);
+        }
+        .top-nav .back-link:hover { color: rgba(255,255,255,.9); }
+        .top-nav .spacer { flex: 1; }
+        .top-nav .tag {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,.45);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        /* ─── WRAPPER ───────────────────────────────── */
+        .wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 32px 24px 64px;
+        }
+
+        /* ─── HERO ──────────────────────────────────── */
+        .hero {
+            background: linear-gradient(135deg, var(--header-from) 0%, var(--header-to) 100%);
+            border-radius: 16px;
+            padding: 36px 40px 32px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 80% 50%, rgba(59,91,219,.25) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.5);
+            margin-bottom: 14px;
+        }
+        .hero-kicker .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #60a5fa;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100%{opacity:1}50%{opacity:.4}
+        }
+        .hero h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.25;
+            letter-spacing: -.02em;
+            margin-bottom: 8px;
+        }
+        .hero-sub {
+            font-size: 13px;
+            color: rgba(255,255,255,.55);
+            line-height: 1.5;
+        }
+        .hero-meta {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        .hero-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .hero-stat .label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: rgba(255,255,255,.4);
+        }
+        .hero-stat .value {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,.85);
+        }
+
+        /* ─── TOOLBAR ───────────────────────────────── */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border-radius: 8px;
+            border: 1.5px solid transparent;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            line-height: 1;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        .btn-primary:hover { background: #2f4bc4; border-color: #2f4bc4; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,91,219,.3); }
+        .btn-ghost {
+            background: var(--surface);
+            color: var(--text-2);
+            border-color: var(--border);
+        }
+        .btn-ghost:hover { background: #f8f9fe; border-color: #c5cde8; color: var(--text-1); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+        .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+        .save-pill {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-3);
+            padding: 6px 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+        .save-pill .dot-saved { width:7px;height:7px;border-radius:50%;background:#10b981;flex-shrink:0; }
+        .save-pill .dot-saving { width:7px;height:7px;border-radius:50%;background:#f59e0b;flex-shrink:0;animation:pulse 1s infinite; }
+
+        /* ─── CARD ──────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        /* ─── CARD HEADER ───────────────────────────── */
+        .card-header {
+            padding: 20px 28px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .card-header-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-1);
+            margin-bottom: 3px;
+        }
+        .card-header-sub {
+            font-size: 12px;
+            color: var(--text-3);
+        }
+        .year-badge {
+            flex-shrink: 0;
+            background: var(--accent-s);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        /* ─── TABLE WRAPPER ─────────────────────────── */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        /* ─── TABLE ─────────────────────────────────── */
+        table.kb {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 12.5px;
+            min-width: 860px;
+        }
+
+        /* Header */
+        table.kb thead th {
+            background: #f8f9fc;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text-2);
+            padding: 10px 14px;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            text-align: center;
+        }
+        table.kb thead th:first-child { text-align: left; padding-left: 24px; }
+        table.kb thead th.th-name { text-align: left; white-space: normal; }
+        table.kb thead th.th-pct {
+            background: #f0fdf8;
+            color: var(--green);
+        }
+        table.kb thead .sub-row th {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-1);
+            background: #f4f6fb;
+            text-transform: none;
+            letter-spacing: 0;
+            padding: 7px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        table.kb thead .sub-row th.th-pct { background: #ebfdf6; color: var(--green); }
+        table.kb thead .num-row th {
+            font-size: 10px;
+            color: var(--text-3);
+            background: #f9fafc;
+            border-bottom: 1px solid var(--border);
+            padding: 4px 14px;
+        }
+
+        /* TOTAL ROW */
+        table.kb tbody tr.row-total td {
+            background: #f4f7ff;
+            font-weight: 700;
+            color: var(--text-1);
+            border-bottom: 2px solid #d1d9f5;
+            padding: 13px 14px;
+        }
+        table.kb tbody tr.row-total td:first-child { padding-left: 24px; }
+        table.kb tbody tr.row-total td.td-total-label {
+            font-size: 13px;
+        }
+        table.kb tbody tr.row-total td.td-num-cell {
+            font-size: 11px;
+            color: var(--text-3);
+            text-align: center;
+        }
+
+        /* DATA ROWS */
+        table.kb tbody tr.row-data td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #f0f2f8;
+            vertical-align: middle;
+            color: var(--text-1);
+            transition: background var(--transition);
+        }
+        table.kb tbody tr.row-data:last-child td { border-bottom: none; }
+        table.kb tbody tr.row-data:hover td { background: #f8f9fe; }
+        table.kb tbody tr.row-data td:first-child { padding-left: 24px; }
+
+        /* NUMBER COL */
+        td.td-idx {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-3);
+            width: 36px;
+        }
+        td.td-badge {
+            text-align: center;
+            width: 48px;
+        }
+        .row-num-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px; height: 24px;
+            border-radius: 6px;
+            background: var(--accent-s);
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .row-total .row-num-badge {
+            background: var(--accent);
+            color: #fff;
+            font-size: 11px;
+            width: 28px; height: 28px;
+            border-radius: 7px;
+        }
+
+        /* NAME COL */
+        td.td-name {
+            line-height: 1.45;
+            min-width: 200px;
+            max-width: 400px;
+            font-size: 12px;
+        }
+        td.td-name.total-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* VALUE COLS */
+        td.td-val {
+            text-align: right;
+            min-width: 110px;
+            padding: 0 !important;
+        }
+        td.td-val input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: right;
+            font-size: 12.5px;
+            font-family: 'Inter', monospace;
+            color: var(--text-1);
+            padding: 11px 14px;
+            outline: none;
+            transition: background var(--transition), box-shadow var(--transition);
+        }
+        td.td-val input:focus {
+            background: #fffbec;
+            box-shadow: inset 0 0 0 2px #f59e0b66;
+            border-radius: 0;
+        }
+        td.td-val input::placeholder { color: var(--text-3); }
+
+        td.td-val.total-val {
+            text-align: right;
+            padding: 13px 14px !important;
+            font-size: 12.5px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--accent);
+        }
+
+        /* PCT COL */
+        td.td-pct {
+            text-align: center;
+            min-width: 100px;
+            padding: 8px 14px !important;
+            background: #f8fefc;
+        }
+        table.kb tbody tr.row-data:hover td.td-pct { background: #f0fdf8; }
+        .pct-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .pct-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--green);
+        }
+        .pct-bar-track {
+            width: 64px;
+            height: 4px;
+            border-radius: 99px;
+            background: #d0f5ed;
+            overflow: hidden;
+        }
+        .pct-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: var(--green);
+            transition: width .5s cubic-bezier(.4,0,.2,1);
+        }
+        td.td-pct.total-pct {
+            background: #ebfdf6;
+            padding: 13px 14px !important;
+        }
+        .total-pct-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--green);
+            background: var(--green-s);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        /* ─── SIGNATURE ─────────────────────────────── */
+        .sig-section {
+            padding: 24px 28px 28px;
+            border-top: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        .sig-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .sig-role {
+            font-size: 11px;
+            color: var(--text-3);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+        .sig-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-1);
+        }
+        .sig-line {
+            margin-top: 2px;
+            height: 1px;
+            background: var(--border);
+            width: 140px;
+        }
+
+        /* ─── PRINT ─────────────────────────────────── */
+        @media print {
+            @page { size: A3 landscape; margin: 10mm; }
+            body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .top-nav, .toolbar { display: none !important; }
+            .wrapper { padding: 0; max-width: 100%; }
+            .hero { background: #0f172a !important; -webkit-print-color-adjust: exact; }
+            .card { box-shadow: none; border: 1px solid #ccc; }
+            td.td-val input { font-size: 10.5px; padding: 8px 10px; }
+            table.kb { font-size: 10.5px; }
+            td.td-pct { background: #f8fefc !important; -webkit-print-color-adjust: exact; }
+            .pct-bar-fill { background: #0d9488 !important; -webkit-print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────── -->
+<nav class="top-nav">
+    <span class="brand">НАО РФМШ</span>
+    <span style="color:rgba(255,255,255,.2);">|</span>
+    <a href="index.html" class="back-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 12L6 8l4-4"/>
+        </svg>
+        Главная
+    </a>
+    <div class="spacer"></div>
+    <span class="tag">Для руководства</span>
+</nav>
+
+<!-- ── Main ────────────────────────────────────────────── -->
+<div class="wrapper">
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-kicker">
+            <span class="dot"></span>
+            Консолидированный бюджет · КБ
+        </div>
+        <h1>Сводный расчёт доходов НАО РФМШ</h1>
+        <p class="hero-sub">НАО «Республиканская физико-математическая школа» · 2026–2028 гг.</p>
+        <div class="hero-meta">
+            <div class="hero-stat">
+                <span class="label">Период</span>
+                <span class="value">2026 – 2028</span>
+            </div>
+            <div class="hero-stat">
+                <span class="label">Строк данных</span>
+                <span class="value">11</span>
+            </div>
+            <div class="hero-stat">
+                <span class="label">Итого 2026</span>
+                <span class="value" id="hero-total">—</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <button class="btn btn-primary" onclick="doExportExcel()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 2v8M5 7l3 3 3-3M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1"/>
+            </svg>
+            Скачать Excel
+        </button>
+        <button class="btn btn-ghost" onclick="doExportPDF()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="1" width="12" height="14" rx="1.5"/>
+                <path d="M5 5h6M5 8h6M5 11h3"/>
+            </svg>
+            Сохранить PDF
+        </button>
+        <button class="btn btn-ghost" onclick="fillRandom()" style="border-color:#f59e0b;color:#b45309;">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 5h2l1-2h6l1 2h2M2 5v8a1 1 0 001 1h10a1 1 0 001-1V5"/>
+                <path d="M6 9l1.5 1.5L10 7"/>
+            </svg>
+            Тест-данные
+        </button>
+        <button class="btn btn-ghost" onclick="window.print()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 5V2h8v3M4 11H2V6h12v5h-2M4 11v3h8v-3"/>
+            </svg>
+            Печать
+        </button>
+        <div class="save-pill" id="save-pill">
+            <span class="dot-saved" id="save-dot"></span>
+            <span id="save-text">Сохранено</span>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="card">
+
+        <div class="card-header">
+            <div>
+                <div class="card-header-title">Сводный расчёт доходов</div>
+                <div class="card-header-sub">НАО «Республиканская физико-математическая школа»</div>
+            </div>
+            <div class="year-badge">2026 · 2027 · 2028</div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="kb" id="kb-table">
+                <thead>
+                    <!-- Row 1 — group headers -->
+                    <tr>
+                        <th style="width:36px;">#</th>
+                        <th class="th-name" style="min-width:220px;">Наименование</th>
+                        <th colspan="2" style="min-width:210px;">Уточнённый план</th>
+                        <th colspan="3" style="min-width:310px;">Плановые показатели</th>
+                        <th class="th-pct" style="min-width:100px;">% от бюджета</th>
+                    </tr>
+                    <!-- Row 2 — year sub-headers -->
+                    <tr class="sub-row">
+                        <th></th>
+                        <th></th>
+                        <th>2024 г.</th>
+                        <th>2025 г.</th>
+                        <th>2026 г.</th>
+                        <th>2027 г.</th>
+                        <th>2028 г.</th>
+                        <th class="th-pct">план 2026</th>
+                    </tr>
+                    <!-- Row 3 — column numbers -->
+                    <tr class="num-row">
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                        <th>4</th>
+                        <th>5</th>
+                        <th>6</th>
+                        <th>7</th>
+                        <th>8</th>
+                    </tr>
+                </thead>
+                <tbody id="kb-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- Signatures -->
+        <div class="sig-section">
+            <div class="sig-item">
+                <div class="sig-role">Председатель правления НАО «РФМШ»</div>
+                <div class="sig-line"></div>
+                <div class="sig-name">Калиев Р.С.</div>
+            </div>
+            <div class="sig-item">
+                <div class="sig-role">Финансовый директор НАО «РФМШ»</div>
+                <div class="sig-line"></div>
+                <div class="sig-name">Калкенова Г.К.</div>
+            </div>
+            <div class="sig-item">
+                <div class="sig-role">Главный экономист НАО «РФМШ»</div>
+                <div class="sig-line"></div>
+                <div class="sig-name">Каужапарова С.С.</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   DATA & STATE
+═══════════════════════════════════════════════════════ */
+var ROWS = [
+    { id:'r1',  name:'Программа 004 «Обеспечение доступности качественного школьного образования» подпрограмма-100 «Обучение и воспитание детей в республиканских организациях образования», специфика-159 — Оплата прочих услуг и работ (ГОЗ за счёт средств республиканского бюджета) по филиалам городов Алматы, Астаны, Уральска', d24:0,d25:0,d26:0,d27:0,d28:0 },
+    { id:'r2',  name:'Поступление за счёт средств республиканского бюджета (Государственный образовательный заказ)', d24:0,d25:0,d26:0,d27:0,d28:0 },
+    { id:'r3',  name:'Поступление за счёт средств реализации образовательных услуг на возмездной основе', d24:0,d25:0,d26:0,d27:0,d28:0 },
+    { id:'r4',  name:'Поступление за счёт сторонних организаций (аренда помещений в школах, школьных столовых и другое)', d24:0,d25:0,d26:0,d27:0,d28:0 },
+    { id:'r5',  name:'Поступление за счёт средств республиканского бюджета: «Проведение республиканских школьных олимпиад, конкурсов, внешкольных мероприятий». Международная Жаутыковская олимпиада', d24:0,d25:0,d26:0,d27:0,d28:0 },
+    { id:'r6',  name:'Поступление за счёт реализации образовательных услуг на возмездной основе: «Проведение республиканских школьных олимпиад, конкурсов». Жаутыковская олимпиада и Выставка высших учебных заведений', d24:0,d25:0,d26:0,d27:0,d28:0 },
+    { id:'r7',  name:'Поступление за счёт образовательных услуг на возмездной основе «Проведение ежегодного Международного открытого творческого конкурса учителей и тренеров олимпийского резерва математики, физики и информатики (IMPACT)»', d24:0,d25:0,d26:0,d27:0,d28:0 },
+    { id:'r8',  name:'Поступление за счёт проведения конкурсного отбора претендентов из числа учащихся 7–8 классов для поступления в школы НАО «РФМШ»', d24:0,d25:0,d26:0,d27:0,d28:0 },
+    { id:'r9',  name:'Поступление за счёт вознаграждений Депозита овернайт', d24:0,d25:0,d26:0,d27:0,d28:0 },
+    { id:'r10', name:'Поступление ЧУ «Fizmat Academy»', d24:0,d25:0,d26:0,d27:0,d28:0 },
+    { id:'r11', name:'Прочие поступления', d24:0,d25:0,d26:0,d27:0,d28:0 }
+];
+
+var COLS = ['d24','d25','d26','d27','d28'];
+var KEY  = 'kb_svod_v2';
+var saveTimer = null;
+
+/* ── Load ──────────────────────────────────────────── */
+function loadData() {
+    try {
+        var raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        var saved = JSON.parse(raw);
+        ROWS.forEach(function(r) {
+            if (saved[r.id]) COLS.forEach(function(c) {
+                if (saved[r.id][c] != null) r[c] = saved[r.id][c];
+            });
+        });
+    } catch(e) {}
+}
+
+/* ── Save ──────────────────────────────────────────── */
+function saveData() {
+    var out = {};
+    ROWS.forEach(function(r) {
+        out[r.id] = {};
+        COLS.forEach(function(c) { out[r.id][c] = r[c]; });
+    });
+    localStorage.setItem(KEY, JSON.stringify(out));
+    setSaveStatus('saved');
+}
+
+/* ── Totals ─────────────────────────────────────────── */
+function totals() {
+    var t = {d24:0,d25:0,d26:0,d27:0,d28:0};
+    ROWS.forEach(function(r) { COLS.forEach(function(c){ t[c]+=(+r[c]||0); }); });
+    return t;
+}
+
+/* ── Format ─────────────────────────────────────────── */
+function fmt(v) {
+    var n = +v||0;
+    if (!n) return '';
+    return n.toLocaleString('ru-RU', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+function pct(v, total) {
+    var n = +v||0, t = +total||0;
+    if (!t || !n) return null;
+    return (n/t*100);
+}
+
+/* ── Status ─────────────────────────────────────────── */
+function setSaveStatus(state) {
+    var dot  = document.getElementById('save-dot');
+    var text = document.getElementById('save-text');
+    if (state === 'saving') {
+        dot.className  = 'dot-saving';
+        text.textContent = 'Сохранение…';
+    } else {
+        dot.className  = 'dot-saved';
+        text.textContent = 'Сохранено';
+    }
+}
+
+/* ── Update DOM (no full re-render) ─────────────────── */
+function updateDOM() {
+    var T = totals();
+
+    /* Total row values */
+    COLS.forEach(function(c) {
+        var el = document.getElementById('tv_'+c);
+        if (el) el.textContent = fmt(T[c]);
+    });
+
+    /* Hero total */
+    var ht = document.getElementById('hero-total');
+    if (ht) ht.textContent = T.d26 ? fmt(T.d26) + ' ₸' : '—';
+
+    /* % col + bars */
+    document.getElementById('total-pct-label').textContent = T.d26 ? '100 %' : '—';
+
+    ROWS.forEach(function(r) {
+        var p = pct(r.d26, T.d26);
+        var labelEl = document.getElementById('pct_label_'+r.id);
+        var fillEl  = document.getElementById('pct_bar_'+r.id);
+        if (labelEl) labelEl.textContent = p != null ? p.toFixed(1)+'%' : '—';
+        if (fillEl)  fillEl.style.width  = p != null ? Math.min(p, 100)+'%' : '0%';
+    });
+}
+
+/* ── Input handler ──────────────────────────────────── */
+function onInput(rowId, col, el) {
+    var row = ROWS.find(function(r){ return r.id===rowId; });
+    if (!row) return;
+    row[col] = parseFloat(el.value.replace(/\s/g,'').replace(',','.')) || 0;
+    updateDOM();
+    setSaveStatus('saving');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveData, 700);
+}
+
+/* ── Render table ───────────────────────────────────── */
+function render() {
+    var T    = totals();
+    var html = '';
+
+    /* Total row */
+    html += '<tr class="row-total">';
+    html += '<td class="td-badge"><span class="row-num-badge">159</span></td>';
+    html += '<td class="td-name total-name">Всего (в тенге)</td>';
+    COLS.forEach(function(c) {
+        html += '<td class="td-val total-val" id="tv_'+c+'">' + fmt(T[c]) + '</td>';
+    });
+    html += '<td class="td-pct total-pct"><span class="total-pct-label"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="3" r="1.2"/><line x1="2" y1="8" x2="8" y2="2"/></svg><span id="total-pct-label">' + (T.d26 ? '100 %' : '—') + '</span></span></td>';
+    html += '</tr>';
+
+    /* Data rows */
+    ROWS.forEach(function(r, i) {
+        var p = pct(r.d26, T.d26);
+        html += '<tr class="row-data">';
+        html += '<td class="td-badge"><span class="row-num-badge">'+(i+1)+'</span></td>';
+        html += '<td class="td-name">'+escHtml(r.name)+'</td>';
+        COLS.forEach(function(c) {
+            html += '<td class="td-val"><input type="text" value="'+fmt(r[c])+'" placeholder="0"'
+                 + ' id="inp_'+r.id+'_'+c+'"'
+                 + ' oninput="onInput(\''+r.id+'\',\''+c+'\',this)"'
+                 + ' onfocus="this.select()"'
+                 + '></td>';
+        });
+        html += '<td class="td-pct">'
+             + '<div class="pct-wrap">'
+             + '<span class="pct-label" id="pct_label_'+r.id+'">'+(p!=null?p.toFixed(1)+'%':'—')+'</span>'
+             + '<div class="pct-bar-track"><div class="pct-bar-fill" id="pct_bar_'+r.id+'" style="width:'+(p!=null?Math.min(p,100)+'%':'0%')+'"></div></div>'
+             + '</div></td>';
+        html += '</tr>';
+    });
+
+    document.getElementById('kb-tbody').innerHTML = html;
+}
+
+/* ── HTML escape ────────────────────────────────────── */
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXCEL EXPORT
+═══════════════════════════════════════════════════════ */
+function doExportExcel() {
+    if (typeof XLSX === 'undefined') { alert('Библиотека XLSX не загружена'); return; }
+    var T = totals();
+    var aoa = [];
+    aoa.push(['Консолидированный бюджет НАО РФМШ']);
+    aoa.push(['Сводный расчёт доходов на 2026–2028 годы']);
+    aoa.push(['НАО «Республиканская физико-математическая школа»']);
+    aoa.push([]);
+    aoa.push(['№','Наименование','Уточ. план 2024 г.','Уточ. план 2025 г.','План 2026','План 2027','План 2028','% от бюджета (2026)']);
+    aoa.push(['159','Всего (в тенге)', T.d24||0, T.d25||0, T.d26||0, T.d27||0, T.d28||0, T.d26?'100%':'']);
+    ROWS.forEach(function(r,i) {
+        var p = pct(r.d26, T.d26);
+        aoa.push([i+1, r.name, +r.d24||0, +r.d25||0, +r.d26||0, +r.d27||0, +r.d28||0, p!=null?p.toFixed(1)+'%':'']);
+    });
+    aoa.push([]);
+    aoa.push(['','Председатель правления НАО «РФМШ»','','','','','Калиев Р.С.','']);
+    aoa.push(['','Финансовый директор НАО «РФМШ»','','','','','Калкенова Г.К.','']);
+    aoa.push(['','Главный экономист НАО «РФМШ»','','','','','Каужапарова С.С.','']);
+
+    var ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{wch:5},{wch:72},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16}];
+    ws['!merges'] = [
+        {s:{r:0,c:0},e:{r:0,c:7}},
+        {s:{r:1,c:0},e:{r:1,c:7}},
+        {s:{r:2,c:0},e:{r:2,c:7}}
+    ];
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'КБ НАО РФМШ');
+    XLSX.writeFile(wb, 'КБ_НАО_РФМШ_' + new Date().toISOString().slice(0,10) + '.xlsx');
+}
+
+/* ═══════════════════════════════════════════════════════
+   PDF EXPORT
+═══════════════════════════════════════════════════════ */
+function doExportPDF() {
+    var s = document.createElement('style');
+    s.id = '_pdf';
+    s.textContent = '@media print{'
+        + '@page{size:A3 landscape;margin:10mm}'
+        + 'body{-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+        + '.top-nav,.toolbar{display:none!important}'
+        + '.wrapper{padding:0;max-width:100%}'
+        + '.hero{background:#0f172a!important;-webkit-print-color-adjust:exact}'
+        + '.card{box-shadow:none;border:1px solid #ddd}'
+        + 'td.td-val input{font-size:10px;padding:8px 10px}'
+        + 'table.kb{font-size:10.5px}'
+        + '.pct-bar-fill{background:#0d9488!important;-webkit-print-color-adjust:exact}'
+        + '.row-total td{background:#f4f7ff!important;-webkit-print-color-adjust:exact}'
+        + '}';
+    document.head.appendChild(s);
+    window.print();
+    setTimeout(function(){ var el=document.getElementById('_pdf'); if(el)el.remove(); }, 2000);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RANDOM TEST DATA
+═══════════════════════════════════════════════════════ */
+function fillRandom() {
+    var base = [
+        4200000000, 1800000000, 380000000, 95000000,
+        210000000,  45000000,   28000000,  62000000,
+        18000000,   55000000,   12000000
+    ];
+    ROWS.forEach(function(r, i) {
+        var b = base[i] || 50000000;
+        r.d24 = Math.round(b * (0.78 + Math.random() * 0.18) / 1000) * 1000;
+        r.d25 = Math.round(b * (0.88 + Math.random() * 0.16) / 1000) * 1000;
+        r.d26 = Math.round(b * (0.96 + Math.random() * 0.12) / 1000) * 1000;
+        r.d27 = Math.round(b * (1.04 + Math.random() * 0.10) / 1000) * 1000;
+        r.d28 = Math.round(b * (1.10 + Math.random() * 0.10) / 1000) * 1000;
+    });
+    COLS.forEach(function(c) {
+        ROWS.forEach(function(r) {
+            var inp = document.getElementById('inp_'+r.id+'_'+c);
+            if (inp) inp.value = fmt(r[c]);
+        });
+    });
+    updateDOM();
+    setSaveStatus('saving');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveData, 700);
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+    loadData();
+    render();
+});
+</script>
+
+</body>
+</html>
